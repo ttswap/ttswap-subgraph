@@ -20,6 +20,10 @@ dataSources:
       entities:
         - Customer
         - CustomerData
+        - Refer
+        - ReferData
+        - Gate
+        - GateData
         - MarketState
         - GoodState
         - ProofState
@@ -47,7 +51,7 @@ dataSources:
           handler: handle_e_buyGood
         - event: e_investGood(indexed uint256,address,address,uint256,uint256,uint256)
           handler: handle_e_investGood
-        - event: e_disinvestProof(indexed uint256,address,address,uint256,uint256,uint256,uint256)
+        - event: e_disinvestProof(indexed uint256,address,address,address,uint256,uint256,uint256,uint256)
           handler: handle_e_disinvestProof
         - event: e_setMarketConfig(uint256)
           handler: handle_e_setMarketConfig
@@ -79,6 +83,8 @@ dataSources:
       file: ./src/ttswap_token.ts
       entities:
         - Customer
+        - Refer
+        - Gate
         - tts_env
         - tts_restake
         - tts_share

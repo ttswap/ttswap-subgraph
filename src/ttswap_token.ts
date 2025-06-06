@@ -6,6 +6,8 @@ import {
         tts_env,
         tts_auth,
         tts_share,
+        Refer,
+        Gate,
 } from "../generated/schema";
 
 import {
@@ -23,8 +25,6 @@ import {
 } from "../generated/TTSwap_Token/TTSwap_Token";
 
 import { MARKET_ADDRESS, BI_128, ZERO_BI, ONE_BI } from "./util/constants";
-
-import { log_CustomerData } from "./util/customer";
 
 export function handle_e_setenv(event: e_setenv): void {
         let ttsenv = tts_env.load("1");
@@ -232,11 +232,11 @@ export function handle_e_addreferer(event: e_addreferral): void {
                 newcustomer.stakettsvalue = ZERO_BI;
                 newcustomer.stakettscontruct = ZERO_BI;
                 newcustomer.getfromstake = ZERO_BI;
+                newcustomer.lastgate = "#";
         }
         newcustomer.refer = event.params.referral.toHexString();
         newcustomer.lastoptime = event.block.timestamp;
         newcustomer.save();
-        log_CustomerData(newcustomer, event.block.timestamp);
         let referralcus = Customer.load(event.params.referral.toHexString());
         if (referralcus === null) {
                 referralcus = new Customer(event.params.referral.toHexString());
@@ -257,10 +257,54 @@ export function handle_e_addreferer(event: e_addreferral): void {
                 referralcus.stakettscontruct = ZERO_BI;
                 referralcus.getfromstake = ZERO_BI;
                 referralcus.lastoptime = event.block.timestamp;
+                referralcus.lastgate = "#";
         }
         referralcus.referralnum = referralcus.referralnum.plus(ONE_BI);
         referralcus.save();
-        log_CustomerData(referralcus, event.block.timestamp);
+
+        
+                let gate = Gate.load(referralcus.lastgate as string);
+                if (gate === null) {
+                        gate = new Gate(
+                                referralcus.lastgate as string
+                        );
+                        gate.tradeValue = ZERO_BI;
+                        gate.investValue = ZERO_BI;
+                        gate.disinvestValue = ZERO_BI;
+                        gate.tradeCount = ZERO_BI;
+                        gate.investCount = ZERO_BI;
+                        gate.disinvestCount = ZERO_BI;
+                        gate.totalprofitvalue = ZERO_BI;
+                        gate.totalcommissionvalue = ZERO_BI;
+                        gate.referralnum = ZERO_BI;
+                        gate.stakettsvalue = ZERO_BI;
+                        gate.stakettscontruct = ZERO_BI;
+                        gate.getfromstake = ZERO_BI;
+                }
+                gate.referralnum=gate.referralnum.plus(ONE_BI);
+                gate.save();
+        
+
+        let refer = Refer.load(event.params.referral.toHexString());
+        if (refer === null) {
+                refer = new Refer(
+                        event.params.referral.toHexString()
+                );
+                refer.tradeValue = ZERO_BI;
+                refer.investValue = ZERO_BI;
+                refer.disinvestValue = ZERO_BI;
+                refer.tradeCount = ZERO_BI;
+                refer.investCount = ZERO_BI;
+                refer.disinvestCount = ZERO_BI;
+                refer.totalprofitvalue = ZERO_BI;
+                refer.totalcommissionvalue = ZERO_BI;
+                refer.referralnum = ZERO_BI;
+                refer.stakettsvalue = ZERO_BI;
+                refer.stakettscontruct = ZERO_BI;
+                refer.getfromstake = ZERO_BI;
+        }
+        refer.referralnum=refer.referralnum.plus(ONE_BI);
+        refer.save()
         marketstate.save();
 }
 
@@ -312,7 +356,55 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
                 newcustomer.stakettsvalue = ZERO_BI;
                 newcustomer.stakettscontruct = ZERO_BI;
                 newcustomer.getfromstake = ZERO_BI;
+                newcustomer.lastgate = "#";
         }
+        
+        let refer = Refer.load(newcustomer.refer as string);
+        if (refer === null) {
+                refer = new Refer(
+                        newcustomer.refer as string
+                );
+                refer.tradeValue = ZERO_BI;
+                refer.investValue = ZERO_BI;
+                refer.disinvestValue = ZERO_BI;
+                refer.tradeCount = ZERO_BI;
+                refer.investCount = ZERO_BI;
+                refer.disinvestCount = ZERO_BI;
+                refer.totalprofitvalue = ZERO_BI;
+                refer.totalcommissionvalue = ZERO_BI;
+                refer.referralnum = ZERO_BI;
+                refer.stakettsvalue = ZERO_BI;
+                refer.stakettscontruct = ZERO_BI;
+                refer.getfromstake = ZERO_BI;
+        }
+
+        refer.stakettsvalue=refer.stakettsvalue.minus(newcustomer.stakettsvalue);
+        refer.stakettscontruct=refer.stakettscontruct.minus(newcustomer.stakettscontruct);
+
+
+        let gate = Gate.load(newcustomer.lastgate as string);
+        if (gate === null) {
+                gate = new Gate(
+                        newcustomer.lastgate as string
+                );
+                gate.tradeValue = ZERO_BI;
+                gate.investValue = ZERO_BI;
+                gate.disinvestValue = ZERO_BI;
+                gate.tradeCount = ZERO_BI;
+                gate.investCount = ZERO_BI;
+                gate.disinvestCount = ZERO_BI;
+                gate.totalprofitvalue = ZERO_BI;
+                gate.totalcommissionvalue = ZERO_BI;
+                gate.referralnum = ZERO_BI;
+                gate.stakettsvalue = ZERO_BI;
+                gate.stakettscontruct = ZERO_BI;
+                gate.getfromstake = ZERO_BI;
+        }
+
+        gate.stakettsvalue=gate.stakettsvalue.minus(newcustomer.stakettsvalue);
+        gate.stakettscontruct=gate.stakettscontruct.minus(newcustomer.stakettscontruct);
+
+
         let proofvalue = event.params.proofvalue.div(BI_128);
         let proofcontrunct = event.params.proofvalue.mod(BI_128);
 
@@ -322,6 +414,15 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
         newcustomer.stakettscontruct = proofcontrunct;
         newcustomer.lastoptime = event.block.timestamp;
         newcustomer.save();
+
+        refer.stakettsvalue=refer.stakettsvalue.plus(newcustomer.stakettsvalue);
+        refer.stakettscontruct=refer.stakettscontruct.plus(newcustomer.stakettscontruct);
+        refer.save();
+
+
+        gate.stakettsvalue=gate.stakettsvalue.minus(newcustomer.stakettsvalue);
+        gate.stakettscontruct=gate.stakettscontruct.minus(newcustomer.stakettscontruct);
+        gate.save();
 
         let ttsenv = tts_env.load("1");
         if (ttsenv === null) {
