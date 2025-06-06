@@ -17,6 +17,7 @@ type Customer @entity(immutable:false) {
   getfromstake:BigInt!
   stakettsvalue:BigInt!
   stakettscontruct:BigInt!
+  lastgate:String!
   custdata:[CustomerData!]@derivedFrom(field: "customerid")
 }
 
@@ -40,7 +41,87 @@ type CustomerData @entity(immutable:false) {
   stakettsvalue:BigInt!
   stakettscontruct:BigInt!
   create_time:BigInt!
+  lastgate:String!
 }
+
+type Refer @entity(immutable:false) {
+  # address
+  id: ID!
+  tradeValue: BigInt!
+  investValue: BigInt!
+  disinvestValue: BigInt!
+  tradeCount: BigInt!
+  investCount: BigInt!
+  disinvestCount: BigInt!
+  totalprofitvalue:BigInt!
+  totalcommissionvalue:BigInt!
+  lastoptime:BigInt!
+  referralnum:BigInt!
+  getfromstake:BigInt!
+  stakettsvalue:BigInt!
+  stakettscontruct:BigInt!
+  referdata:[ReferData!]@derivedFrom(field: "referid")
+}
+
+type ReferData @entity(immutable:false) {
+  # address
+  id:ID!
+  tradeValue: BigInt!
+  investValue: BigInt!
+  disinvestValue: BigInt!
+  tradeCount: BigInt!
+  investCount: BigInt!
+  disinvestCount: BigInt!
+  totalprofitvalue:BigInt!
+  totalcommissionvalue:BigInt!
+  lastoptime:BigInt!
+  referralnum:BigInt!
+  getfromstake:BigInt!
+  stakettsvalue:BigInt!
+  stakettscontruct:BigInt!
+  referid:Refer!
+  create_time:BigInt!
+}
+
+
+type Gate @entity(immutable:false) {
+  # address
+  id: ID!
+  tradeValue: BigInt!
+  investValue: BigInt!
+  disinvestValue: BigInt!
+  tradeCount: BigInt!
+  investCount: BigInt!
+  disinvestCount: BigInt!
+  totalprofitvalue:BigInt!
+  totalcommissionvalue:BigInt!
+  referralnum:BigInt!
+  lastoptime:BigInt!
+  getfromstake:BigInt!
+  stakettsvalue:BigInt!
+  stakettscontruct:BigInt!
+  gatedata:[GateData!]@derivedFrom(field: "gateid")
+}
+
+type GateData @entity(immutable:false) {
+  # address
+  id:ID!
+  tradeValue: BigInt!
+  investValue: BigInt!
+  disinvestValue: BigInt!
+  tradeCount: BigInt!
+  investCount: BigInt!
+  disinvestCount: BigInt!
+  totalprofitvalue:BigInt!
+  totalcommissionvalue:BigInt!
+  referralnum:BigInt!
+  getfromstake:BigInt!
+  stakettsvalue:BigInt!
+  stakettscontruct:BigInt!
+  gateid:Gate!
+  create_time:BigInt!
+}
+
 
 type MarketState @entity(immutable:false) {
   #market address

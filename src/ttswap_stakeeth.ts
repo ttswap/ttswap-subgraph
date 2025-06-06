@@ -14,14 +14,7 @@ import {
         e_unstakeSETH,
 } from "../generated/TTSwap_StakeETH/TTSwap_StakeETH";
 
-<<<<<<< HEAD
 import {  BI_128, ZERO_BI } from "./util/constants";
-
-=======
-import { MARKET_ADDRESS, BI_128, ZERO_BI, ONE_BI } from "./util/constants";
-
-import { log_CustomerData } from "./util/customer";
->>>>>>> master
 
 export function handle_e_stakeSETH(event: e_stakeSETH): void {
         let ttsstakeenv = ttswap_stakeeth_env.load(
