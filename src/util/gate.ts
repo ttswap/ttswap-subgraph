@@ -31,5 +31,6 @@ export function log_GateData(
         gateData_week.getfromstake = gate.getfromstake;
         gateData_week.stakettsvalue = gate.stakettsvalue;
         gateData_week.stakettscontruct = gate.stakettscontruct;
+        gateData_week.referralnum=gate.referralnum;
         gateData_week.save();
 }
