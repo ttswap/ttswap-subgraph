@@ -282,7 +282,8 @@ export function handle_e_addreferer(event: e_addreferral): void {
                         gate.getfromstake = ZERO_BI;
                 }
                 gate.referralnum=gate.referralnum.plus(ONE_BI);
-                gate.save();
+                gate.lastoptime=event.block.timestamp;
+        gate.save();;
         
 
         let refer = Refer.load(event.params.referral.toHexString());
@@ -303,6 +304,8 @@ export function handle_e_addreferer(event: e_addreferral): void {
                 refer.stakettscontruct = ZERO_BI;
                 refer.getfromstake = ZERO_BI;
         }
+
+        refer.lastoptime=event.block.timestamp;
         refer.referralnum=refer.referralnum.plus(ONE_BI);
         refer.save()
         marketstate.save();
@@ -372,12 +375,13 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
                 refer.disinvestCount = ZERO_BI;
                 refer.totalprofitvalue = ZERO_BI;
                 refer.totalcommissionvalue = ZERO_BI;
+
                 refer.referralnum = ZERO_BI;
                 refer.stakettsvalue = ZERO_BI;
                 refer.stakettscontruct = ZERO_BI;
                 refer.getfromstake = ZERO_BI;
         }
-
+        refer.lastoptime=event.block.timestamp;
         refer.stakettsvalue=refer.stakettsvalue.minus(newcustomer.stakettsvalue);
         refer.stakettscontruct=refer.stakettscontruct.minus(newcustomer.stakettscontruct);
 
@@ -422,7 +426,8 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
 
         gate.stakettsvalue=gate.stakettsvalue.minus(newcustomer.stakettsvalue);
         gate.stakettscontruct=gate.stakettscontruct.minus(newcustomer.stakettscontruct);
-        gate.save();
+        gate.lastoptime=event.block.timestamp;
+        gate.save();;
 
         let ttsenv = tts_env.load("1");
         if (ttsenv === null) {
