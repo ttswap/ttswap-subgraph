@@ -125,7 +125,6 @@ type GateData @entity(immutable:false) {
 type MarketState @entity(immutable:false) {
   #market address
   id: ID!
-  marketConfig: BigInt!
   marketCreator:String!
   goodCount: BigInt!
   proofCount: BigInt!
@@ -243,7 +242,6 @@ type MarketData @entity(immutable:false) {
   # year: y+5day (73)
   id: ID!
   timetype:String!
-  marketConfig: BigInt!
   goodCount: BigInt!
   proofCount: BigInt!
   userCount: BigInt!

@@ -31,5 +31,6 @@ export function log_ReferData(
         referData_week.getfromstake = refer.getfromstake;
         referData_week.stakettsvalue = refer.stakettsvalue;
         referData_week.stakettscontruct = refer.stakettscontruct;
+        referData_week.lastoptime = refer.lastoptime;
         referData_week.save();
 }

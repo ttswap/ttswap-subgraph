@@ -1,4 +1,4 @@
-import { Address, BigInt, dataSource, Bytes } from "@graphprotocol/graph-ts";
+import {  dataSource } from "@graphprotocol/graph-ts";
 
 import { ttswap_stakeeth_env } from "../generated/schema";
 
@@ -14,16 +14,16 @@ import {
         e_unstakeSETH,
 } from "../generated/TTSwap_StakeETH/TTSwap_StakeETH";
 
-import {  BI_128, ZERO_BI } from "./util/constants";
+import { BI_128, ZERO_BI } from "./util/constants";
 
 export function handle_e_stakeSETH(event: e_stakeSETH): void {
         let ttsstakeenv = ttswap_stakeeth_env.load(
-                Bytes.fromHexString(dataSource.address.toString())
+                dataSource.address()
         );
 
         if (ttsstakeenv === null) {
                 ttsstakeenv = new ttswap_stakeeth_env(
-                        Bytes.fromHexString(dataSource.address.toString())
+                        dataSource.address()
                 );
                 ttsstakeenv.TotalState0 = ZERO_BI;
                 ttsstakeenv.TotalState1 = ZERO_BI;
@@ -59,12 +59,12 @@ export function handle_e_stakeSETH(event: e_stakeSETH): void {
 
 export function handle_e_stakeSWETH(event: e_stakeSWETH): void {
         let ttsstakeenv = ttswap_stakeeth_env.load(
-                Bytes.fromHexString(dataSource.address.toString())
+                dataSource.address()
         );
 
         if (ttsstakeenv === null) {
                 ttsstakeenv = new ttswap_stakeeth_env(
-                        Bytes.fromHexString(dataSource.address.toString())
+                        dataSource.address()
                 );
                 ttsstakeenv.TotalState0 = ZERO_BI;
                 ttsstakeenv.TotalState1 = ZERO_BI;
@@ -99,12 +99,12 @@ export function handle_e_stakeSWETH(event: e_stakeSWETH): void {
 
 export function handle_e_unstakeSWETH(event: e_unstakeSWETH): void {
         let ttsstakeenv = ttswap_stakeeth_env.load(
-                Bytes.fromHexString(dataSource.address.toString())
+                dataSource.address()
         );
 
         if (ttsstakeenv === null) {
                 ttsstakeenv = new ttswap_stakeeth_env(
-                        Bytes.fromHexString(dataSource.address.toString())
+                        dataSource.address()
                 );
                 ttsstakeenv.TotalState0 = ZERO_BI;
                 ttsstakeenv.TotalState1 = ZERO_BI;
@@ -140,12 +140,12 @@ export function handle_e_unstakeSWETH(event: e_unstakeSWETH): void {
 
 export function handle_e_unstakeSETH(event: e_unstakeSETH): void {
         let ttsstakeenv = ttswap_stakeeth_env.load(
-                Bytes.fromHexString(dataSource.address.toString())
+                dataSource.address()
         );
 
         if (ttsstakeenv === null) {
                 ttsstakeenv = new ttswap_stakeeth_env(
-                        Bytes.fromHexString(dataSource.address.toString())
+                        dataSource.address()
                 );
                 ttsstakeenv.TotalState0 = ZERO_BI;
                 ttsstakeenv.TotalState1 = ZERO_BI;
@@ -181,12 +181,12 @@ export function handle_e_unstakeSETH(event: e_unstakeSETH): void {
 
 export function handle_e_collecttts(event: e_collecttts): void {
         let ttsstakeenv = ttswap_stakeeth_env.load(
-                Bytes.fromHexString(dataSource.address.toString())
+                dataSource.address()
         );
 
         if (ttsstakeenv === null) {
                 ttsstakeenv = new ttswap_stakeeth_env(
-                        Bytes.fromHexString(dataSource.address.toString())
+                        dataSource.address()
                 );
                 ttsstakeenv.TotalState0 = ZERO_BI;
                 ttsstakeenv.TotalState1 = ZERO_BI;
@@ -217,12 +217,12 @@ export function handle_e_collecttts(event: e_collecttts): void {
 
 export function handle_e_rocketpoolUnstaked(event: e_rocketpoolUnstaked): void {
         let ttsstakeenv = ttswap_stakeeth_env.load(
-                Bytes.fromHexString(dataSource.address.toString())
+                dataSource.address()
         );
 
         if (ttsstakeenv === null) {
                 ttsstakeenv = new ttswap_stakeeth_env(
-                        Bytes.fromHexString(dataSource.address.toString())
+                        dataSource.address()
                 );
                 ttsstakeenv.TotalState0 = ZERO_BI;
                 ttsstakeenv.TotalState1 = ZERO_BI;
@@ -254,12 +254,12 @@ export function handle_e_rocketpoolUnstaked(event: e_rocketpoolUnstaked): void {
 
 export function handle_e_stakeRocketPoolETH(event: e_stakeRocketPoolETH): void {
         let ttsstakeenv = ttswap_stakeeth_env.load(
-                Bytes.fromHexString(dataSource.address.toString())
+                dataSource.address()
         );
 
         if (ttsstakeenv === null) {
                 ttsstakeenv = new ttswap_stakeeth_env(
-                        Bytes.fromHexString(dataSource.address.toString())
+                        dataSource.address()
                 );
                 ttsstakeenv.TotalState0 = ZERO_BI;
                 ttsstakeenv.TotalState1 = ZERO_BI;
@@ -286,12 +286,12 @@ export function handle_e_stakeRocketPoolETH(event: e_stakeRocketPoolETH): void {
 
 export function handle_e_stakeeth_invest(event: e_stakeeth_invest): void {
         let ttsstakeenv = ttswap_stakeeth_env.load(
-                Bytes.fromHexString(dataSource.address.toString())
+                dataSource.address()
         );
 
         if (ttsstakeenv === null) {
                 ttsstakeenv = new ttswap_stakeeth_env(
-                        Bytes.fromHexString(dataSource.address.toString())
+                        dataSource.address()
                 );
                 ttsstakeenv.TotalState0 = ZERO_BI;
                 ttsstakeenv.TotalState1 = ZERO_BI;
@@ -318,12 +318,12 @@ export function handle_e_stakeeth_invest(event: e_stakeeth_invest): void {
 
 export function handle_e_stakeeth_devest(event: e_stakeeth_devest): void {
         let ttsstakeenv = ttswap_stakeeth_env.load(
-                Bytes.fromHexString(dataSource.address.toString())
+                dataSource.address()
         );
 
         if (ttsstakeenv === null) {
                 ttsstakeenv = new ttswap_stakeeth_env(
-                        Bytes.fromHexString(dataSource.address.toString())
+                        dataSource.address()
                 );
                 ttsstakeenv.TotalState0 = ZERO_BI;
                 ttsstakeenv.TotalState1 = ZERO_BI;
