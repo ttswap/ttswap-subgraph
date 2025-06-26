@@ -1,13 +1,12 @@
 /* eslint-disable prefer-const */
-import { BigInt, BigDecimal, Address } from "@graphprotocol/graph-ts";
-import { TTSwap_Market as MarketContract } from "../../generated/TTSwap_Market/TTSwap_Market";
+import { BigInt, BigDecimal, Address, Bytes } from "@graphprotocol/graph-ts";
 
 export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
 export const ADDRESS_ONE = "0x0000000000000000000000000000000000000001";
 export const ADDRESS_TWO = "0x0000000000000000000000000000000000000002";
 export const ADDRESS_THREE = "0x0000000000000000000000000000000000000003";
 export const WETH = "0x0000000000000000000000000000000000000003";
-export const MARKET_ADDRESS = "0x1e61fc264ff5a75185146f0FE55915e106Fe03B0";
+
 
 export let ZERO_BI = BigInt.fromI32(0);
 export let ONE_BI = BigInt.fromI32(1);
@@ -18,9 +17,6 @@ export let BI_128 = BigInt.fromString(
         "340282366920938463463374607431768211456"
 );
 
-export let marketContract = MarketContract.bind(
-        Address.fromString(MARKET_ADDRESS)
-);
 export function convertQuantityToDecimal(
         tokenAmount: BigInt,
         exchangeDecimals: BigInt

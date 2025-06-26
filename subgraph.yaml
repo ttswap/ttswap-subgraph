@@ -9,9 +9,9 @@ dataSources:
     name: TTSwap_Market
     network: hoodi
     source:
-      address: "0x1e61fc264ff5a75185146f0FE55915e106Fe03B0"
+      address: "0x11d36E67810ba06aa1953e84217e0eEb1E5c9Fb9"
       abi: TTSwap_Market
-      startBlock: 368251
+      startBlock: 675267
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -41,8 +41,6 @@ dataSources:
         - name: ERC20SymbolBytes
           file: ./abis/ERC20SymbolBytes.json
       eventHandlers:
-        - event: e_changemarketcreator(address)
-          handler: handle_e_changemarketcreator
         - event: e_initMetaGood(uint256,address,uint256,uint256,uint256)
           handler: handle_e_initMetaGood
         - event: e_initGood(uint256,address,address,uint256,uint256,uint256,uint256)
@@ -53,29 +51,23 @@ dataSources:
           handler: handle_e_investGood
         - event: e_disinvestProof(indexed uint256,address,address,address,uint256,uint256,uint256,uint256)
           handler: handle_e_disinvestProof
-        - event: e_setMarketConfig(uint256)
-          handler: handle_e_setMarketConfig
         - event: e_updateGoodConfig(address,uint256)
           handler: handle_e_updateGoodConfig
         - event: e_modifyGoodConfig(address,uint256)
           handler: handle_e_modifyGoodConfig
-        - event: e_modifiedUserConfig(address,uint256)
-          handler: handle_e_modifiedUserConfig
         - event: e_collectcommission(address[],uint256[])
           handler: handle_e_collectcommission
         - event: e_goodWelfare(address,uint128)
           handler: handle_e_goodWelfare
         - event: e_changegoodowner(address,address)
           handler: handle_e_changegoodowner
-        - event: e_transferdel(uint256,uint256)
-          handler: handle_e_transferdel
   - kind: ethereum/contract
     name: TTSwap_Token
     network: hoodi
     source:
-      address: "0xE9f2200d261591bF5f4bAa983110333D0226b9B5"
+      address: "0xEdDf74E4e50D513a29b214F8aF60D92CB3eb3767"
       abi: TTSwap_Token
-      startBlock: 368180
+      startBlock: 675186
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -85,7 +77,6 @@ dataSources:
         - Customer
         - Refer
         - Gate
-        - tts_env
         - tts_restake
         - tts_share
         - tts_auth
@@ -99,12 +90,6 @@ dataSources:
           handler: handle_e_publicsell
         - event: e_setenv(address)
           handler: handle_e_setenv
-        - event: e_setdaoadmin(address)
-          handler: handle_e_setdaoadmin
-        - event: e_addauths(address,uint256)
-          handler: handle_e_addauths
-        - event: e_rmauths(address)
-          handler: handle_e_rmauths
         - event: e_addShare(address,uint128,uint120,uint8)
           handler: handle_e_addShare
         - event: e_burnShare(address)
@@ -119,9 +104,9 @@ dataSources:
     name: TTSwap_StakeETH
     network: hoodi
     source:
-      address: "0x5ad0c389b77A09cF33F88f45be0DB8549Cba69c4"
+      address: "0xEeBAC0DF2A8824ff58eae48EE39384782905529F"
       abi: TTSwap_StakeETH
-      startBlock: 368343
+      startBlock: 645739
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

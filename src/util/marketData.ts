@@ -19,7 +19,6 @@ export function log_MarketData(
                 marketData_hour.timetype = "h";
         }
         marketData_hour.timetype = "h";
-        marketData_hour.marketConfig = marketstate.marketConfig;
         marketData_hour.goodCount = marketstate.goodCount;
         marketData_hour.proofCount = marketstate.proofCount;
         marketData_hour.userCount = marketstate.userCount;
@@ -47,7 +46,6 @@ export function log_MarketData(
                 marketData_hour.modifiedTime
         ) {
                 marketData_day.timetype = "d";
-                marketData_day.marketConfig = marketData_hour.marketConfig;
                 marketData_day.goodCount = marketData_hour.goodCount;
                 marketData_day.proofCount = marketData_hour.proofCount;
                 marketData_day.userCount = marketData_hour.userCount;
@@ -82,7 +80,6 @@ export function log_MarketData(
                 marketData_day.modifiedTime
         ) {
                 marketData_week.timetype = "w";
-                marketData_week.marketConfig = marketData_day.marketConfig;
                 marketData_week.goodCount = marketData_day.goodCount;
                 marketData_week.proofCount = marketData_day.proofCount;
                 marketData_week.userCount = marketData_day.userCount;
@@ -117,7 +114,6 @@ export function log_MarketData(
                 marketData_week.modifiedTime
         ) {
                 marketData_month.timetype = "m";
-                marketData_month.marketConfig = marketData_week.marketConfig;
                 marketData_month.goodCount = marketData_week.goodCount;
                 marketData_month.proofCount = marketData_week.proofCount;
                 marketData_month.userCount = marketData_week.userCount;
@@ -150,7 +146,6 @@ export function log_MarketData(
                 marketData_month.modifiedTime
         ) {
                 marketData_year.timetype = "y";
-                marketData_year.marketConfig = marketData_month.marketConfig;
                 marketData_year.goodCount = marketData_month.goodCount;
                 marketData_year.proofCount = marketData_month.proofCount;
                 marketData_year.userCount = marketData_month.userCount;

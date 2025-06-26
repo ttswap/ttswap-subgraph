@@ -1,14 +1,11 @@
 import {
-        MarketState,
         GoodState,
-        ProofState,
         GoodData,
 } from "../../generated/schema";
 
-import { Address, BigDecimal, BigInt, bigInt } from "@graphprotocol/graph-ts";
+import { Address, BigInt, dataSource } from "@graphprotocol/graph-ts";
 
 import {
-        MARKET_ADDRESS,
         BI_128,
         ZERO_BI,
         ONE_BI,
@@ -409,7 +406,7 @@ export function fetchGoodDecimals(goodid: Address): BigInt {
 }
 
 export function fetchGoodConfig(goodid: Address): BigInt {
-        let contract = TTSwap_Market.bind(Address.fromString(MARKET_ADDRESS));
+        let contract = TTSwap_Market.bind(dataSource.address());
         // try types uint8 for decimals
         let decimalValue = BigInt.fromU32(0);
         let decimalResult = contract.try_getGoodState(goodid);
