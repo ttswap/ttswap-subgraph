@@ -193,6 +193,9 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
                 refer.stakettscontruct = ZERO_BI;
                 refer.getfromstake = ZERO_BI;
         }
+
+
+        refer.lastoptime = event.block.timestamp;
         refer.investValue = refer.investValue.minus(newcustomer.investValue);
         refer.investCount = refer.investCount.plus(ONE_BI);
 
@@ -203,13 +206,17 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
         newcustomer.save();
 
         gate.investValue = gate.investValue.plus(newcustomer.investValue);
+
         gate.lastoptime = event.block.timestamp;
         gate.save();
+
         log_GateData(gate, modifiedTime);
 
 
         refer.investValue = refer.investValue.plus(newcustomer.investValue);
+
         refer.lastoptime = modifiedTime;
+
         refer.save();
         log_ReferData(refer, modifiedTime);
 
@@ -500,6 +507,10 @@ export function handle_e_initGood(event: e_initGood): void {
                 refer.stakettscontruct = ZERO_BI;
                 refer.getfromstake = ZERO_BI;
         }
+
+
+        refer.lastoptime = event.block.timestamp;
+
         refer.investValue = refer.investValue.minus(newcustomer.investValue);
         refer.investCount = refer.investCount.plus(ONE_BI);
 
@@ -510,8 +521,12 @@ export function handle_e_initGood(event: e_initGood): void {
         newcustomer.save();
 
         gate.investValue = gate.investValue.plus(newcustomer.investValue);
+
         gate.lastoptime = event.block.timestamp;
         gate.save();
+
+     
+
         log_GateData(gate, modifiedTime);
 
         refer.investValue = refer.investValue.plus(newcustomer.investValue);
@@ -930,6 +945,8 @@ export function handle_e_buyGood(event: e_buyGood): void {
                 refer.stakettscontruct = ZERO_BI;
                 refer.getfromstake = ZERO_BI;
         }
+
+        refer.lastoptime = event.block.timestamp;
         refer.tradeValue = refer.tradeValue.minus(newcustomer.tradeValue);
         refer.tradeCount = refer.tradeCount.plus(ONE_BI);
         if (trade_value1.equals(ZERO_BI)) {
@@ -944,12 +961,14 @@ export function handle_e_buyGood(event: e_buyGood): void {
         newcustomer.lastoptime = event.block.timestamp;
         newcustomer.save();
         gate.tradeValue = gate.tradeValue.plus(newcustomer.tradeValue);
+
         gate.lastoptime = event.block.timestamp;
         gate.save();
         log_GateData(gate, event.block.timestamp);
 
         refer.tradeValue = refer.tradeValue.plus(newcustomer.tradeValue);
         refer.lastoptime = event.block.timestamp;
+
         refer.save();
         log_ReferData(refer, event.block.timestamp);
 
@@ -1224,9 +1243,14 @@ export function handle_e_investGood(event: e_investGood): void {
                 newcustomer.save();
 
                 gate.investValue = gate.investValue.minus(newcustomer.investValue);
-                gate.save()
+
+                gate.lastoptime=event.block.timestamp;
+                gate.save();
 
                 refer.investValue = refer.investValue.minus(newcustomer.investValue);
+
+                refer.lastoptime = event.block.timestamp;
+
                 refer.save()
 
                 log_CustomerData(newcustomer, event.block.timestamp);
@@ -1482,9 +1506,14 @@ export function handle_e_investGood(event: e_investGood): void {
 
                 newcustomer.save();
                 gate.investValue = gate.investValue.plus(newcustomer.investValue);
-                gate.save()
+
+                gate.lastoptime=event.block.timestamp;
+                gate.save();
 
                 refer.investValue = refer.investValue.plus(newcustomer.investValue);
+
+                refer.lastoptime = event.block.timestamp;
+
                 refer.save()
 
                 log_CustomerData(newcustomer, event.block.timestamp);
@@ -1956,14 +1985,17 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 refer.getfromstake = refer.getfromstake.plus(newcustomer.getfromstake);
                 refer.disinvestValue = refer.disinvestValue.plus(newcustomer.disinvestValue);
                 refer.totalprofitvalue = refer.totalprofitvalue.plus(newcustomer.totalprofitvalue);
+
                 refer.lastoptime = event.block.timestamp;
                 refer.save();
                 log_ReferData(refer, event.block.timestamp);
                 gate.getfromstake = gate.getfromstake.plus(newcustomer.getfromstake);
                 gate.disinvestValue = gate.disinvestValue.plus(newcustomer.disinvestValue);
                 gate.totalprofitvalue = gate.totalprofitvalue.plus(newcustomer.totalprofitvalue);
+
                 gate.lastoptime = event.block.timestamp;
                 gate.save();
+
                 log_GateData(gate, event.block.timestamp);
                 log_CustomerData(newcustomer, event.block.timestamp);
                 log_GoodData(value_good, event.block.timestamp);
@@ -2063,14 +2095,17 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 refer.getfromstake = refer.getfromstake.plus(newcustomer.getfromstake);
                 refer.disinvestValue = refer.disinvestValue.plus(newcustomer.disinvestValue);
                 refer.totalprofitvalue = refer.totalprofitvalue.plus(newcustomer.totalprofitvalue);
+
                 refer.lastoptime = event.block.timestamp;
                 refer.save();
                 log_ReferData(refer, event.block.timestamp);
                 gate.getfromstake = gate.getfromstake.plus(newcustomer.getfromstake);
                 gate.disinvestValue = gate.disinvestValue.plus(newcustomer.disinvestValue);
                 gate.totalprofitvalue = gate.totalprofitvalue.plus(newcustomer.totalprofitvalue);
+
                 gate.lastoptime = event.block.timestamp;
                 gate.save();
+
                 log_GateData(gate, event.block.timestamp);
 
                 log_CustomerData(newcustomer, event.block.timestamp);
@@ -2179,7 +2214,11 @@ export function handle_e_collectcommission(event: e_collectcommission): void {
                 gate.stakettscontruct = ZERO_BI;
                 gate.getfromstake = ZERO_BI;
         }
+
+
         gate.totalcommissionvalue = gate.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
+
+
         let goodidarrary = event.params._gooid;
         let commissionarray = event.params._commisionamount;
         for (let aa = 0; aa < goodidarrary.length; aa++) {
@@ -2195,12 +2234,15 @@ export function handle_e_collectcommission(event: e_collectcommission): void {
         }
         newcustomer.save();
         refer.totalcommissionvalue = refer.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
+
         refer.lastoptime = event.block.timestamp;
         refer.save();
         log_ReferData(refer, event.block.timestamp);
         gate.totalcommissionvalue = gate.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
+
         gate.lastoptime = event.block.timestamp;
         gate.save();
+
         log_GateData(gate, event.block.timestamp);
         log_CustomerData(newcustomer, event.block.timestamp);
 }

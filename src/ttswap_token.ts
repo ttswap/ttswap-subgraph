@@ -219,6 +219,7 @@ export function handle_e_addreferer(event: e_addreferral): void {
         referralcus.save();
 
 
+
         let gate = Gate.load(referralcus.lastgate as string);
         if (gate === null) {
                 gate = new Gate(
@@ -243,6 +244,7 @@ export function handle_e_addreferer(event: e_addreferral): void {
 
 
         let refer = Refer.load(event.params.referal.toHexString());
+
         if (refer === null) {
                 refer = new Refer(
                         event.params.referal.toHexString()
@@ -260,8 +262,11 @@ export function handle_e_addreferer(event: e_addreferral): void {
                 refer.stakettscontruct = ZERO_BI;
                 refer.getfromstake = ZERO_BI;
         }
-        refer.referralnum = refer.referralnum.plus(ONE_BI);
-        refer.lastoptime = event.block.timestamp;
+
+
+        refer.lastoptime=event.block.timestamp;
+        refer.referralnum=refer.referralnum.plus(ONE_BI);
+
         refer.save()
         marketstate.save();
 }
@@ -347,14 +352,16 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
                 refer.disinvestCount = ZERO_BI;
                 refer.totalprofitvalue = ZERO_BI;
                 refer.totalcommissionvalue = ZERO_BI;
+
                 refer.referralnum = ZERO_BI;
                 refer.stakettsvalue = ZERO_BI;
                 refer.stakettscontruct = ZERO_BI;
                 refer.getfromstake = ZERO_BI;
         }
 
-        refer.stakettsvalue = refer.stakettsvalue.minus(newcustomer.stakettsvalue);
-        refer.stakettscontruct = refer.stakettscontruct.minus(newcustomer.stakettscontruct);
+        refer.stakettsvalue=refer.stakettsvalue.minus(newcustomer.stakettsvalue);
+        refer.stakettscontruct=refer.stakettscontruct.minus(newcustomer.stakettscontruct);
+
 
 
         let gate = Gate.load(newcustomer.lastgate as string);
@@ -396,10 +403,12 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
         refer.save();
 
 
+
         gate.stakettsvalue = gate.stakettsvalue.minus(newcustomer.stakettsvalue);
         gate.stakettscontruct = gate.stakettscontruct.minus(newcustomer.stakettscontruct);
         gate.lastoptime = event.block.timestamp;
         gate.save();
+
 
         let ttsenv = tts_env.load("1");
         if (ttsenv === null) {

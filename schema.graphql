@@ -74,7 +74,6 @@ type ReferData @entity(immutable:false) {
   disinvestCount: BigInt!
   totalprofitvalue:BigInt!
   totalcommissionvalue:BigInt!
-  lastoptime:BigInt!
   referralnum:BigInt!
   getfromstake:BigInt!
   stakettsvalue:BigInt!
