@@ -33,61 +33,85 @@ export function log_GoodData(
                 );
                 goodData_hour.modifiedTime = ZERO_BI;
                 goodData_hour.timetype = "h";
+                goodData_hour.good = normal_good.id;
+                goodData_hour.goodConfig = normal_good.goodConfig;
+                goodData_hour.isvaluegood = normal_good.isvaluegood;
+                goodData_hour.decimals = normal_good.tokendecimals;
+                goodData_hour.currentValue = normal_good.currentValue;
+                goodData_hour.currentQuantity = normal_good.currentQuantity;
+                goodData_hour.investValue = normal_good.investValue;
+                goodData_hour.investQuantity = normal_good.investQuantity;
+                goodData_hour.feeQuantity = normal_good.feeQuantity;
+                goodData_hour.contructFee = normal_good.contructFee;
+                goodData_hour.totalTradeQuantity = normal_good.totalTradeQuantity;
+                goodData_hour.totalInvestQuantity = normal_good.totalInvestQuantity;
+                goodData_hour.totalDisinvestQuantity =
+                        normal_good.totalDisinvestQuantity;
+                goodData_hour.totalProfit = normal_good.totalProfit;
+                goodData_hour.totalTradeCount = normal_good.totalTradeCount;
+                goodData_hour.totalInvestCount = normal_good.totalInvestCount;
+                goodData_hour.totalDisinvestCount = normal_good.totalDisinvestCount;
                 goodData_hour.open = price;
                 goodData_hour.high = price;
                 goodData_hour.low = price;
                 goodData_hour.close = price;
+
+                goodData_hour.modifiedTime = modifiedTime;
+                goodData_hour.save();
         }
-        goodData_hour.timetype = "h";
-        goodData_hour.good = normal_good.id;
-        goodData_hour.goodConfig = normal_good.goodConfig;
-        goodData_hour.isvaluegood = normal_good.isvaluegood;
-        goodData_hour.decimals = normal_good.tokendecimals;
-        goodData_hour.currentValue = normal_good.currentValue;
-        goodData_hour.currentQuantity = normal_good.currentQuantity;
-        goodData_hour.investValue = normal_good.investValue;
-        goodData_hour.investQuantity = normal_good.investQuantity;
-        goodData_hour.feeQuantity = normal_good.feeQuantity;
-        goodData_hour.contructFee = normal_good.contructFee;
-        goodData_hour.totalTradeQuantity = normal_good.totalTradeQuantity;
-        goodData_hour.totalInvestQuantity = normal_good.totalInvestQuantity;
-        goodData_hour.totalDisinvestQuantity =
-                normal_good.totalDisinvestQuantity;
-        goodData_hour.totalProfit = normal_good.totalProfit;
-        goodData_hour.totalTradeCount = normal_good.totalTradeCount;
-        goodData_hour.totalInvestCount = normal_good.totalInvestCount;
-        goodData_hour.totalDisinvestCount = normal_good.totalDisinvestCount;
 
         if (
-                goodData_hour.modifiedTime
-                        .mod(BigInt.fromU32(7260))
-                        .div(BigInt.fromU32(60)) <
-                modifiedTime.mod(BigInt.fromU32(7260)).div(BigInt.fromU32(60))
+                goodData_hour.modifiedTime.plus(BigInt.fromU32(60)) <
+                normal_good.modifiedTime
         ) {
-                goodData_hour.open = price;
-        }
-        if (compareprice(goodData_hour.high, price)) {
-                goodData_hour.high = price;
-        }
+                goodData_hour.modifiedTime = ZERO_BI;
+                goodData_hour.timetype = "h";
+                goodData_hour.good = normal_good.id;
+                goodData_hour.goodConfig = normal_good.goodConfig;
+                goodData_hour.isvaluegood = normal_good.isvaluegood;
+                goodData_hour.decimals = normal_good.tokendecimals;
+                goodData_hour.currentValue = normal_good.currentValue;
+                goodData_hour.currentQuantity = normal_good.currentQuantity;
+                goodData_hour.investValue = normal_good.investValue;
+                goodData_hour.investQuantity = normal_good.investQuantity;
+                goodData_hour.feeQuantity = normal_good.feeQuantity;
+                goodData_hour.contructFee = normal_good.contructFee;
+                goodData_hour.totalTradeQuantity = normal_good.totalTradeQuantity;
+                goodData_hour.totalInvestQuantity = normal_good.totalInvestQuantity;
+                goodData_hour.totalDisinvestQuantity =
+                        normal_good.totalDisinvestQuantity;
+                goodData_hour.totalProfit = normal_good.totalProfit;
+                goodData_hour.totalTradeCount = normal_good.totalTradeCount;
+                goodData_hour.totalInvestCount = normal_good.totalInvestCount;
+                goodData_hour.totalDisinvestCount = normal_good.totalDisinvestCount;
 
-        if (compareprice(price, goodData_hour.low)) {
-                goodData_hour.low = price;
+                if (
+                        goodData_hour.modifiedTime
+                                .mod(BigInt.fromU32(7260))
+                                .div(BigInt.fromU32(60)) <
+                        modifiedTime.mod(BigInt.fromU32(7260)).div(BigInt.fromU32(60))
+                ) {
+                        goodData_hour.open = price;
+                }
+                if (compareprice(goodData_hour.high, price)) {
+                        goodData_hour.high = price;
+                }
+
+                if (compareprice(price, goodData_hour.low)) {
+                        goodData_hour.low = price;
+                }
+                if (
+                        modifiedTime.mod(BigInt.fromU32(7260)).div(BigInt.fromU32(60)) <
+                        modifiedTime
+                                .plus(ONE_BI)
+                                .mod(BigInt.fromU32(7260))
+                                .div(BigInt.fromU32(60))
+                ) {
+                        goodData_hour.close = price;
+                }
+                goodData_hour.modifiedTime = modifiedTime;
+                goodData_hour.save();
         }
-        if (
-                modifiedTime.mod(BigInt.fromU32(7260)).div(BigInt.fromU32(60)) <
-                modifiedTime
-                        .plus(ONE_BI)
-                        .mod(BigInt.fromU32(7260))
-                        .div(BigInt.fromU32(60))
-        ) {
-                goodData_hour.close = price;
-        }
-        goodData_hour.open = price;
-        goodData_hour.high = price;
-        goodData_hour.low = price;
-        goodData_hour.close = price;
-        goodData_hour.modifiedTime = modifiedTime;
-        goodData_hour.save();
 
         let data_day = modifiedTime
                 .mod(BigInt.fromU32(174000))
@@ -99,15 +123,39 @@ export function log_GoodData(
                 goodData_day = new GoodData(
                         normal_good.id + "d" + data_day.toString()
                 );
-                goodData_day.modifiedTime = ZERO_BI;
+
                 goodData_day.timetype = "d";
+                goodData_day.good = goodData_hour.good;
+                goodData_day.decimals = goodData_hour.decimals;
+                goodData_day.goodConfig = goodData_hour.goodConfig;
+                goodData_day.isvaluegood = goodData_hour.isvaluegood;
+                goodData_day.currentValue = goodData_hour.currentValue;
+                goodData_day.currentQuantity = goodData_hour.currentQuantity;
+                goodData_day.investValue = goodData_hour.investValue;
+                goodData_day.investQuantity = goodData_hour.investQuantity;
+                goodData_day.feeQuantity = goodData_hour.feeQuantity;
+                goodData_day.contructFee = goodData_hour.contructFee;
+                goodData_day.totalTradeQuantity =
+                        goodData_hour.totalTradeQuantity;
+                goodData_day.totalInvestQuantity =
+                        goodData_hour.totalInvestQuantity;
+                goodData_day.totalDisinvestQuantity =
+                        goodData_hour.totalDisinvestQuantity;
+                goodData_day.totalProfit = goodData_hour.totalProfit;
+                goodData_day.totalTradeCount = goodData_hour.totalTradeCount;
+                goodData_day.totalInvestCount = goodData_hour.totalInvestCount;
+                goodData_day.totalDisinvestCount =
+                        goodData_hour.totalDisinvestCount;
+
+                goodData_day.modifiedTime = modifiedTime;
                 goodData_day.open = price;
                 goodData_day.high = price;
                 goodData_day.low = price;
                 goodData_day.close = price;
+                goodData_day.save();
         }
         if (
-                goodData_day.modifiedTime.plus(BigInt.fromU32(60)) <=
+                goodData_day.modifiedTime.plus(BigInt.fromU32(60)) <
                 goodData_hour.modifiedTime
         ) {
                 goodData_day.timetype = "d";
@@ -133,6 +181,7 @@ export function log_GoodData(
                 goodData_day.totalDisinvestCount =
                         goodData_hour.totalDisinvestCount;
 
+                goodData_day.modifiedTime = modifiedTime;
                 if (
                         goodData_day.modifiedTime
                                 .mod(BigInt.fromU32(174000))
@@ -161,7 +210,6 @@ export function log_GoodData(
                 ) {
                         goodData_day.close = price;
                 }
-                goodData_day.modifiedTime = modifiedTime;
                 goodData_day.save();
         }
 
@@ -176,15 +224,36 @@ export function log_GoodData(
                         normal_good.id + "w" + data_week.toString()
                 );
 
-                goodData_week.timetype = "w";
-                goodData_week.modifiedTime = ZERO_BI;
+                goodData_week.timetype = "w"; goodData_week.good = goodData_day.good;
+                goodData_week.decimals = goodData_day.decimals;
+                goodData_week.goodConfig = goodData_day.goodConfig;
+                goodData_week.isvaluegood = goodData_day.isvaluegood;
+                goodData_week.currentValue = goodData_day.currentValue;
+                goodData_week.currentQuantity = goodData_day.currentQuantity;
+                goodData_week.investValue = goodData_day.investValue;
+                goodData_week.investQuantity = goodData_day.investQuantity;
+                goodData_week.feeQuantity = goodData_day.feeQuantity;
+                goodData_week.contructFee = goodData_day.contructFee;
+                goodData_week.totalTradeQuantity =
+                        goodData_day.totalTradeQuantity;
+                goodData_week.totalInvestQuantity =
+                        goodData_day.totalInvestQuantity;
+                goodData_week.totalDisinvestQuantity =
+                        goodData_day.totalDisinvestQuantity;
+                goodData_week.totalProfit = goodData_day.totalProfit;
+                goodData_week.totalTradeCount = goodData_day.totalTradeCount;
+                goodData_week.totalInvestCount = goodData_day.totalInvestCount;
+                goodData_week.totalDisinvestCount =
+                        goodData_day.totalDisinvestCount;
+                goodData_week.modifiedTime = modifiedTime;
                 goodData_week.open = price;
                 goodData_week.high = price;
                 goodData_week.low = price;
                 goodData_week.close = price;
+                goodData_week.save();
         }
         if (
-                goodData_week.modifiedTime.plus(BigInt.fromU32(1200)) <=
+                goodData_week.modifiedTime.plus(BigInt.fromU32(1200)) <
                 goodData_day.modifiedTime
         ) {
                 goodData_week.timetype = "w";
@@ -209,7 +278,7 @@ export function log_GoodData(
                 goodData_week.totalInvestCount = goodData_day.totalInvestCount;
                 goodData_week.totalDisinvestCount =
                         goodData_day.totalDisinvestCount;
-
+                goodData_week.modifiedTime = modifiedTime;
                 if (
                         goodData_week.modifiedTime
                                 .mod(BigInt.fromU32(1220400))
@@ -238,7 +307,7 @@ export function log_GoodData(
                 ) {
                         goodData_week.close = price;
                 }
-                goodData_week.modifiedTime = modifiedTime;
+
                 goodData_week.save();
         }
 
@@ -254,14 +323,37 @@ export function log_GoodData(
                 );
                 goodData_month.modifiedTime = ZERO_BI;
 
-                goodData_month.timetype = "m";
+                goodData_month.timetype = "m"; goodData_month.good = goodData_week.good;
+                goodData_month.decimals = goodData_week.decimals;
+                goodData_month.goodConfig = goodData_week.goodConfig;
+                goodData_month.isvaluegood = goodData_week.isvaluegood;
+                goodData_month.currentValue = goodData_week.currentValue;
+                goodData_month.currentQuantity = goodData_week.currentQuantity;
+                goodData_month.investValue = goodData_week.investValue;
+                goodData_month.investQuantity = goodData_week.investQuantity;
+                goodData_month.feeQuantity = goodData_week.feeQuantity;
+                goodData_month.contructFee = goodData_week.contructFee;
+                goodData_month.totalTradeQuantity =
+                        goodData_week.totalTradeQuantity;
+                goodData_month.totalInvestQuantity =
+                        goodData_week.totalInvestQuantity;
+                goodData_month.totalDisinvestQuantity =
+                        goodData_week.totalDisinvestQuantity;
+                goodData_month.totalProfit = goodData_week.totalProfit;
+                goodData_month.totalTradeCount = goodData_week.totalTradeCount;
+                goodData_month.totalInvestCount =
+                        goodData_week.totalInvestCount;
+                goodData_month.totalDisinvestCount =
+                        goodData_week.totalDisinvestCount;
+                goodData_month.modifiedTime = modifiedTime;
                 goodData_month.open = price;
                 goodData_month.high = price;
                 goodData_month.low = price;
                 goodData_month.close = price;
+                goodData_month.save();
         }
         if (
-                goodData_month.modifiedTime.plus(BigInt.fromU32(10800)) <=
+                goodData_month.modifiedTime.plus(BigInt.fromU32(10800)) <
                 goodData_week.modifiedTime
         ) {
                 goodData_month.timetype = "m";
@@ -287,7 +379,7 @@ export function log_GoodData(
                         goodData_week.totalInvestCount;
                 goodData_month.totalDisinvestCount =
                         goodData_week.totalDisinvestCount;
-
+                goodData_month.modifiedTime = modifiedTime;
                 if (
                         goodData_month.modifiedTime
                                 .mod(BigInt.fromU32(5356800))
@@ -316,7 +408,7 @@ export function log_GoodData(
                 ) {
                         goodData_month.close = price;
                 }
-                goodData_month.modifiedTime = modifiedTime;
+
                 goodData_month.save();
         }
 
@@ -335,9 +427,34 @@ export function log_GoodData(
                 goodData_year.high = price;
                 goodData_year.low = price;
                 goodData_year.close = price;
+                goodData_year.good = goodData_month.good;
+                goodData_year.decimals = goodData_month.decimals;
+                goodData_year.goodConfig = goodData_month.goodConfig;
+                goodData_year.isvaluegood = goodData_month.isvaluegood;
+                goodData_year.currentValue = goodData_month.currentValue;
+                goodData_year.currentQuantity = goodData_month.currentQuantity;
+                goodData_year.investValue = goodData_month.investValue;
+                goodData_year.investQuantity = goodData_month.investQuantity;
+                goodData_year.feeQuantity = goodData_month.feeQuantity;
+                goodData_year.contructFee = goodData_month.contructFee;
+                goodData_year.totalTradeQuantity =
+                        goodData_month.totalTradeQuantity;
+                goodData_year.totalInvestQuantity =
+                        goodData_month.totalInvestQuantity;
+                goodData_year.totalDisinvestQuantity =
+                        goodData_month.totalDisinvestQuantity;
+                goodData_year.totalProfit = goodData_month.totalProfit;
+                goodData_year.totalTradeCount = goodData_month.totalTradeCount;
+                goodData_year.totalInvestCount =
+                        goodData_month.totalInvestCount;
+                goodData_year.totalDisinvestCount =
+                        goodData_month.totalDisinvestCount;
+
+                goodData_year.modifiedTime = modifiedTime;
+                goodData_year.save();
         }
         if (
-                goodData_year.modifiedTime.plus(BigInt.fromU32(43200)) <=
+                goodData_year.modifiedTime.plus(BigInt.fromU32(43200)) <
                 goodData_month.modifiedTime
         ) {
                 goodData_year.timetype = "y";
@@ -364,6 +481,7 @@ export function log_GoodData(
                 goodData_year.totalDisinvestCount =
                         goodData_month.totalDisinvestCount;
 
+                goodData_year.modifiedTime = modifiedTime;
                 if (
                         goodData_year.modifiedTime.div(BigInt.fromU32(432000)) <
                         modifiedTime.div(BigInt.fromU32(432000))
@@ -385,7 +503,6 @@ export function log_GoodData(
                 ) {
                         goodData_year.close = price;
                 }
-                goodData_year.modifiedTime = modifiedTime;
                 goodData_year.save();
         }
 }

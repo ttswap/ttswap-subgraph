@@ -14,25 +14,44 @@ export function log_GateData(
                 gateData_week = new GateData(
                         gate.id + "w" + data_week.toString()
                 );
+                gateData_week.tradeValue = gate.tradeValue;
+                gateData_week.investValue = gate.investValue;
+                gateData_week.disinvestValue = gate.disinvestValue;
+                gateData_week.tradeCount = gate.tradeCount;
+                gateData_week.investCount = gate.investCount;
+                gateData_week.disinvestCount = gate.disinvestCount;
+                gateData_week.totalprofitvalue = gate.totalprofitvalue;
+                gateData_week.totalcommissionvalue =
+                        gate.totalcommissionvalue;
+                gateData_week.gateid = gate.id;
+                gateData_week.create_time = modifiedTime;
+                gateData_week.getfromstake = gate.getfromstake;
+                gateData_week.stakettsvalue = gate.stakettsvalue;
+                gateData_week.stakettscontruct = gate.stakettscontruct;
 
+                gateData_week.referralnum = gate.referralnum;
+                gateData_week.save();
 
         }
-        gateData_week.tradeValue = gate.tradeValue;
-        gateData_week.investValue = gate.investValue;
-        gateData_week.disinvestValue = gate.disinvestValue;
-        gateData_week.tradeCount = gate.tradeCount;
-        gateData_week.investCount = gate.investCount;
-        gateData_week.disinvestCount = gate.disinvestCount;
-        gateData_week.totalprofitvalue = gate.totalprofitvalue;
-        gateData_week.totalcommissionvalue =
-                gate.totalcommissionvalue;
-        gateData_week.gateid = gate.id;
-        gateData_week.create_time = modifiedTime;
-        gateData_week.getfromstake = gate.getfromstake;
-        gateData_week.stakettsvalue = gate.stakettsvalue;
-        gateData_week.stakettscontruct = gate.stakettscontruct;
 
-        gateData_week.referralnum = gate.referralnum;
+        if (gateData_week.create_time.plus(BigInt.fromU32(36000)) < modifiedTime) {
+                gateData_week.tradeValue = gate.tradeValue;
+                gateData_week.investValue = gate.investValue;
+                gateData_week.disinvestValue = gate.disinvestValue;
+                gateData_week.tradeCount = gate.tradeCount;
+                gateData_week.investCount = gate.investCount;
+                gateData_week.disinvestCount = gate.disinvestCount;
+                gateData_week.totalprofitvalue = gate.totalprofitvalue;
+                gateData_week.totalcommissionvalue =
+                        gate.totalcommissionvalue;
+                gateData_week.gateid = gate.id;
+                gateData_week.create_time = modifiedTime;
+                gateData_week.getfromstake = gate.getfromstake;
+                gateData_week.stakettsvalue = gate.stakettsvalue;
+                gateData_week.stakettscontruct = gate.stakettscontruct;
 
-        gateData_week.save();
+                gateData_week.referralnum = gate.referralnum;
+                gateData_week.save();
+        }        
 }
+      

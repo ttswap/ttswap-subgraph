@@ -270,7 +270,7 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
 
         let null_good = new GoodState(ADDRESS_ZERO.toString());
 
-        null_good.goodseq = ZERO_BI;
+        null_good.goodseq = ZERO_BI;    
         null_good.isvaluegood = false;
         null_good.tokenname = "#";
         null_good.tokensymbol = "#";
