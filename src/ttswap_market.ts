@@ -828,7 +828,7 @@ export function handle_e_buyGood(event: e_buyGood): void {
         }
         from_good.totalTradeCount = from_good.totalTradeCount.plus(ONE_BI);
         from_good.totalTradeQuantity = from_good.totalTradeQuantity.plus(
-                event.params.good2change.div(BI_128)
+               to_quantity
         );
         from_good.txCount = from_good.txCount.plus(ONE_BI);
         from_good.modifiedTime = event.block.timestamp;
@@ -877,7 +877,7 @@ export function handle_e_buyGood(event: e_buyGood): void {
         }
         to_good.totalTradeCount = to_good.totalTradeCount.plus(ONE_BI);
         to_good.totalTradeQuantity = to_good.totalTradeQuantity.plus(
-                event.params.good2change.div(BI_128)
+                to_quantity
         );
         to_good.modifiedTime = event.block.timestamp;
         to_good.txCount = to_good.txCount.plus(ONE_BI);
