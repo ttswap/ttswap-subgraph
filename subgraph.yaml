@@ -9,9 +9,9 @@ dataSources:
     name: TTSwap_Market
     network: hoodi
     source:
-      address: "0x3aCaC503018569B0e2DF4E6B0252Dc2c33Aa67d5"
+      address: "0x63275e12e1245427d47036aB14763e34Ce3eAC7b"
       abi: TTSwap_Market
-      startBlock: 927168
+      startBlock: 951489
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -49,7 +49,7 @@ dataSources:
           handler: handle_e_buyGood
         - event: e_investGood(indexed uint256,address,address,uint256,uint256,uint256)
           handler: handle_e_investGood
-        - event: e_disinvestProof(indexed uint256,address,address,address,uint256,uint256,uint256,uint256)
+        - event: e_disinvestProof(indexed uint256,address,address,address,uint256,uint256,uint256,uint256,uint256)
           handler: handle_e_disinvestProof
         - event: e_updateGoodConfig(address,uint256)
           handler: handle_e_updateGoodConfig
@@ -65,9 +65,9 @@ dataSources:
     name: TTSwap_Token
     network: hoodi
     source:
-      address: "0x259D2036C4E942a679A26542Be1960404EccFD08"
+      address: "0x6aD3B65Fe6715c3D8b849b4DcB1D825D355b4C3B"
       abi: TTSwap_Token
-      startBlock: 927150
+      startBlock: 951470
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
