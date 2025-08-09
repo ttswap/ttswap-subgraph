@@ -334,6 +334,8 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
                 proof.good1Quantity = proofstate.value.invest.mod(BI_128);
                 proof.good1ContructFee = proofstate.value.invest.div(BI_128);
                 proof.proofValue = proofstate.value.state.div(BI_128);
+                proof.proofActualValue = proofstate.value.state.div(BI_128);
+                proof.good1ActualQuantity = proofstate.value.invest.mod(BI_128);
         }
         proof.save();
 
@@ -352,6 +354,9 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
                 tx.togoodQuantity = ZERO_BI;
                 tx.togoodfee = ZERO_BI;
                 tx.timestamp = ZERO_BI;
+                tx.transActualValue = ZERO_BI;
+                tx.fromgoodActualQuanity = ZERO_BI;
+                tx.togoodActualQuantity = ZERO_BI;
                 marketstate.txCount = marketstate.txCount.plus(ONE_BI);
         }
         tx.blockNumber = event.block.number;
@@ -366,6 +371,8 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
         tx.timestamp = modifiedTime;
         tx.recipent = event.transaction.from.toHexString();
         tx.hash = event.transaction.hash.toHexString();
+        tx.transActualValue = trade_value;
+        tx.fromgoodActualQuanity = trade_quantity;
         tx.save();
 
         marketstate.totalInvestValue =
@@ -696,29 +703,29 @@ export function handle_e_initGood(event: e_initGood): void {
                 proof.good2Quantity = ZERO_BI;
                 proof.good1ContructFee = ZERO_BI;
                 proof.good2ContructFee = ZERO_BI;
-                proof.createTime = event.block.timestamp; 
+                proof.createTime = event.block.timestamp;
                 proof.proofActualValue = ZERO_BI;
                 proof.good1ActualQuantity = ZERO_BI;
                 proof.good2ActualQuantity = ZERO_BI;
                 marketstate.proofCount = marketstate.proofCount.plus(ONE_BI);
         }
         proof.proofValue = proof.proofValue.plus(trade_value);
+        proof.proofActualValue = proof.proofActualValue.plus(trade_value);
         proof.good1ContructFee = proof.good1ContructFee.plus(
                 trade_normalgood_contruct
         );
         proof.good1Quantity = proof.good1Quantity.plus(
                 trade_normalgood_quantity
         );
+        proof.good1ActualQuantity = proof.good1ActualQuantity.plus(trade_normalgood_quantity);
         proof.good2ContructFee = proof.good2ContructFee.plus(
                 trade_valuegood_contruct
         );
         proof.good2Quantity = proof.good2Quantity.plus(
                 trade_valuegood_quantity
         );
-        proof.createTime = modifiedTime;
-        proof.proofActualValue = proof.proofActualValue.plus(trade_value);
-        proof.good1ActualQuantity = proof.good1ActualQuantity.plus(trade_normalgood_quantity);
         proof.good2ActualQuantity = proof.good2ActualQuantity.plus(trade_valuegood_quantity);
+        proof.createTime = modifiedTime;
         proof.save();
         let transid =
                 normal_good.id.toString() +
@@ -735,6 +742,9 @@ export function handle_e_initGood(event: e_initGood): void {
                 tx.togoodQuantity = ZERO_BI;
                 tx.togoodfee = ZERO_BI;
                 tx.timestamp = ZERO_BI;
+                tx.transActualValue = ZERO_BI;
+                tx.fromgoodActualQuanity = ZERO_BI;
+                tx.togoodActualQuantity = ZERO_BI;
                 marketstate.txCount = marketstate.txCount.plus(ONE_BI);
         }
         tx.blockNumber = event.block.number;
@@ -747,6 +757,9 @@ export function handle_e_initGood(event: e_initGood): void {
         tx.timestamp = modifiedTime;
         tx.recipent = event.transaction.from.toHexString();
         tx.hash = event.transaction.hash.toHexString();
+        tx.transActualValue = trade_value.times(BigInt.fromString("2"));;
+        tx.fromgoodActualQuanity = trade_normalgood_quantity;
+        tx.togoodActualQuantity = trade_valuegood_quantity;
         tx.save();
         marketstate.totalInvestValue =
                 marketstate.totalInvestValue.plus(trade_value);
@@ -1052,6 +1065,9 @@ export function handle_e_buyGood(event: e_buyGood): void {
                 tx.togoodQuantity = ZERO_BI;
                 tx.togoodfee = ZERO_BI;
                 tx.timestamp = ZERO_BI;
+                tx.transActualValue = ZERO_BI;
+                tx.fromgoodActualQuanity = ZERO_BI;
+                tx.togoodActualQuantity = ZERO_BI;
         }
         tx.blockNumber = event.block.number;
         if (trade_value1.equals(ZERO_BI)) {
@@ -1084,6 +1100,7 @@ export function handle_e_investGood(event: e_investGood): void {
         let marketmanage = TTSwap_Market.bind(event.address);
         let proofstate = marketmanage.try_getProofState(event.params._proofNo);
         let invest_value = proofstate.value.state.div(BI_128);
+        let invest_actualvalue = proofstate.value.state.mod(BI_128);
         let normal_contructFee = proofstate.value.invest.div(BI_128);
         let normal_Quantity = proofstate.value.invest.mod(BI_128);
         // let normal_fee = event.params._invest.div(BI_128);
@@ -1100,7 +1117,7 @@ export function handle_e_investGood(event: e_investGood): void {
                 proof.good1Quantity = ZERO_BI;
                 proof.good2Quantity = ZERO_BI;
                 proof.good1ContructFee = ZERO_BI;
-                proof.good2ContructFee = ZERO_BI; 
+                proof.good2ContructFee = ZERO_BI;
                 proof.proofActualValue = ZERO_BI;
                 proof.good1ActualQuantity = ZERO_BI;
                 proof.good2ActualQuantity = ZERO_BI;
@@ -1191,9 +1208,9 @@ export function handle_e_investGood(event: e_investGood): void {
         }
 
         normal_good.currentActualValue = normal_good.currentActualValue.plus(event.params._value.mod(BI_128));
-        normal_good.currentAcutualQuanity = normal_good.currentAcutualQuanity.plus(normal_Quantity.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
+        normal_good.currentAcutualQuanity = normal_good.currentAcutualQuanity.plus(event.params._invest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
         normal_good.investActualValue = normal_good.investActualValue.plus(event.params._value.mod(BI_128));
-        normal_good.investActualQuantity = normal_good.investActualQuantity.plus(normal_Quantity.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
+        normal_good.investActualQuantity = normal_good.investActualQuantity.plus(event.params._invest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
 
         normal_good.totalInvestQuantity =
                 normal_good.totalInvestQuantity.plus(normal_Quantity);
@@ -1414,9 +1431,9 @@ export function handle_e_investGood(event: e_investGood): void {
                                 value_good.contructFee.plus(value_contructFee);
                 }
                 value_good.currentActualValue = value_good.currentActualValue.plus(event.params._value.mod(BI_128));
-                value_good.currentAcutualQuanity = value_good.currentAcutualQuanity.plus(value_Quantity.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
+                value_good.currentAcutualQuanity = value_good.currentAcutualQuanity.plus(event.params._valueinvest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
                 value_good.investActualValue = value_good.investActualValue.plus(event.params._value.mod(BI_128));
-                value_good.investActualQuantity = value_good.investActualQuantity.plus(value_Quantity.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
+                value_good.investActualQuantity = value_good.investActualQuantity.plus(event.params._valueinvest.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
                 value_good.totalInvestQuantity =
                         value_good.totalInvestQuantity.minus(
                                 proof.good2Quantity
@@ -1447,6 +1464,9 @@ export function handle_e_investGood(event: e_investGood): void {
                         tx.togoodQuantity = ZERO_BI;
                         tx.togoodfee = ZERO_BI;
                         tx.timestamp = ZERO_BI;
+                        tx.transActualValue = ZERO_BI;
+                        tx.fromgoodActualQuanity = ZERO_BI;
+                        tx.togoodActualQuantity = ZERO_BI;
                 }
                 tx.blockNumber = event.block.number;
                 tx.transtype = "invest";
@@ -1462,17 +1482,20 @@ export function handle_e_investGood(event: e_investGood): void {
                 tx.timestamp = event.block.timestamp;
                 tx.recipent = event.transaction.from.toHexString();
                 tx.hash = event.transaction.hash.toHexString();
+                tx.transActualValue = event.params._value.mod(BI_128).times(BigInt.fromString("2"));
+                tx.fromgoodActualQuanity = event.params._invest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
+                tx.togoodActualQuantity = event.params._valueinvest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
                 tx.save();
                 proof.good1 = normalgoodid;
                 proof.good2 = valuegoodid;
-                proof.proofValue = invest_value;
+                proof.proofValue = invest_value
                 proof.good1ContructFee = normal_contructFee;
                 proof.good1Quantity = normal_Quantity;
                 proof.good2ContructFee = value_contructFee;
                 proof.good2Quantity = value_Quantity;
-                proof.proofActualValue = proof.proofActualValue.plus(event.params._value.mod(BI_128));
-                proof.good1ActualQuantity = proof.good1ActualQuantity.plus(normal_Quantity.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
-                proof.good2ActualQuantity = proof.good2ActualQuantity.plus(value_Quantity.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
+                proof.proofActualValue = invest_actualvalue;
+                proof.good1ActualQuantity = normal_Quantity.times(invest_actualvalue).div(invest_value);
+                proof.good2ActualQuantity = value_Quantity.times(invest_actualvalue).div(invest_value);
                 proof.save();
                 let ttsenv = tts_env.load("1");
                 if (ttsenv === null) {
@@ -1613,6 +1636,9 @@ export function handle_e_investGood(event: e_investGood): void {
                         tx.togoodQuantity = ZERO_BI;
                         tx.togoodfee = ZERO_BI;
                         tx.timestamp = ZERO_BI;
+                        tx.transActualValue = ZERO_BI;
+                        tx.fromgoodActualQuanity = ZERO_BI;
+                        tx.togoodActualQuantity = ZERO_BI;
                 }
                 tx.blockNumber = event.block.number;
                 tx.transtype = "invest";
@@ -1624,16 +1650,19 @@ export function handle_e_investGood(event: e_investGood): void {
                 tx.timestamp = event.block.timestamp;
                 tx.recipent = event.transaction.from.toHexString();
                 tx.hash = event.transaction.hash.toHexString();
+                tx.transActualValue = event.params._value.mod(BI_128);
+                tx.fromgoodActualQuanity = event.params._invest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
                 tx.save();
                 proof.good1 = normalgoodid;
                 proof.good2 = valuegoodid;
-                proof.proofValue = invest_value;
+                proof.proofValue = invest_value
                 proof.good1ContructFee = normal_contructFee;
                 proof.good1Quantity = normal_Quantity;
                 proof.good2ContructFee = ZERO_BI;
                 proof.good2Quantity = ZERO_BI;
-                proof.proofActualValue = proof.proofActualValue.plus(event.params._value.mod(BI_128));
-                proof.good1ActualQuantity = proof.good1ActualQuantity.plus(normal_Quantity.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
+                proof.proofActualValue = invest_actualvalue;
+                proof.good1ActualQuantity = normal_Quantity.times(invest_actualvalue).div(invest_value);
+                proof.good2ActualQuantity = ZERO_BI;
                 proof.save();
                 let ttsenv = tts_env.load("1");
                 if (ttsenv === null) {
@@ -1670,20 +1699,12 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
         let proof_value_contructFee = ZERO_BI;
         let proof_value_Quantity = ZERO_BI;
         let proof_invest_value = ZERO_BI;
+        let proof_invest_actualvalue = ZERO_BI;
         let tts_stakeproof = ZERO_BI;
         let proof_normal_contructFee = ZERO_BI;
         let proof_normal_Quantity = ZERO_BI;
         let devestvalue = event.params._value.div(BI_128);
-        let proofstate = marketmanage.try_getProofState(event.params._proofNo);
-        if (!proofstate.reverted) {
-                proof_value_contructFee =
-                        proofstate.value.valueinvest.div(BI_128);
-                proof_value_Quantity = proofstate.value.valueinvest.mod(BI_128);
-                proof_invest_value = proofstate.value.state.div(BI_128);
-                // tts_stakeproof = proofstate.value.state.mod(BI_128);
-                proof_normal_contructFee = proofstate.value.invest.div(BI_128);
-                proof_normal_Quantity = proofstate.value.invest.mod(BI_128);
-        }
+        
         let normal_fee = event.params._normaldisvest.div(BI_128);
         let value_fee = event.params._valuedisvest.div(BI_128);
         let proof = ProofState.load(proofNo);
@@ -1696,11 +1717,31 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 proof.good1Quantity = ZERO_BI;
                 proof.good2Quantity = ZERO_BI;
                 proof.good1ContructFee = ZERO_BI;
-                proof.good2ContructFee = ZERO_BI; 
+                proof.good2ContructFee = ZERO_BI;
                 proof.proofActualValue = ZERO_BI;
                 proof.good1ActualQuantity = ZERO_BI;
                 proof.good2ActualQuantity = ZERO_BI;
                 proof.createTime = event.block.timestamp;
+        }
+
+
+        let proofstate = marketmanage.try_getProofState(event.params._proofNo);
+        if (!proofstate.reverted) {
+                proof_value_contructFee =
+                        proofstate.value.valueinvest.div(BI_128);
+                proof_value_Quantity = proofstate.value.valueinvest.mod(BI_128);
+                proof_invest_value = proofstate.value.state.div(BI_128);
+                proof_invest_actualvalue = proofstate.value.state.mod(BI_128);
+                // tts_stakeproof = proofstate.value.state.mod(BI_128);
+                proof_normal_contructFee = proofstate.value.invest.div(BI_128);
+                proof_normal_Quantity = proofstate.value.invest.mod(BI_128);
+        }else{
+                proof_invest_value = proof.proofActualValue.minus(event.params._value.div(BI_128));
+                proof_invest_actualvalue = proof.good2ActualQuantity.minus(event.params._value.mod(BI_128));
+                proof_normal_contructFee = proof.good1ContructFee.minus(event.params._normaldisvest.div(BI_128).plus(event.params._normalprofit.div(BI_128)));
+                proof_normal_Quantity = proof.good1Quantity.minus(event.params._normalprofit.mod(BI_128));
+                proof_value_contructFee = proof.good2ContructFee.minus(event.params._valuedisvest.div(BI_128).plus(event.params._valueprofit.div(BI_128)));
+                proof_value_Quantity = proof.good2Quantity.minus(event.params._valueprofit.mod(BI_128));
         }
         let normal_good = GoodState.load(normalgoodid);
         if (normal_good === null) {
@@ -1958,6 +1999,9 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                         tx.togoodQuantity = ZERO_BI;
                         tx.togoodfee = ZERO_BI;
                         tx.timestamp = ZERO_BI;
+                        tx.transActualValue = ZERO_BI;
+                        tx.fromgoodActualQuanity = ZERO_BI;
+                        tx.togoodActualQuantity = ZERO_BI;
                 }
                 tx.blockNumber = event.block.number;
                 tx.transtype = "divest";
@@ -1973,18 +2017,18 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 tx.timestamp = event.block.timestamp;
                 tx.recipent = event.transaction.from.toHexString();
                 tx.hash = event.transaction.hash.toHexString();
+                tx.transActualValue = event.params._value.mod(BI_128).times(BigInt.fromString("2"));
+                tx.fromgoodActualQuanity = event.params._normaldisvest.mod(BI_128);
+                tx.togoodActualQuantity = event.params._valuedisvest.mod(BI_128);
                 tx.save();
                 proof.proofValue = proof_invest_value;
                 proof.good1ContructFee = proof_normal_contructFee;
-                proof.good1Quantity = proof_normal_Quantity;
+                proof.good1Quantity = proof_normal_Quantity
                 proof.good2ContructFee = proof_value_contructFee;
                 proof.good2Quantity = proof_value_Quantity;
-                proof.proofActualValue = proof_invest_value;
-                proof.good1ActualQuantity = proof_normal_Quantity;
-                proof.good2ActualQuantity = proof_value_Quantity;
-                proof.proofActualValue = proof.proofActualValue.minus(event.params._value.mod(BI_128));
-                proof.good1ActualQuantity = proof.good1ActualQuantity.minus(proof_normal_Quantity.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
-                proof.good2ActualQuantity = proof.good2ActualQuantity.minus(proof_value_Quantity.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
+                proof.proofActualValue = proof_invest_actualvalue;
+                proof.good1ActualQuantity = proof_normal_Quantity.times(proof_invest_actualvalue).div(proof_invest_value);
+                proof.good2ActualQuantity = proof_value_Quantity.times(proof_invest_actualvalue).div(proof_invest_value);
                 proof.save();
                 let newcustomer = Customer.load(
                         event.transaction.from.toHexString()
@@ -2231,23 +2275,28 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                         tx.togoodQuantity = ZERO_BI;
                         tx.togoodfee = ZERO_BI;
                         tx.timestamp = ZERO_BI;
+                        tx.transActualValue = ZERO_BI;
+                        tx.fromgoodActualQuanity = ZERO_BI;
+                        tx.togoodActualQuantity = ZERO_BI;
                 }
                 tx.blockNumber = event.block.number;
                 tx.transtype = "divest";
                 tx.transvalue = event.params._value.div(BI_128);
                 tx.fromgood = normal_good.id;
                 tx.togood = ADDRESS_ZERO;
-                tx.fromgoodQuanity = event.params._valueprofit.mod(BI_128);
+                tx.fromgoodQuanity = event.params._normalprofit.mod(BI_128);
                 tx.fromgoodfee = normal_fee;
                 tx.timestamp = event.block.timestamp;
                 tx.recipent = event.transaction.from.toHexString();
                 tx.hash = event.transaction.hash.toHexString();
+                tx.transActualValue = event.params._value.mod(BI_128).times(BigInt.fromString("2"));
+                tx.fromgoodActualQuanity = event.params._normaldisvest.mod(BI_128);
                 tx.save();
                 proof.proofValue = proof_invest_value;
                 proof.good1ContructFee = proof_normal_contructFee;
                 proof.good1Quantity = proof_normal_Quantity;
-                proof.proofActualValue = proof.proofActualValue.minus(event.params._value.mod(BI_128));
-                proof.good1ActualQuantity = proof.good1ActualQuantity.minus(proof_normal_Quantity.times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128)));
+                proof.proofActualValue = proof_invest_actualvalue;
+                proof.good1ActualQuantity = proof_normal_Quantity.times(proof_invest_actualvalue).div(proof_invest_value);
                 proof.save();
                 log_GoodData(normal_good, event.block.timestamp);
                 log_MarketData(marketstate, event.block.timestamp);

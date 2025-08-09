@@ -204,6 +204,9 @@ type Transaction @entity(immutable:false) {
   fromgoodfee:BigInt!
   togoodQuantity:BigInt!
   togoodfee:BigInt!
+  transActualValue:BigInt!
+  fromgoodActualQuanity:BigInt!
+  togoodActualQuantity:BigInt!
   hash:String!
   recipent:String!
   timestamp: BigInt!
