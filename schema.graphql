@@ -153,6 +153,10 @@ type GoodState @entity(immutable:false) {
   currentQuantity:BigInt!
   investValue:BigInt!
   investQuantity:BigInt!
+  currentActualValue:BigInt!
+  currentAcutualQuanity:BigInt!
+  investActualValue:BigInt!
+  investActualQuantity:BigInt!
   feeQuantity:BigInt!
   contructFee: BigInt!
   totalTradeQuantity:BigInt!
@@ -182,6 +186,9 @@ type ProofState @entity(immutable:false) {
   good1Quantity:BigInt!
   good2ContructFee: BigInt!
   good2Quantity:BigInt!
+  proofActualValue:BigInt!
+  good1ActualQuantity:BigInt!
+  good2ActualQuantity:BigInt!
   createTime: BigInt!
 }
 
@@ -197,6 +204,9 @@ type Transaction @entity(immutable:false) {
   fromgoodfee:BigInt!
   togoodQuantity:BigInt!
   togoodfee:BigInt!
+  transActualValue:BigInt!
+  fromgoodActualQuanity:BigInt!
+  togoodActualQuantity:BigInt!
   hash:String!
   recipent:String!
   timestamp: BigInt!
@@ -219,6 +229,10 @@ type GoodData @entity(immutable:false) {
   currentQuantity:BigInt!
   investValue:BigInt!
   investQuantity:BigInt!
+  currentActualValue:BigInt!
+  currentAcutualQuanity:BigInt!
+  investActualValue:BigInt!
+  investActualQuantity:BigInt!
   feeQuantity:BigInt!
   contructFee:BigInt!
   totalTradeQuantity:BigInt!
