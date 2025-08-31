@@ -404,8 +404,8 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
 
 
 
-        gate.stakettsvalue = gate.stakettsvalue.minus(newcustomer.stakettsvalue);
-        gate.stakettscontruct = gate.stakettscontruct.minus(newcustomer.stakettscontruct);
+        gate.stakettsvalue = gate.stakettsvalue.plus(newcustomer.stakettsvalue);
+        gate.stakettscontruct = gate.stakettscontruct.plus(newcustomer.stakettscontruct);
         gate.lastoptime = event.block.timestamp;
         gate.save();
 
