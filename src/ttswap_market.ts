@@ -321,6 +321,7 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
                 proof.good1ActualQuantity = ZERO_BI;
                 proof.good2ActualQuantity = ZERO_BI;
                 marketstate.proofCount = marketstate.proofCount.plus(ONE_BI);
+                proof.createTime = modifiedTime;
         }
 
         proof.proofValue = proof.proofValue.plus(trade_value);
@@ -1776,7 +1777,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 value_good.investQuantity = value_good.investQuantity.minus(event.params._valueprofit.mod(BI_128));
                 value_good.investActualQuantity = value_good.investActualQuantity.minus(event.params._valuedisvest.mod(BI_128));
                 value_good.feeQuantity = value_good.feeQuantity.plus(event.params._valuedisvest.div(BI_128));
-        
+
                 if (!valuegoodstate.reverted) {
                         value_good.virtualQuantity = valuegoodstate.value.goodConfig.mod(BI_128);
                         value_good.currentValue = valuegoodstate.value.investState.mod(BI_128);
@@ -1785,7 +1786,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                         value_good.investShares = valuegoodstate.value.investState.div(BI_128);
                         value_good.investActualQuantity = value_good.investQuantity.minus(value_good.virtualQuantity);
                 }
-                
+
                 value_good.totalDisinvestQuantity =
                         value_good.totalDisinvestQuantity.plus(
                                 event.params._valueprofit.mod(BI_128)
@@ -1846,9 +1847,9 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                         proof.good1ActualQuantity = proofstate.value.invest.mod(BI_128);
                         proof.good2ActualQuantity = proofstate.value.valueinvest.mod(BI_128);
                         proof.proofActualValue = proofstate.value.state.mod(BI_128);
-        
+
                 }
-                 proof.save();
+                proof.save();
                 let newcustomer = Customer.load(
                         event.transaction.from.toHexString()
                 );
@@ -2121,9 +2122,9 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                         proof.good1ActualQuantity = proofstate.value.invest.mod(BI_128);
                         proof.good2ActualQuantity = proofstate.value.valueinvest.mod(BI_128);
                         proof.proofActualValue = proofstate.value.state.mod(BI_128);
-        
+
                 }
-                 proof.save();
+                proof.save();
                 log_GoodData(normal_good, event.block.timestamp);
                 log_MarketData(marketstate, event.block.timestamp);
         }
