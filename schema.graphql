@@ -149,16 +149,13 @@ type GoodState @entity(immutable:false) {
   owner: String!
   erc20Address: String!
   goodConfig: BigInt!
+  virtualQuantity:BigInt!
   currentValue:BigInt!
   currentQuantity:BigInt!
-  investValue:BigInt!
   investQuantity:BigInt!
-  currentActualValue:BigInt!
-  currentAcutualQuanity:BigInt!
-  investActualValue:BigInt!
+  investShares:BigInt!
   investActualQuantity:BigInt!
   feeQuantity:BigInt!
-  contructFee: BigInt!
   totalTradeQuantity:BigInt!
   totalInvestQuantity:BigInt!
   totalDisinvestQuantity:BigInt!
@@ -182,13 +179,13 @@ type ProofState @entity(immutable:false) {
   good1: GoodState!
   good2: GoodState!
   proofValue:BigInt!
-  good1ContructFee: BigInt!
+  good1Shares: BigInt!
   good1Quantity:BigInt!
-  good2ContructFee: BigInt!
-  good2Quantity:BigInt!
-  proofActualValue:BigInt!
   good1ActualQuantity:BigInt!
-  good2ActualQuantity:BigInt!
+  good2Shares:BigInt!
+  good2Quantity:BigInt!
+  good2ActualQuantity: BigInt!
+  proofActualValue:BigInt!
   createTime: BigInt!
 }
 
@@ -225,16 +222,13 @@ type GoodData @entity(immutable:false) {
   goodConfig: BigInt!
   isvaluegood:Boolean!
   decimals: BigInt!
+  virtualQuantity:BigInt!
   currentValue:BigInt!
   currentQuantity:BigInt!
-  investValue:BigInt!
   investQuantity:BigInt!
-  currentActualValue:BigInt!
-  currentAcutualQuanity:BigInt!
-  investActualValue:BigInt!
+  investShares:BigInt!
   investActualQuantity:BigInt!
   feeQuantity:BigInt!
-  contructFee:BigInt!
   totalTradeQuantity:BigInt!
   totalInvestQuantity:BigInt!
   totalDisinvestQuantity:BigInt!

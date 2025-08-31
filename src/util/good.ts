@@ -37,16 +37,16 @@ export function log_GoodData(
                 goodData_hour.goodConfig = normal_good.goodConfig;
                 goodData_hour.isvaluegood = normal_good.isvaluegood;
                 goodData_hour.decimals = normal_good.tokendecimals;
+
+                goodData_hour.virtualQuantity = normal_good.virtualQuantity;
                 goodData_hour.currentValue = normal_good.currentValue;
                 goodData_hour.currentQuantity = normal_good.currentQuantity;
-                goodData_hour.investValue = normal_good.investValue;
                 goodData_hour.investQuantity = normal_good.investQuantity;
-                goodData_hour.currentActualValue = normal_good.currentActualValue;
-                goodData_hour.currentAcutualQuanity = normal_good.currentAcutualQuanity;
-                goodData_hour.investActualValue = normal_good.investActualValue;
+                goodData_hour.investShares = normal_good.investShares;
                 goodData_hour.investActualQuantity = normal_good.investActualQuantity;
                 goodData_hour.feeQuantity = normal_good.feeQuantity;
-                goodData_hour.contructFee = normal_good.contructFee;
+
+              
                 goodData_hour.totalTradeQuantity = normal_good.totalTradeQuantity;
                 goodData_hour.totalInvestQuantity = normal_good.totalInvestQuantity;
                 goodData_hour.totalDisinvestQuantity =
@@ -74,16 +74,18 @@ export function log_GoodData(
                 goodData_hour.goodConfig = normal_good.goodConfig;
                 goodData_hour.isvaluegood = normal_good.isvaluegood;
                 goodData_hour.decimals = normal_good.tokendecimals;
+
+                goodData_hour.virtualQuantity = normal_good.virtualQuantity;
                 goodData_hour.currentValue = normal_good.currentValue;
                 goodData_hour.currentQuantity = normal_good.currentQuantity;
-                goodData_hour.investValue = normal_good.investValue;
                 goodData_hour.investQuantity = normal_good.investQuantity;
-                goodData_hour.currentActualValue = normal_good.currentActualValue;
-                goodData_hour.currentAcutualQuanity = normal_good.currentAcutualQuanity;
-                goodData_hour.investActualValue = normal_good.investActualValue;
+                goodData_hour.investShares = normal_good.investShares;
                 goodData_hour.investActualQuantity = normal_good.investActualQuantity;
                 goodData_hour.feeQuantity = normal_good.feeQuantity;
-                goodData_hour.contructFee = normal_good.contructFee;
+
+
+      
+                
                 goodData_hour.totalTradeQuantity = normal_good.totalTradeQuantity;
                 goodData_hour.totalInvestQuantity = normal_good.totalInvestQuantity;
                 goodData_hour.totalDisinvestQuantity =
@@ -137,16 +139,17 @@ export function log_GoodData(
                 goodData_day.decimals = goodData_hour.decimals;
                 goodData_day.goodConfig = goodData_hour.goodConfig;
                 goodData_day.isvaluegood = goodData_hour.isvaluegood;
+
+                goodData_day.virtualQuantity = goodData_hour.virtualQuantity;
                 goodData_day.currentValue = goodData_hour.currentValue;
                 goodData_day.currentQuantity = goodData_hour.currentQuantity;
-                goodData_day.investValue = goodData_hour.investValue;
                 goodData_day.investQuantity = goodData_hour.investQuantity;
-                goodData_day.currentActualValue = goodData_hour.currentActualValue;
-                goodData_day.currentAcutualQuanity = goodData_hour.currentAcutualQuanity;
-                goodData_day.investActualValue = goodData_hour.investActualValue;
+                goodData_day.investShares = goodData_hour.investShares;
                 goodData_day.investActualQuantity = goodData_hour.investActualQuantity;
                 goodData_day.feeQuantity = goodData_hour.feeQuantity;
-                goodData_day.contructFee = goodData_hour.contructFee;
+
+
+               
                 goodData_day.totalTradeQuantity =
                         goodData_hour.totalTradeQuantity;
                 goodData_day.totalInvestQuantity =
@@ -175,16 +178,18 @@ export function log_GoodData(
                 goodData_day.decimals = goodData_hour.decimals;
                 goodData_day.goodConfig = goodData_hour.goodConfig;
                 goodData_day.isvaluegood = goodData_hour.isvaluegood;
+
+
+                goodData_day.virtualQuantity = goodData_hour.virtualQuantity;
                 goodData_day.currentValue = goodData_hour.currentValue;
                 goodData_day.currentQuantity = goodData_hour.currentQuantity;
-                goodData_day.investValue = goodData_hour.investValue;
                 goodData_day.investQuantity = goodData_hour.investQuantity;
-                goodData_day.currentActualValue = goodData_hour.currentActualValue;
-                goodData_day.currentAcutualQuanity = goodData_hour.currentAcutualQuanity;
-                goodData_day.investActualValue = goodData_hour.investActualValue;
+                goodData_day.investShares = goodData_hour.investShares;
                 goodData_day.investActualQuantity = goodData_hour.investActualQuantity;
                 goodData_day.feeQuantity = goodData_hour.feeQuantity;
-                goodData_day.contructFee = goodData_hour.contructFee;
+
+
+                
                 goodData_day.totalTradeQuantity =
                         goodData_hour.totalTradeQuantity;
                 goodData_day.totalInvestQuantity =
@@ -244,16 +249,16 @@ export function log_GoodData(
                 goodData_week.decimals = goodData_day.decimals;
                 goodData_week.goodConfig = goodData_day.goodConfig;
                 goodData_week.isvaluegood = goodData_day.isvaluegood;
+
+                goodData_week.virtualQuantity = goodData_day.virtualQuantity;
                 goodData_week.currentValue = goodData_day.currentValue;
                 goodData_week.currentQuantity = goodData_day.currentQuantity;
-                goodData_week.investValue = goodData_day.investValue;
-                goodData_week.investQuantity = goodData_day.investQuantity;   
-                goodData_week.currentActualValue = goodData_day.currentActualValue;
-                goodData_week.currentAcutualQuanity = goodData_day.currentAcutualQuanity;
-                goodData_week.investActualValue = goodData_day.investActualValue;
+                goodData_week.investQuantity = goodData_day.investQuantity;
+                goodData_week.investShares = goodData_day.investShares;
                 goodData_week.investActualQuantity = goodData_day.investActualQuantity;
                 goodData_week.feeQuantity = goodData_day.feeQuantity;
-                goodData_week.contructFee = goodData_day.contructFee;
+
+                
                 goodData_week.totalTradeQuantity =
                         goodData_day.totalTradeQuantity;
                 goodData_week.totalInvestQuantity =
@@ -281,16 +286,16 @@ export function log_GoodData(
                 goodData_week.decimals = goodData_day.decimals;
                 goodData_week.goodConfig = goodData_day.goodConfig;
                 goodData_week.isvaluegood = goodData_day.isvaluegood;
+              
+                goodData_week.virtualQuantity = goodData_day.virtualQuantity;
                 goodData_week.currentValue = goodData_day.currentValue;
                 goodData_week.currentQuantity = goodData_day.currentQuantity;
-                goodData_week.investValue = goodData_day.investValue;
                 goodData_week.investQuantity = goodData_day.investQuantity;
-                goodData_week.currentActualValue = goodData_day.currentActualValue;
-                goodData_week.currentAcutualQuanity = goodData_day.currentAcutualQuanity;
-                goodData_week.investActualValue = goodData_day.investActualValue;
+                goodData_week.investShares = goodData_day.investShares;
                 goodData_week.investActualQuantity = goodData_day.investActualQuantity;
                 goodData_week.feeQuantity = goodData_day.feeQuantity;
-                goodData_week.contructFee = goodData_day.contructFee;
+
+                
                 goodData_week.totalTradeQuantity =
                         goodData_day.totalTradeQuantity;
                 goodData_week.totalInvestQuantity =
@@ -351,16 +356,18 @@ export function log_GoodData(
                 goodData_month.decimals = goodData_week.decimals;
                 goodData_month.goodConfig = goodData_week.goodConfig;
                 goodData_month.isvaluegood = goodData_week.isvaluegood;
+
+
+                goodData_month.virtualQuantity = goodData_week.virtualQuantity;
                 goodData_month.currentValue = goodData_week.currentValue;
                 goodData_month.currentQuantity = goodData_week.currentQuantity;
-                goodData_month.investValue = goodData_week.investValue;
                 goodData_month.investQuantity = goodData_week.investQuantity;
-                goodData_month.currentActualValue = goodData_week.currentActualValue;
-                goodData_month.currentAcutualQuanity = goodData_week.currentAcutualQuanity;
-                goodData_month.investActualValue = goodData_week.investActualValue;
+                goodData_month.investShares = goodData_week.investShares;
                 goodData_month.investActualQuantity = goodData_week.investActualQuantity;
                 goodData_month.feeQuantity = goodData_week.feeQuantity;
-                goodData_month.contructFee = goodData_week.contructFee;
+
+
+                
                 goodData_month.totalTradeQuantity =
                         goodData_week.totalTradeQuantity;
                 goodData_month.totalInvestQuantity =
@@ -389,16 +396,18 @@ export function log_GoodData(
                 goodData_month.decimals = goodData_week.decimals;
                 goodData_month.goodConfig = goodData_week.goodConfig;
                 goodData_month.isvaluegood = goodData_week.isvaluegood;
+
+
+               
+                goodData_month.virtualQuantity = goodData_week.virtualQuantity;
                 goodData_month.currentValue = goodData_week.currentValue;
                 goodData_month.currentQuantity = goodData_week.currentQuantity;
-                goodData_month.investValue = goodData_week.investValue;
                 goodData_month.investQuantity = goodData_week.investQuantity;
-                goodData_month.currentActualValue = goodData_week.currentActualValue;
-                goodData_month.currentAcutualQuanity = goodData_week.currentAcutualQuanity;
-                goodData_month.investActualValue = goodData_week.investActualValue;
+                goodData_month.investShares = goodData_week.investShares;
                 goodData_month.investActualQuantity = goodData_week.investActualQuantity;
                 goodData_month.feeQuantity = goodData_week.feeQuantity;
-                goodData_month.contructFee = goodData_week.contructFee;
+
+                
                 goodData_month.totalTradeQuantity =
                         goodData_week.totalTradeQuantity;
                 goodData_month.totalInvestQuantity =
@@ -463,16 +472,18 @@ export function log_GoodData(
                 goodData_year.decimals = goodData_month.decimals;
                 goodData_year.goodConfig = goodData_month.goodConfig;
                 goodData_year.isvaluegood = goodData_month.isvaluegood;
+
+
+                goodData_year.virtualQuantity = goodData_month.virtualQuantity;
                 goodData_year.currentValue = goodData_month.currentValue;
                 goodData_year.currentQuantity = goodData_month.currentQuantity;
-                goodData_year.investValue = goodData_month.investValue;
                 goodData_year.investQuantity = goodData_month.investQuantity;
-                goodData_year.currentActualValue = goodData_month.currentActualValue;
-                goodData_year.currentAcutualQuanity = goodData_month.currentAcutualQuanity;
-                goodData_year.investActualValue = goodData_month.investActualValue;
+                goodData_year.investShares = goodData_month.investShares;
                 goodData_year.investActualQuantity = goodData_month.investActualQuantity;
                 goodData_year.feeQuantity = goodData_month.feeQuantity;
-                goodData_year.contructFee = goodData_month.contructFee;
+
+
+
                 goodData_year.totalTradeQuantity =
                         goodData_month.totalTradeQuantity;
                 goodData_year.totalInvestQuantity =
@@ -498,16 +509,14 @@ export function log_GoodData(
                 goodData_year.decimals = goodData_month.decimals;
                 goodData_year.goodConfig = goodData_month.goodConfig;
                 goodData_year.isvaluegood = goodData_month.isvaluegood;
+                goodData_year.virtualQuantity = goodData_month.virtualQuantity;
                 goodData_year.currentValue = goodData_month.currentValue;
                 goodData_year.currentQuantity = goodData_month.currentQuantity;
-                goodData_year.investValue = goodData_month.investValue;
                 goodData_year.investQuantity = goodData_month.investQuantity;
-                goodData_year.currentActualValue = goodData_month.currentActualValue;
-                goodData_year.currentAcutualQuanity = goodData_month.currentAcutualQuanity;
-                goodData_year.investActualValue = goodData_month.investActualValue;
+                goodData_year.investShares = goodData_month.investShares;
                 goodData_year.investActualQuantity = goodData_month.investActualQuantity;
                 goodData_year.feeQuantity = goodData_month.feeQuantity;
-                goodData_year.contructFee = goodData_month.contructFee;
+                
                 goodData_year.totalTradeQuantity =
                         goodData_month.totalTradeQuantity;
                 goodData_year.totalInvestQuantity =
