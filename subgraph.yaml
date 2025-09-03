@@ -9,9 +9,9 @@ dataSources:
     name: TTSwap_Market
     network: hoodi
     source:
-      address: "0x1c860898fA4B39612840D08acfc0217b2f1B7495"
+      address: "0x82a88Eace858a7eEb06B796f5F438897ebfE3F93"
       abi: TTSwap_Market
-      startBlock: 1115110
+      startBlock: 1131650
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -65,9 +65,9 @@ dataSources:
     name: TTSwap_Token
     network: hoodi
     source:
-      address: "0x23fFf2dD82c4B7BDCBa4ddd4302eEfa6738BCe9b"
+      address: "0x9700A14011bD23CA5f06035ce1F9e12Ad996A3A4"
       abi: TTSwap_Token
-      startBlock: 1115030
+      startBlock: 1131620
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

@@ -257,7 +257,9 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
                 meta_good.name_lower = meta_good.tokenname.toLowerCase();
                 meta_good.symbol_lower = meta_good.tokensymbol.toLowerCase();
         }
-
+        meta_good.totalInvestQuantity = meta_good.totalInvestQuantity.plus(
+                trade_quantity
+        );
         meta_good.virtualQuantity = meta_good.virtualQuantity.plus(ZERO_BI);
         meta_good.currentValue = meta_good.currentValue.plus(trade_value);
         meta_good.currentQuantity = meta_good.currentQuantity.plus(trade_quantity);
@@ -391,6 +393,29 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
         marketstate.totalInvestCount =
                 marketstate.totalInvestCount.plus(ONE_BI);
         marketstate.save();
+        let ttsenv = tts_env.load("1");
+        if (ttsenv === null) {
+                ttsenv = new tts_env("1");
+                ttsenv.poolvalue = ZERO_BI;
+                ttsenv.poolasset = ZERO_BI;
+                ttsenv.poolcontruct = ZERO_BI;
+                ttsenv.dao_admin = "#";
+                ttsenv.marketcontract = "#";
+                ttsenv.usdtcontract = "#";
+                ttsenv.publicsell = ZERO_BI;
+                ttsenv.lsttime = ZERO_BI;
+                ttsenv.actual_amount = ZERO_BI;
+                ttsenv.shares_index = ZERO_BI;
+                ttsenv.left_share = ZERO_BI;
+                ttsenv.usdt_amount = ZERO_BI;
+                ttsenv.lasttime = ZERO_BI;
+        }
+        ttsenv.lasttime = event.block.timestamp;
+        ttsenv.poolasset = ttsenv.poolasset.plus(stakecontruct);
+        ttsenv.poolcontruct = ttsenv.poolcontruct.plus(stakecontruct);
+        ttsenv.poolvalue = ttsenv.poolvalue.plus(trade_value);
+        ttsenv.save();
+
 
         log_GoodData(meta_good, modifiedTime);
 
@@ -437,13 +462,13 @@ export function handle_e_initGood(event: e_initGood): void {
                 trade_value = proofstate.value.state.div(BI_128);
                 trade_actual_value = proofstate.value.state.mod(BI_128);
                 trade_normalgood_shares = proofstate.value.shares.div(BI_128);
-                trade_normalgood_quantity = proofstate.value.invest.mod(BI_128);
-                trade_normalgood_actual_quantity = proofstate.value.invest.div(BI_128);
+                trade_normalgood_quantity = proofstate.value.invest.div(BI_128);
+                trade_normalgood_actual_quantity = proofstate.value.invest.mod(BI_128);
                 trade_valuegood_shares = proofstate.value.shares.mod(BI_128);
                 trade_valuegood_quantity =
                         proofstate.value.valueinvest.div(BI_128);
                 trade_valuegood_fee =
-                        proofstate.value.valueinvest.div(BI_128);
+                        event.params._value.div(BI_128);
                 trade_valuegood_actual_quantity = proofstate.value.valueinvest.mod(BI_128);
         }
 
@@ -605,7 +630,7 @@ export function handle_e_initGood(event: e_initGood): void {
         normal_good.feeQuantity = normal_good.feeQuantity.plus(trade_normalgood_fee);
 
         let normalgoodstate = TTSwap_Market.bind(event.address).try_getGoodState(
-                event.params._valuegoodNo
+                event.params._goodid
         );
 
         if (!normalgoodstate.reverted) {
@@ -616,6 +641,9 @@ export function handle_e_initGood(event: e_initGood): void {
                 normal_good.investShares = normalgoodstate.value.investState.div(BI_128);
                 normal_good.investActualQuantity = normal_good.investQuantity.minus(normal_good.virtualQuantity);
         }
+        normal_good.totalInvestQuantity = normal_good.totalInvestQuantity.plus(
+                normal_good.investActualQuantity
+        );
         normal_good.totalInvestCount =
                 normal_good.totalInvestCount.plus(ONE_BI);
         normal_good.modifiedTime = modifiedTime;
@@ -680,8 +708,6 @@ export function handle_e_initGood(event: e_initGood): void {
         value_good.investShares = value_good.investShares.plus(event.params._value.mod(BI_128));
         value_good.investActualQuantity = value_good.investActualQuantity.plus(event.params._value.mod(BI_128));
         value_good.feeQuantity = value_good.feeQuantity.plus(trade_valuegood_fee);
-
-
         if (!valuegoodstate.reverted) {
                 value_good.virtualQuantity = valuegoodstate.value.goodConfig.mod(BI_128);
                 value_good.currentValue = valuegoodstate.value.investState.mod(BI_128);
@@ -923,10 +949,10 @@ export function handle_e_buyGood(event: e_buyGood): void {
         let togoodcurrentstate = TTSwap_Market.bind(
                 event.address
         ).try_getGoodState(event.params.forgood);
-        to_good.currentQuantity = to_good.currentQuantity.minus(from_quantity);
-        to_good.investQuantity = to_good.investQuantity.plus(from_fee);
-        to_good.investActualQuantity = to_good.investActualQuantity.plus(from_fee);
-        to_good.feeQuantity = to_good.feeQuantity.plus(from_fee);
+        to_good.currentQuantity = to_good.currentQuantity.minus(to_quantity);
+        to_good.investQuantity = to_good.investQuantity.plus(to_fee);
+        to_good.investActualQuantity = to_good.investActualQuantity.minus(to_quantity);
+        to_good.feeQuantity = to_good.feeQuantity.plus(to_fee);
         if (!goodcurrentstate.reverted) {
 
                 to_good.currentValue = togoodcurrentstate.value.investState.mod(BI_128);
@@ -1689,13 +1715,15 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
         let normalgoodstate = TTSwap_Market.bind(
                 event.address
         ).try_getGoodState(event.params._normalGoodNo);
-        normal_good.feeQuantity = normal_good.feeQuantity.plus(event.params._valuedisvest.div(BI_128));
-        normal_good.virtualQuantity = normal_good.virtualQuantity.plus(ZERO_BI);
-        normal_good.currentValue = normal_good.currentValue.plus(event.params._value.div(BI_128));
+        
+        normal_good.virtualQuantity = normal_good.virtualQuantity.minus(event.params._normalprofit.mod(BI_128));
+        normal_good.virtualQuantity = normal_good.virtualQuantity.plus(event.params._normaldisvest.mod(BI_128));
+        normal_good.currentValue = normal_good.currentValue.minus(event.params._value.div(BI_128));
         normal_good.currentQuantity = normal_good.currentQuantity.minus(event.params._normalprofit.mod(BI_128));
         normal_good.investQuantity = normal_good.investQuantity.minus(event.params._normalprofit.mod(BI_128));
         normal_good.investActualQuantity = normal_good.investActualQuantity.minus(event.params._normaldisvest.mod(BI_128));
         normal_good.feeQuantity = normal_good.feeQuantity.plus(event.params._normaldisvest.div(BI_128));
+        normal_good.feeQuantity = normal_good.feeQuantity.minus(event.params._normalprofit.div(BI_128));
 
         if (!normalgoodstate.reverted) {
                 normal_good.virtualQuantity = normalgoodstate.value.goodConfig.mod(BI_128);
@@ -1769,14 +1797,15 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
 
                 let valuegoodstate = TTSwap_Market.bind(
                         event.address
-                ).try_getGoodState(event.params._normalGoodNo);
-                value_good.feeQuantity = value_good.feeQuantity.plus(event.params._valuedisvest.div(BI_128));
+                ).try_getGoodState(event.params._valueGoodNo);
+            
                 value_good.virtualQuantity = value_good.virtualQuantity.plus(ZERO_BI);
-                value_good.currentValue = value_good.currentValue.plus(event.params._value.div(BI_128));
+                value_good.currentValue = value_good.currentValue.minus(event.params._value.div(BI_128));
                 value_good.currentQuantity = value_good.currentQuantity.minus(event.params._valueprofit.mod(BI_128));
                 value_good.investQuantity = value_good.investQuantity.minus(event.params._valueprofit.mod(BI_128));
                 value_good.investActualQuantity = value_good.investActualQuantity.minus(event.params._valuedisvest.mod(BI_128));
                 value_good.feeQuantity = value_good.feeQuantity.plus(event.params._valuedisvest.div(BI_128));
+                value_good.feeQuantity = value_good.feeQuantity.minus(event.params._valueprofit.div(BI_128));
 
                 if (!valuegoodstate.reverted) {
                         value_good.virtualQuantity = valuegoodstate.value.goodConfig.mod(BI_128);
@@ -1901,7 +1930,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 refer.getfromstake = refer.getfromstake.minus(newcustomer.getfromstake);
                 refer.disinvestValue = refer.disinvestValue.minus(newcustomer.disinvestValue);
                 refer.disinvestCount = refer.disinvestCount.plus(ONE_BI);
-                refer.totalprofitvalue = refer.totalprofitvalue.minus(newcustomer.totalprofitvalue);
+                refer.totalprofitvalue = refer.totalprofitvalue.minus(newcustomer.totalprofitvalue); 
 
 
                 let gate = Gate.load(newcustomer.lastgate as string);
@@ -1945,7 +1974,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 newcustomer.totalprofitvalue =
                         newcustomer.totalprofitvalue.plus(
                                 value_good.currentValue
-                                        .times(event.params._valueprofit.mod(BI_128))
+                                        .times(event.params._valueprofit.div(BI_128))
                                         .div(value_good.currentQuantity)
                         );
                 newcustomer.lastoptime = event.block.timestamp;
@@ -2055,7 +2084,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 newcustomer.totalprofitvalue =
                         newcustomer.totalprofitvalue.plus(
                                 normal_good.currentValue
-                                        .times(event.params._valueprofit.div(BI_128))
+                                        .times(event.params._normalprofit.div(BI_128))
                                         .div(normal_good.currentQuantity)
                         );
                 newcustomer.lastoptime = event.block.timestamp;
