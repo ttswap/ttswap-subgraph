@@ -15,7 +15,6 @@ import {
         e_setenv,
         e_addShare,
         e_stakeinfo,
-        e_updatepool,
         e_burnShare,
         e_shareMint,
 } from "../generated/TTSwap_Token/TTSwap_Token";
@@ -389,9 +388,10 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
 
         let proofvalue = event.params.proofvalue.div(BI_128);
         let proofcontrunct = event.params.proofvalue.mod(BI_128);
-
         let profit = event.params.unstakestate.mod(BI_128);
-        newcustomer.getfromstake = newcustomer.getfromstake.plus(profit);
+        if(event.params.unstakestate.div(BI_128) !==ZERO_BI){
+                newcustomer.getfromstake = newcustomer.getfromstake.plus(profit);
+        }
         newcustomer.stakettsvalue = proofvalue;
         newcustomer.stakettscontruct = proofcontrunct;
         newcustomer.lastoptime = event.block.timestamp;
@@ -401,8 +401,6 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
         refer.stakettscontruct = refer.stakettscontruct.plus(newcustomer.stakettscontruct);
         refer.lastoptime = event.block.timestamp;
         refer.save();
-
-
 
         gate.stakettsvalue = gate.stakettsvalue.plus(newcustomer.stakettsvalue);
         gate.stakettscontruct = gate.stakettscontruct.plus(newcustomer.stakettscontruct);
@@ -428,6 +426,7 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
                 ttsenv.usdt_amount = ZERO_BI;
                 ttsenv.lasttime = ZERO_BI;
         }
+        ttsenv.lsttime=event.block.timestamp;
         ttsenv.actual_amount = ttsenv.actual_amount.plus(profit);
         ttsenv.poolcontruct = event.params.poolstate.mod(BI_128);
         ttsenv.poolvalue = event.params.stakestate.mod(BI_128);
@@ -435,27 +434,4 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
         ttsenv.save();
         marketstate.save();
 }
-export function handle_e_updatepool(event: e_updatepool): void {
-        let ttsenv = tts_env.load("1");
-        if (ttsenv === null) {
-                ttsenv = new tts_env("1");
-                ttsenv.poolvalue = ZERO_BI;
-                ttsenv.poolasset = ZERO_BI;
-                ttsenv.poolcontruct = ZERO_BI;
 
-                ttsenv.dao_admin = "#";
-                ttsenv.marketcontract = "#";
-                ttsenv.usdtcontract = "#";
-                ttsenv.publicsell = ZERO_BI;
-                ttsenv.lsttime = ZERO_BI;
-                ttsenv.actual_amount = ZERO_BI;
-                ttsenv.shares_index = ZERO_BI;
-                ttsenv.left_share = ZERO_BI;
-                ttsenv.usdt_amount = ZERO_BI;
-                ttsenv.lasttime = ZERO_BI;
-        }
-        ttsenv.lasttime = event.block.timestamp;
-        ttsenv.lsttime = event.params.poolstate.div(BI_128);
-        ttsenv.poolasset = event.params.poolstate.mod(BI_128);
-        ttsenv.save();
-}
