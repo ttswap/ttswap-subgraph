@@ -8,7 +8,6 @@ import {
         Customer,
         Refer,
         Gate,
-        tts_env,
 } from "../generated/schema";
 
 import {
@@ -393,29 +392,7 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
         marketstate.totalInvestCount =
                 marketstate.totalInvestCount.plus(ONE_BI);
         marketstate.save();
-        let ttsenv = tts_env.load("1");
-        if (ttsenv === null) {
-                ttsenv = new tts_env("1");
-                ttsenv.poolvalue = ZERO_BI;
-                ttsenv.poolasset = ZERO_BI;
-                ttsenv.poolcontruct = ZERO_BI;
-                ttsenv.dao_admin = "#";
-                ttsenv.marketcontract = "#";
-                ttsenv.usdtcontract = "#";
-                ttsenv.publicsell = ZERO_BI;
-                ttsenv.lsttime = ZERO_BI;
-                ttsenv.actual_amount = ZERO_BI;
-                ttsenv.shares_index = ZERO_BI;
-                ttsenv.left_share = ZERO_BI;
-                ttsenv.usdt_amount = ZERO_BI;
-                ttsenv.lasttime = ZERO_BI;
-        }
-        ttsenv.lasttime = event.block.timestamp;
-        ttsenv.poolasset = ttsenv.poolasset.plus(stakecontruct);
-        ttsenv.poolcontruct = ttsenv.poolcontruct.plus(stakecontruct);
-        ttsenv.poolvalue = ttsenv.poolvalue.plus(trade_value);
-        ttsenv.save();
-
+       
 
         log_GoodData(meta_good, modifiedTime);
 
@@ -794,29 +771,7 @@ export function handle_e_initGood(event: e_initGood): void {
         marketstate.totalInvestCount =
                 marketstate.totalInvestCount.plus(ONE_BI);
         marketstate.save();
-        let ttsenv = tts_env.load("1");
-        if (ttsenv === null) {
-                ttsenv = new tts_env("1");
-                ttsenv.poolvalue = ZERO_BI;
-                ttsenv.poolasset = ZERO_BI;
-                ttsenv.poolcontruct = ZERO_BI;
-                ttsenv.dao_admin = "#";
-                ttsenv.marketcontract = "#";
-                ttsenv.usdtcontract = "#";
-                ttsenv.publicsell = ZERO_BI;
-                ttsenv.lsttime = ZERO_BI;
-                ttsenv.actual_amount = ZERO_BI;
-                ttsenv.shares_index = ZERO_BI;
-                ttsenv.left_share = ZERO_BI;
-                ttsenv.usdt_amount = ZERO_BI;
-                ttsenv.lasttime = ZERO_BI;
-        }
-        ttsenv.lasttime = event.block.timestamp;
-        ttsenv.poolasset = ttsenv.poolasset.plus(stakecontruct);
-        ttsenv.poolcontruct = ttsenv.poolcontruct.plus(stakecontruct);
-        ttsenv.poolvalue = ttsenv.poolvalue.plus(trade_value);
-        ttsenv.poolvalue = ttsenv.poolvalue.plus(trade_value);
-        ttsenv.save();
+        
         log_GoodData(value_good, modifiedTime);
         log_GoodData(normal_good, modifiedTime);
         log_MarketData(marketstate, modifiedTime);
@@ -1615,28 +1570,7 @@ export function handle_e_investGood(event: e_investGood): void {
                 tx.fromgoodActualQuanity = event.params._invest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
                 tx.save();
 
-                let ttsenv = tts_env.load("1");
-                if (ttsenv === null) {
-                        ttsenv = new tts_env("1");
-                        ttsenv.poolvalue = ZERO_BI;
-                        ttsenv.poolasset = ZERO_BI;
-                        ttsenv.poolcontruct = ZERO_BI;
-                        ttsenv.dao_admin = "#";
-                        ttsenv.marketcontract = "#";
-                        ttsenv.usdtcontract = "#";
-                        ttsenv.publicsell = ZERO_BI;
-                        ttsenv.lsttime = ZERO_BI;
-                        ttsenv.actual_amount = ZERO_BI;
-                        ttsenv.shares_index = ZERO_BI;
-                        ttsenv.left_share = ZERO_BI;
-                        ttsenv.usdt_amount = ZERO_BI;
-                        ttsenv.lasttime = ZERO_BI;
-                }
-                ttsenv.lasttime = event.block.timestamp;
-                ttsenv.poolasset = ttsenv.poolasset.plus(stakecontruct);
-                ttsenv.poolcontruct = ttsenv.poolcontruct.plus(stakecontruct);
-                ttsenv.poolvalue = ttsenv.poolvalue.plus(invest_value);
-                ttsenv.save();
+               
                 log_GoodData(normal_good, event.block.timestamp);
                 log_MarketData(marketstate, event.block.timestamp);
         }

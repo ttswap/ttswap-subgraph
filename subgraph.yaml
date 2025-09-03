@@ -98,5 +98,3 @@ dataSources:
           handler: handle_e_shareMint
         - event: e_stakeinfo(address,uint256,uint256,uint256,uint256)
           handler: handle_e_stakeinfo
-        - event: e_updatepool(uint256)
-          handler: handle_e_updatepool
