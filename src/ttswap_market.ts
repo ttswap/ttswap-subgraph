@@ -151,7 +151,8 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
                 newcustomer.getfromstake = ZERO_BI;
                 newcustomer.stakettsvalue = ZERO_BI;
                 newcustomer.stakettscontruct = ZERO_BI;
-                newcustomer.lastgate = "#";
+                newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
+                newcustomer.publicsaletts = ZERO_BI;
         }
         let gate = Gate.load(newcustomer.lastgate);
         if (gate === null) {
@@ -392,7 +393,7 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
         marketstate.totalInvestCount =
                 marketstate.totalInvestCount.plus(ONE_BI);
         marketstate.save();
-       
+
 
         log_GoodData(meta_good, modifiedTime);
 
@@ -487,7 +488,8 @@ export function handle_e_initGood(event: e_initGood): void {
                 newcustomer.getfromstake = ZERO_BI;
                 newcustomer.stakettsvalue = ZERO_BI;
                 newcustomer.stakettscontruct = ZERO_BI;
-                newcustomer.lastgate = "#";
+                newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
+                newcustomer.publicsaletts = ZERO_BI;
         }
 
         let gate = Gate.load(newcustomer.lastgate as string);
@@ -771,7 +773,7 @@ export function handle_e_initGood(event: e_initGood): void {
         marketstate.totalInvestCount =
                 marketstate.totalInvestCount.plus(ONE_BI);
         marketstate.save();
-        
+
         log_GoodData(value_good, modifiedTime);
         log_GoodData(normal_good, modifiedTime);
         log_MarketData(marketstate, modifiedTime);
@@ -944,7 +946,8 @@ export function handle_e_buyGood(event: e_buyGood): void {
                 newcustomer.getfromstake = ZERO_BI;
                 newcustomer.stakettsvalue = ZERO_BI;
                 newcustomer.stakettscontruct = ZERO_BI;
-                newcustomer.lastgate = "#";
+                newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
+                newcustomer.publicsaletts = ZERO_BI;
         }
 
         let gate = Gate.load(newcustomer.lastgate as string);
@@ -1231,7 +1234,8 @@ export function handle_e_investGood(event: e_investGood): void {
                         newcustomer.getfromstake = ZERO_BI;
                         newcustomer.stakettsvalue = ZERO_BI;
                         newcustomer.stakettscontruct = ZERO_BI;
-                        newcustomer.lastgate = "#";
+                        newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
+                        newcustomer.publicsaletts = ZERO_BI;
                 }
 
                 let refer = Refer.load(newcustomer.refer as string);
@@ -1464,7 +1468,8 @@ export function handle_e_investGood(event: e_investGood): void {
                         newcustomer.getfromstake = ZERO_BI;
                         newcustomer.stakettsvalue = ZERO_BI;
                         newcustomer.stakettscontruct = ZERO_BI;
-                        newcustomer.lastgate = "#";
+                        newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
+                        newcustomer.publicsaletts = ZERO_BI;
                 }
 
                 let refer = Refer.load(newcustomer.refer as string);
@@ -1570,7 +1575,7 @@ export function handle_e_investGood(event: e_investGood): void {
                 tx.fromgoodActualQuanity = event.params._invest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
                 tx.save();
 
-               
+
                 log_GoodData(normal_good, event.block.timestamp);
                 log_MarketData(marketstate, event.block.timestamp);
         }
@@ -1649,7 +1654,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
         let normalgoodstate = TTSwap_Market.bind(
                 event.address
         ).try_getGoodState(event.params._normalGoodNo);
-        
+
         normal_good.virtualQuantity = normal_good.virtualQuantity.minus(event.params._normalprofit.mod(BI_128));
         normal_good.virtualQuantity = normal_good.virtualQuantity.plus(event.params._normaldisvest.mod(BI_128));
         normal_good.currentValue = normal_good.currentValue.minus(event.params._value.div(BI_128));
@@ -1732,7 +1737,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 let valuegoodstate = TTSwap_Market.bind(
                         event.address
                 ).try_getGoodState(event.params._valueGoodNo);
-            
+
                 value_good.virtualQuantity = value_good.virtualQuantity.plus(ZERO_BI);
                 value_good.currentValue = value_good.currentValue.minus(event.params._value.div(BI_128));
                 value_good.currentQuantity = value_good.currentQuantity.minus(event.params._valueprofit.mod(BI_128));
@@ -1837,7 +1842,8 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                         newcustomer.getfromstake = ZERO_BI;
                         newcustomer.stakettsvalue = ZERO_BI;
                         newcustomer.stakettscontruct = ZERO_BI;
-                        newcustomer.lastgate = "#";
+                        newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
+                        newcustomer.publicsaletts = ZERO_BI;
                 }
 
                 newcustomer.lastgate = event.params._gate.toHexString();
@@ -1864,7 +1870,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 refer.getfromstake = refer.getfromstake.minus(newcustomer.getfromstake);
                 refer.disinvestValue = refer.disinvestValue.minus(newcustomer.disinvestValue);
                 refer.disinvestCount = refer.disinvestCount.plus(ONE_BI);
-                refer.totalprofitvalue = refer.totalprofitvalue.minus(newcustomer.totalprofitvalue); 
+                refer.totalprofitvalue = refer.totalprofitvalue.minus(newcustomer.totalprofitvalue);
 
 
                 let gate = Gate.load(newcustomer.lastgate as string);
@@ -1958,7 +1964,8 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                         newcustomer.getfromstake = ZERO_BI;
                         newcustomer.stakettsvalue = ZERO_BI;
                         newcustomer.stakettscontruct = ZERO_BI;
-                        newcustomer.lastgate = "#";
+                        newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
+                        newcustomer.publicsaletts = ZERO_BI;
                 }
 
                 newcustomer.lastgate = event.params._gate.toHexString();
@@ -2093,8 +2100,6 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
         }
 }
 
-
-
 export function handle_e_collectcommission(event: e_collectcommission): void {
         let newcustomer = Customer.load(event.transaction.from.toHexString());
         if (newcustomer === null) {
@@ -2116,7 +2121,8 @@ export function handle_e_collectcommission(event: e_collectcommission): void {
                 newcustomer.getfromstake = ZERO_BI;
                 newcustomer.stakettsvalue = ZERO_BI;
                 newcustomer.stakettscontruct = ZERO_BI;
-                newcustomer.lastgate = "#";
+                newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
+                newcustomer.publicsaletts = ZERO_BI;
         }
 
         let refer = Refer.load(newcustomer.refer as string);
@@ -2137,11 +2143,7 @@ export function handle_e_collectcommission(event: e_collectcommission): void {
                 refer.stakettscontruct = ZERO_BI;
                 refer.getfromstake = ZERO_BI;
         }
-
         refer.totalcommissionvalue = refer.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
-
-
-
         let gate = Gate.load(newcustomer.lastgate as string);
         if (gate === null) {
                 gate = new Gate(
@@ -2160,11 +2162,7 @@ export function handle_e_collectcommission(event: e_collectcommission): void {
                 gate.stakettscontruct = ZERO_BI;
                 gate.getfromstake = ZERO_BI;
         }
-
-
         gate.totalcommissionvalue = gate.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
-
-
         let goodidarrary = event.params._gooid;
         let commissionarray = event.params._commisionamount;
         for (let aa = 0; aa < goodidarrary.length; aa++) {
@@ -2179,13 +2177,12 @@ export function handle_e_collectcommission(event: e_collectcommission): void {
                 }
         }
         newcustomer.save();
-        refer.totalcommissionvalue = refer.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
+        refer.totalcommissionvalue = refer.totalcommissionvalue.plus(newcustomer.totalcommissionvalue);
 
         refer.lastoptime = event.block.timestamp;
         refer.save();
         log_ReferData(refer, event.block.timestamp);
-        gate.totalcommissionvalue = gate.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
-
+        gate.totalcommissionvalue = gate.totalcommissionvalue.plus(newcustomer.totalcommissionvalue);
         gate.lastoptime = event.block.timestamp;
         gate.save();
 

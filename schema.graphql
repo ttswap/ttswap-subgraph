@@ -18,6 +18,8 @@ type Customer @entity(immutable:false) {
   stakettsvalue:BigInt!
   stakettscontruct:BigInt!
   lastgate:String!
+  publicsaleusdt:BigInt!
+  publicsaletts:BigInt!
   custdata:[CustomerData!]@derivedFrom(field: "customerid")
 }
 
@@ -279,6 +281,7 @@ type tts_env  @entity(immutable:false) {
   left_share:BigInt!
   usdt_amount:BigInt!
   lasttime:BigInt!
+  publicsaleusercount:BigInt!
 }
 
 type tts_share @entity(immutable:false){
@@ -294,26 +297,12 @@ type tts_auth @entity(immutable:false){
   priv:BigInt!
 }
 
-
-type ttswap_stakeeth_env @entity(immutable:false){
+type ttswap_publicsell_log @entity(immutable:true){
   id:Bytes!
-  TotalState0:BigInt!
-  TotalState1:BigInt!
-  ethShare0:BigInt!
-  ethShare1:BigInt!
-  wethShare0:BigInt!
-  wethShare1:BigInt!
-  TotalStake0:BigInt!
-  TotalStake1:BigInt!
-  Total_stake:BigInt!
-  Total_reward:BigInt!
-  reth_staking0:BigInt!
-  reth_staking1:BigInt!
-  total_restakedAmount:BigInt!
-  total_restakedAward:BigInt!
-  total_ttsreward:BigInt!
-  total_ttstoreth:BigInt!
-  rocketReward:BigInt!
+  user:String!
+  ttsamount:BigInt!
+  usdtamount:BigInt!
+  create_time:BigInt!
 }
 
 
