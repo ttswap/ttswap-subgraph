@@ -144,6 +144,7 @@ type GoodState @entity(immutable:false) {
   id: ID!
   goodseq:BigInt!
   isvaluegood:Boolean!
+  islockgood:Boolean!
   tokenname: String!
   tokensymbol: String!
   tokentotalsuply: BigInt!

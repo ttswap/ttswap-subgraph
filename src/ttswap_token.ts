@@ -6,7 +6,7 @@ import {
         tts_env,
         tts_share,
         Refer,
-        Gate,ttswap_publicsell_log
+        Gate, ttswap_publicsell_log
 } from "../generated/schema";
 
 import {
@@ -355,12 +355,12 @@ export function handle_e_publicsell(event: e_publicsell): void {
         newcustomer.lastoptime = event.block.timestamp;
         newcustomer.save();
 
-        let ttswap_publicsell_log1=new ttswap_publicsell_log(event.transaction.hash);
-        ttswap_publicsell_log1.create_time=event.block.timestamp;
-          ttswap_publicsell_log1.user=event.transaction.from.toHexString();
-  ttswap_publicsell_log1.ttsamount=event.params.ttsamount;
-  ttswap_publicsell_log1.usdtamount=event.params.usdtamount;
-  ttswap_publicsell_log1.save();
+        let ttswap_publicsell_log1 = new ttswap_publicsell_log(event.transaction.hash);
+        ttswap_publicsell_log1.create_time = event.block.timestamp;
+        ttswap_publicsell_log1.user = event.transaction.from.toHexString();
+        ttswap_publicsell_log1.ttsamount = event.params.ttsamount;
+        ttswap_publicsell_log1.usdtamount = event.params.usdtamount;
+        ttswap_publicsell_log1.save();
 
 }
 
