@@ -54,24 +54,8 @@ import { log_ReferData } from "./util/refer";
 export function handle_e_updateGoodConfig(event: e_updateGoodConfig): void {
         let from_good = GoodState.load(event.params._goodid.toHexString());
         if (from_good !== null) {
-                // Check if it's a value good
-                if (
-                        from_good.goodConfig.div(
-                                BigInt.fromString(
-                                        "57896044618658097711785492504343953926634992332820282019728792003956564819968"
-                                )
-                        ) >= ONE_BI
-                ) {
-                        from_good.isvaluegood = true;
-                } else {
-                        from_good.isvaluegood = false;
-                }
                 // Update good configuration
-                from_good.goodConfig = event.params._goodConfig.mod(
-                        BigInt.fromString(
-                                "57896044618658097711785492504343953926634992332820282019728792003956564819968"
-                        )
-                );
+                from_good.goodConfig = event.params._goodConfig;
                 from_good.save();
         }
 }
@@ -83,7 +67,8 @@ export function handle_e_updateGoodConfig(event: e_updateGoodConfig): void {
 export function handle_e_modifyGoodConfig(event: e_modifyGoodConfig): void {
         let from_good = GoodState.load(event.params._goodid.toHexString());
         if (from_good !== null) {
-                from_good.goodConfig = fetchGoodConfig(event.params._goodid);
+                from_good.goodConfig = event.params._goodconfig;
+                //2**255
                 if (
                         from_good.goodConfig.div(
                                 BigInt.fromString(
@@ -95,6 +80,19 @@ export function handle_e_modifyGoodConfig(event: e_modifyGoodConfig): void {
                 } else {
                         from_good.isvaluegood = false;
                 }
+                //2**254
+                if (
+                        from_good.goodConfig.div(
+                                BigInt.fromString(
+                                        "28948022309329048855892746252171976963317496166410141009864396001978282409984"
+                                )
+                        ).mod(BigInt.fromString("2")) == ONE_BI
+                ) {
+                        from_good.islockgood = true;
+                } else {
+                        from_good.islockgood = false;
+                }
+
                 from_good.save();
         }
 }
@@ -229,6 +227,7 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
                 meta_good.modifiedTime = modifiedTime;
                 meta_good.goodseq = marketstate.goodCount;
                 meta_good.isvaluegood = true;
+                meta_good.islockgood = false;
                 meta_good.tokenname = fetchTokenName(address_erc20);
                 meta_good.tokensymbol = fetchTokenSymbol(address_erc20);
                 meta_good.tokentotalsuply =
@@ -276,6 +275,7 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
 
         null_good.goodseq = ZERO_BI;
         null_good.isvaluegood = false;
+        null_good.islockgood = false;
         null_good.tokenname = "#";
         null_good.tokensymbol = "#";
         null_good.tokentotalsuply = ZERO_BI;
@@ -569,6 +569,7 @@ export function handle_e_initGood(event: e_initGood): void {
                 normal_good.modifiedTime = modifiedTime;
                 normal_good.goodseq = marketstate.goodCount;
                 normal_good.isvaluegood = false;
+                normal_good.islockgood = false;
                 normal_good.tokenname = fetchTokenName(addresserc);
                 normal_good.tokensymbol = fetchTokenSymbol(addresserc);
                 normal_good.tokentotalsuply = fetchTokenTotalSupply(addresserc);
@@ -649,6 +650,7 @@ export function handle_e_initGood(event: e_initGood): void {
                 value_good = new GoodState(valuegoodid);
                 value_good.goodseq = ZERO_BI;
                 value_good.isvaluegood = false;
+                value_good.islockgood = false;
                 value_good.tokenname = "#";
                 value_good.tokensymbol = "#";
                 value_good.tokentotalsuply = ZERO_BI;
@@ -822,6 +824,7 @@ export function handle_e_buyGood(event: e_buyGood): void {
                 from_good = new GoodState(fromgood);
                 from_good.goodseq = ZERO_BI;
                 from_good.isvaluegood = false;
+                from_good.islockgood = false;
                 from_good.tokenname = "#";
                 from_good.tokensymbol = "#";
                 from_good.tokentotalsuply = ZERO_BI;
@@ -876,6 +879,7 @@ export function handle_e_buyGood(event: e_buyGood): void {
                 to_good = new GoodState(togood);
                 to_good.goodseq = ZERO_BI;
                 to_good.isvaluegood = false;
+                to_good.islockgood = false;
                 to_good.tokenname = "#";
                 to_good.tokensymbol = "#";
                 to_good.tokentotalsuply = ZERO_BI;
@@ -1112,6 +1116,7 @@ export function handle_e_investGood(event: e_investGood): void {
                 normal_good = new GoodState(normalgoodid);
                 normal_good.goodseq = ZERO_BI;
                 normal_good.isvaluegood = false;
+                normal_good.islockgood = false;
                 normal_good.tokenname = "#";
                 normal_good.tokensymbol = "#";
                 normal_good.tokentotalsuply = ZERO_BI;
@@ -1315,6 +1320,7 @@ export function handle_e_investGood(event: e_investGood): void {
                         value_good = new GoodState(valuegoodid);
                         value_good.goodseq = ZERO_BI;
                         value_good.isvaluegood = false;
+                        value_good.islockgood = false;
                         value_good.tokenname = "#";
                         value_good.tokensymbol = "#";
                         value_good.tokentotalsuply = ZERO_BI;
@@ -1623,6 +1629,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 normal_good = new GoodState(normalgoodid);
                 normal_good.goodseq = ZERO_BI;
                 normal_good.isvaluegood = false;
+                normal_good.islockgood = false;
                 normal_good.tokenname = "#";
                 normal_good.tokensymbol = "#";
                 normal_good.tokentotalsuply = ZERO_BI;
@@ -1705,6 +1712,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                         value_good = new GoodState(valuegoodid);
                         value_good.goodseq = ZERO_BI;
                         value_good.isvaluegood = false;
+                        value_good.islockgood = false;
                         value_good.tokenname = "#";
                         value_good.tokensymbol = "#";
                         value_good.tokentotalsuply = ZERO_BI;
@@ -2199,6 +2207,7 @@ export function handle_e_goodWelfare(event: e_goodWelfare): void {
                 normal_good.goodseq = ZERO_BI;
 
                 normal_good.isvaluegood = false;
+                normal_good.islockgood = false;
                 normal_good.tokenname = "#";
                 normal_good.tokensymbol = "#";
                 normal_good.tokentotalsuply = ZERO_BI;
@@ -2238,8 +2247,8 @@ export function handle_e_changegoodowner(event: e_changegoodowner): void {
         if (normal_good === null) {
                 normal_good = new GoodState(normalgoodid);
                 normal_good.goodseq = ZERO_BI;
-
                 normal_good.isvaluegood = false;
+                normal_good.islockgood = false;
                 normal_good.tokenname = "#";
                 normal_good.tokensymbol = "#";
                 normal_good.tokentotalsuply = ZERO_BI;
