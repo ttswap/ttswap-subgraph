@@ -210,6 +210,9 @@ type Transaction @entity(immutable:false) {
   hash:String!
   recipent:String!
   timestamp: BigInt!
+  payhash:BigInt
+  excuter:String
+  receive:String
 }
 
 type GoodData @entity(immutable:false) {
