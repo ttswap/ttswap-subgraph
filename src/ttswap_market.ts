@@ -22,6 +22,7 @@ import {
         e_disinvestProof,
         e_collectcommission,
         e_goodWelfare,
+        e_payGood,
 } from "../generated/TTSwap_Market/TTSwap_Market";
 
 import {
@@ -762,11 +763,12 @@ export function handle_e_initGood(event: e_initGood): void {
         tx.fromgoodQuanity = trade_normalgood_quantity;
         tx.togoodQuantity = trade_valuegood_quantity;
         tx.timestamp = modifiedTime;
-        tx.recipent = event.transaction.from.toHexString();
+        tx.recipent = event.params._trader.toHexString();
         tx.hash = event.transaction.hash.toHexString();
         tx.transActualValue = trade_value.times(BigInt.fromString("2"));;
         tx.fromgoodActualQuanity = trade_normalgood_quantity;
         tx.togoodActualQuantity = trade_valuegood_quantity;
+        tx.excuter = event.transaction.from.toHexString();
         tx.save();
         marketstate.totalInvestValue =
                 marketstate.totalInvestValue.plus(trade_value);
@@ -796,8 +798,6 @@ export function handle_e_initGood(event: e_initGood): void {
 export function handle_e_buyGood(event: e_buyGood): void {
         let fromgood = event.params.sellgood.toHexString();
         let togood = event.params.forgood.toHexString();
-        let trade_value1 = event.params.swapvalue.mod(BI_128);
-        let trade_value2 = event.params.swapvalue.div(BI_128);
 
         let from_quantity = event.params.good1change.mod(BI_128);
         let from_fee = event.params.good1change.div(BI_128);
@@ -929,10 +929,10 @@ export function handle_e_buyGood(event: e_buyGood): void {
         to_good.modifiedTime = event.block.timestamp;
         to_good.txCount = to_good.txCount.plus(ONE_BI);
         to_good.save();
-        let newcustomer = Customer.load(event.transaction.from.toHexString());
+        let newcustomer = Customer.load(event.params._trader.toHexString());
         if (newcustomer === null) {
                 newcustomer = new Customer(
-                        event.transaction.from.toHexString()
+                        event.params._trader.toHexString()
                 );
                 newcustomer.refer = "#";
                 newcustomer.tradeValue = ZERO_BI;
@@ -997,13 +997,9 @@ export function handle_e_buyGood(event: e_buyGood): void {
         refer.lastoptime = event.block.timestamp;
         refer.tradeValue = refer.tradeValue.minus(newcustomer.tradeValue);
         refer.tradeCount = refer.tradeCount.plus(ONE_BI);
-        if (trade_value1.equals(ZERO_BI)) {
-                newcustomer.tradeValue =
-                        newcustomer.tradeValue.plus(trade_value2);
-        } else {
-                newcustomer.tradeValue =
-                        newcustomer.tradeValue.plus(trade_value1);
-        }
+
+        newcustomer.tradeValue =
+                newcustomer.tradeValue.plus(event.params.swapvalue);
 
         newcustomer.tradeCount = newcustomer.tradeCount.plus(ONE_BI);
         newcustomer.lastoptime = event.block.timestamp;
@@ -1023,13 +1019,10 @@ export function handle_e_buyGood(event: e_buyGood): void {
         log_CustomerData(newcustomer, event.block.timestamp);
         marketstate.txCount = marketstate.txCount.plus(ONE_BI);
         marketstate.totalTradeCount = marketstate.totalTradeCount.plus(ONE_BI);
-        if (trade_value1.equals(ZERO_BI)) {
-                marketstate.totalTradeValue =
-                        marketstate.totalTradeValue.plus(trade_value2);
-        } else {
-                marketstate.totalTradeValue =
-                        marketstate.totalTradeValue.plus(trade_value1);
-        }
+
+        marketstate.totalTradeValue =
+                marketstate.totalTradeValue.plus(event.params.swapvalue);
+
 
         marketstate.save();
         let transid =
@@ -1052,13 +1045,9 @@ export function handle_e_buyGood(event: e_buyGood): void {
                 tx.togoodActualQuantity = ZERO_BI;
         }
         tx.blockNumber = event.block.number;
-        if (trade_value1.equals(ZERO_BI)) {
-                tx.transtype = "pay";
-                tx.transvalue = trade_value2;
-        } else {
-                tx.transtype = "buy";
-                tx.transvalue = trade_value1;
-        }
+
+        tx.transtype = "buy";
+        tx.transvalue = event.params.swapvalue;
         tx.fromgood = from_good.id;
         tx.togood = to_good.id;
         tx.fromgoodQuanity = from_quantity;
@@ -1066,12 +1055,321 @@ export function handle_e_buyGood(event: e_buyGood): void {
         tx.togoodQuantity = to_quantity;
         tx.togoodfee = to_fee;
         tx.timestamp = event.block.timestamp;
-        tx.recipent = event.transaction.from.toHexString();
+        tx.recipent = event.params._trader.toHexString();
         tx.hash = event.transaction.hash.toHexString();
+        tx.excuter = event.transaction.from.toHexString();
+        tx.receive = event.params._trader.toHexString();
         tx.save();
         log_GoodData(from_good, event.block.timestamp);
         log_GoodData(to_good, event.block.timestamp);
         log_MarketData(marketstate, event.block.timestamp);
+}
+
+export function handle_e_paygood(event: e_payGood): void {
+        let fromgood = event.params.sellgood.toHexString();
+        let togood = event.params.forgood.toHexString();
+
+        let from_quantity = event.params.good1change.mod(BI_128);
+        let from_fee = event.params.good1change.div(BI_128);
+        let to_quantity = event.params.good2change.mod(BI_128);
+        let to_fee = event.params.good2change.div(BI_128);
+        let marketstate = MarketState.load("1");
+                if (marketstate === null) {
+                        marketstate = new MarketState("1");
+
+                        marketstate.marketCreator = "#";
+                        marketstate.goodCount = ZERO_BI;
+                        marketstate.proofCount = ZERO_BI;
+                        marketstate.userCount = BigInt.fromU64(100000);
+                        marketstate.txCount = ZERO_BI;
+                        marketstate.totalTradeCount = ZERO_BI;
+                        marketstate.totalInvestCount = ZERO_BI;
+                        marketstate.totalDisinvestCount = ZERO_BI;
+                        marketstate.totalDisinvestValue = ZERO_BI;
+                        marketstate.totalInvestValue = ZERO_BI;
+                        marketstate.totalTradeValue = ZERO_BI;
+                }
+                let from_good = GoodState.load(fromgood);
+                if (from_good === null) {
+                        from_good = new GoodState(fromgood);
+                        from_good.goodseq = ZERO_BI;
+                        from_good.isvaluegood = false;
+                        from_good.islockgood = false;
+                        from_good.tokenname = "#";
+                        from_good.tokensymbol = "#";
+                        from_good.tokentotalsuply = ZERO_BI;
+                        from_good.tokendecimals = ZERO_BI;
+                        from_good.owner = "#";
+                        from_good.erc20Address = "#";
+                        from_good.goodConfig = ZERO_BI;
+                        from_good.virtualQuantity = ZERO_BI;
+                        from_good.currentValue = ZERO_BI;
+                        from_good.currentQuantity = ZERO_BI;
+                        from_good.investQuantity = ZERO_BI;
+                        from_good.investShares = ZERO_BI;
+                        from_good.investActualQuantity = ZERO_BI;
+                        from_good.feeQuantity = ZERO_BI;
+                        from_good.totalTradeQuantity = ZERO_BI;
+                        from_good.totalInvestQuantity = ZERO_BI;
+                        from_good.totalDisinvestQuantity = ZERO_BI;
+                        from_good.totalProfit = ZERO_BI;
+                        from_good.totalTradeCount = ZERO_BI;
+                        from_good.totalInvestCount = ZERO_BI;
+                        from_good.totalDisinvestCount = ZERO_BI;
+                        from_good.modifiedTime = ZERO_BI;
+                        from_good.txCount = ZERO_BI;
+                        from_good.create_time = ZERO_BI;
+                        from_good.name_lower = "#";
+                        from_good.symbol_lower = "#";
+                }
+                let goodcurrentstate = TTSwap_Market.bind(
+                        event.address
+                ).try_getGoodState(event.params.sellgood);
+
+                from_good.currentQuantity = from_good.currentQuantity.plus(from_quantity);
+                from_good.investQuantity = from_good.investQuantity.plus(from_fee);
+                from_good.investActualQuantity = from_good.investActualQuantity.plus(from_fee);
+                from_good.feeQuantity = from_good.feeQuantity.plus(from_fee);
+                if (!goodcurrentstate.reverted) {
+
+                        from_good.currentValue = goodcurrentstate.value.investState.mod(BI_128);
+                        from_good.currentQuantity = goodcurrentstate.value.currentState.mod(BI_128);
+                        from_good.investQuantity = goodcurrentstate.value.currentState.div(BI_128)
+                        from_good.investActualQuantity = from_good.investQuantity.minus(from_good.virtualQuantity);
+                }
+                from_good.totalTradeCount = from_good.totalTradeCount.plus(ONE_BI);
+                from_good.totalTradeQuantity = from_good.totalTradeQuantity.plus(
+                        from_quantity
+                );
+                from_good.txCount = from_good.txCount.plus(ONE_BI);
+                from_good.modifiedTime = event.block.timestamp;
+                from_good.save();
+        if (togood !== ADDRESS_ZERO) {
+                let to_good = GoodState.load(togood);
+                if (to_good === null) {
+                        to_good = new GoodState(togood);
+                        to_good.goodseq = ZERO_BI;
+                        to_good.isvaluegood = false;
+                        to_good.islockgood = false;
+                        to_good.tokenname = "#";
+                        to_good.tokensymbol = "#";
+                        to_good.tokentotalsuply = ZERO_BI;
+                        to_good.tokendecimals = ZERO_BI;
+                        to_good.owner = "#";
+                        to_good.erc20Address = "#";
+                        to_good.goodConfig = ZERO_BI;
+                        to_good.virtualQuantity = ZERO_BI;
+                        to_good.currentValue = ZERO_BI;
+                        to_good.currentQuantity = ZERO_BI;
+                        to_good.investQuantity = ZERO_BI;
+                        to_good.investShares = ZERO_BI;
+                        to_good.investActualQuantity = ZERO_BI;
+                        to_good.feeQuantity = ZERO_BI;
+                        to_good.totalTradeQuantity = ZERO_BI;
+                        to_good.totalInvestQuantity = ZERO_BI;
+                        to_good.totalDisinvestQuantity = ZERO_BI;
+                        to_good.totalProfit = ZERO_BI;
+                        to_good.totalTradeCount = ZERO_BI;
+                        to_good.totalInvestCount = ZERO_BI;
+                        to_good.totalDisinvestCount = ZERO_BI;
+                        to_good.modifiedTime = ZERO_BI;
+                        to_good.txCount = ZERO_BI;
+                        to_good.create_time = ZERO_BI;
+                        to_good.name_lower = "#";
+                        to_good.symbol_lower = "#";
+                }
+                let togoodcurrentstate = TTSwap_Market.bind(
+                        event.address
+                ).try_getGoodState(event.params.forgood);
+                to_good.currentQuantity = to_good.currentQuantity.minus(to_quantity);
+                to_good.investQuantity = to_good.investQuantity.plus(to_fee);
+                to_good.investActualQuantity = to_good.investActualQuantity.minus(to_quantity);
+                to_good.feeQuantity = to_good.feeQuantity.plus(to_fee);
+                if (!goodcurrentstate.reverted) {
+
+                        to_good.currentValue = togoodcurrentstate.value.investState.mod(BI_128);
+                        to_good.currentQuantity = togoodcurrentstate.value.currentState.mod(BI_128);
+                        to_good.investQuantity = togoodcurrentstate.value.currentState.div(BI_128)
+                        to_good.investActualQuantity = to_good.investQuantity.minus(to_good.virtualQuantity);
+                }
+
+                to_good.totalTradeCount = to_good.totalTradeCount.plus(ONE_BI);
+                to_good.totalTradeQuantity = to_good.totalTradeQuantity.plus(
+                        to_quantity
+                );
+                to_good.modifiedTime = event.block.timestamp;
+                to_good.txCount = to_good.txCount.plus(ONE_BI);
+                to_good.save();
+                let newcustomer = Customer.load(event.transaction.from.toHexString());
+                if (newcustomer === null) {
+                        newcustomer = new Customer(
+                                event.transaction.from.toHexString()
+                        );
+                        newcustomer.refer = "#";
+                        newcustomer.tradeValue = ZERO_BI;
+                        newcustomer.investValue = ZERO_BI;
+                        newcustomer.disinvestValue = ZERO_BI;
+                        newcustomer.tradeCount = ZERO_BI;
+                        newcustomer.investCount = ZERO_BI;
+                        newcustomer.disinvestCount = ZERO_BI;
+                        newcustomer.userConfig = ZERO_BI;
+                        marketstate.userCount = marketstate.userCount.plus(ONE_BI);
+                        newcustomer.customerno = marketstate.userCount;
+                        newcustomer.totalprofitvalue = ZERO_BI;
+                        newcustomer.totalcommissionvalue = ZERO_BI;
+                        newcustomer.referralnum = ZERO_BI;
+                        newcustomer.getfromstake = ZERO_BI;
+                        newcustomer.stakettsvalue = ZERO_BI;
+                        newcustomer.stakettscontruct = ZERO_BI;
+                        newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
+                        newcustomer.publicsaletts = ZERO_BI;
+                }
+
+                let gate = Gate.load(newcustomer.lastgate as string);
+                if (gate === null) {
+                        gate = new Gate(
+                                newcustomer.lastgate as string
+                        );
+                        gate.tradeValue = ZERO_BI;
+                        gate.investValue = ZERO_BI;
+                        gate.disinvestValue = ZERO_BI;
+                        gate.tradeCount = ZERO_BI;
+                        gate.investCount = ZERO_BI;
+                        gate.disinvestCount = ZERO_BI;
+                        gate.totalprofitvalue = ZERO_BI;
+                        gate.totalcommissionvalue = ZERO_BI;
+                        gate.referralnum = ZERO_BI;
+                        gate.stakettsvalue = ZERO_BI;
+                        gate.stakettscontruct = ZERO_BI;
+                        gate.getfromstake = ZERO_BI;
+                }
+                gate.tradeValue = gate.tradeValue.minus(newcustomer.tradeValue);
+                gate.tradeCount = gate.tradeCount.plus(ONE_BI);
+
+                let refer = Refer.load(newcustomer.refer as string);
+                if (refer === null) {
+                        refer = new Refer(
+                                newcustomer.refer as string
+                        );
+                        refer.tradeValue = ZERO_BI;
+                        refer.investValue = ZERO_BI;
+                        refer.disinvestValue = ZERO_BI;
+                        refer.tradeCount = ZERO_BI;
+                        refer.investCount = ZERO_BI;
+                        refer.disinvestCount = ZERO_BI;
+                        refer.totalprofitvalue = ZERO_BI;
+                        refer.totalcommissionvalue = ZERO_BI;
+                        refer.referralnum = ZERO_BI;
+                        refer.stakettsvalue = ZERO_BI;
+                        refer.stakettscontruct = ZERO_BI;
+                        refer.getfromstake = ZERO_BI;
+                }
+
+                refer.lastoptime = event.block.timestamp;
+                refer.tradeValue = refer.tradeValue.minus(newcustomer.tradeValue);
+                refer.tradeCount = refer.tradeCount.plus(ONE_BI);
+
+                newcustomer.tradeValue = event.params.swapvalue.div(BI_128);
+                newcustomer.tradeCount = newcustomer.tradeCount.plus(ONE_BI);
+                newcustomer.lastoptime = event.block.timestamp;
+                newcustomer.save();
+                gate.tradeValue = gate.tradeValue.plus(newcustomer.tradeValue);
+
+                gate.lastoptime = event.block.timestamp;
+                gate.save();
+                log_GateData(gate, event.block.timestamp);
+
+                refer.tradeValue = refer.tradeValue.plus(newcustomer.tradeValue);
+                refer.lastoptime = event.block.timestamp;
+
+                refer.save();
+                log_ReferData(refer, event.block.timestamp);
+
+                log_CustomerData(newcustomer, event.block.timestamp);
+                marketstate.txCount = marketstate.txCount.plus(ONE_BI);
+                marketstate.totalTradeCount = marketstate.totalTradeCount.plus(ONE_BI);
+                marketstate.totalTradeValue =
+                        event.params.swapvalue.div(BI_128);
+
+
+                marketstate.save();
+                let transid =
+                        from_good.id.toString() +
+                        from_good.txCount.mod(BigInt.fromU32(500)).toString();
+                let tx = Transaction.load(transid);
+                if (tx === null) {
+                        tx = new Transaction(transid);
+                        tx.blockNumber = ZERO_BI;
+                        tx.transtype = "null";
+                        tx.fromgood = from_good.id;
+                        tx.togood = to_good.id;
+                        tx.fromgoodQuanity = ZERO_BI;
+                        tx.fromgoodfee = ZERO_BI;
+                        tx.togoodQuantity = ZERO_BI;
+                        tx.togoodfee = ZERO_BI;
+                        tx.timestamp = ZERO_BI;
+                        tx.transActualValue = ZERO_BI;
+                        tx.fromgoodActualQuanity = ZERO_BI;
+                        tx.togoodActualQuantity = ZERO_BI;
+                }
+                tx.blockNumber = event.block.number;
+                tx.transtype = "pay";
+                tx.transvalue = event.params.swapvalue.div(BI_128);
+                tx.fromgood = from_good.id;
+                tx.togood = to_good.id;
+                tx.fromgoodQuanity = from_quantity;
+                tx.fromgoodfee = from_fee;
+                tx.togoodQuantity = to_quantity;
+                tx.togoodfee = to_fee;
+                tx.timestamp = event.block.timestamp;
+                tx.recipent = event.params._trader.toHexString();
+                tx.hash = event.transaction.hash.toHexString();
+                tx.excuter = event.transaction.from.toHexString();
+                tx.receive = event.params._trader.toHexString();
+                tx.save();
+                log_GoodData(from_good, event.block.timestamp);
+                log_GoodData(to_good, event.block.timestamp);
+                log_MarketData(marketstate, event.block.timestamp);
+        } else {
+                let transid =
+                from_good.id.toString() +
+                        from_good.txCount.mod(BigInt.fromU32(500)).toString();
+                let tx = Transaction.load(transid);
+                if (tx === null) {
+                        tx = new Transaction(transid);
+                        tx.blockNumber = ZERO_BI;
+                        tx.transtype = "null";
+                        tx.fromgood = fromgood;
+                        tx.togood = fromgood;
+                        tx.fromgoodQuanity = ZERO_BI;
+                        tx.fromgoodfee = ZERO_BI;
+                        tx.togoodQuantity = ZERO_BI;
+                        tx.togoodfee = ZERO_BI;
+                        tx.timestamp = ZERO_BI;
+                        tx.transActualValue = ZERO_BI;
+                        tx.fromgoodActualQuanity = ZERO_BI;
+                        tx.togoodActualQuantity = ZERO_BI;
+                }
+                tx.blockNumber = event.block.number;
+                tx.transtype = "pay";
+                tx.transvalue = event.params.swapvalue.div(BI_128);
+                tx.fromgood = fromgood;
+                tx.togood = togood;
+                tx.fromgoodQuanity = event.params.good2change.div(BI_128);
+                tx.fromgoodfee = ZERO_BI;
+                tx.togoodQuantity = event.params.good2change.mod(BI_128);;
+                tx.togoodfee = event.params.good1change;
+                tx.timestamp = event.block.timestamp;
+                tx.recipent = event.params._trader.toHexString();
+                tx.hash = event.transaction.hash.toHexString();
+                tx.excuter = event.transaction.from.toHexString();
+                tx.receive = event.params._trader.toHexString();
+                tx.save();
+                marketstate.txCount = marketstate.txCount.plus(ONE_BI);
+                marketstate.save();
+                log_GoodData(from_good, event.block.timestamp);
+                log_MarketData(marketstate, event.block.timestamp);
+        }
 }
 
 export function handle_e_investGood(event: e_investGood): void {
@@ -1438,11 +1736,12 @@ export function handle_e_investGood(event: e_investGood): void {
                 tx.togoodQuantity = event.params._valueinvest.mod(BI_128);
                 tx.togoodfee = event.params._valueinvest.div(BI_128);
                 tx.timestamp = event.block.timestamp;
-                tx.recipent = event.transaction.from.toHexString();
+                tx.recipent = event.params._trader.toHexString();
                 tx.hash = event.transaction.hash.toHexString();
                 tx.transActualValue = event.params._value.mod(BI_128).times(BigInt.fromString("2"));
                 tx.fromgoodActualQuanity = event.params._invest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
                 tx.togoodActualQuantity = event.params._valueinvest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
+                tx.excuter = event.transaction.from.toHexString();
                 tx.save();
 
 
@@ -1575,10 +1874,12 @@ export function handle_e_investGood(event: e_investGood): void {
                 tx.fromgoodQuanity = event.params._invest.mod(BI_128);
                 tx.fromgoodfee = event.params._invest.div(BI_128);
                 tx.timestamp = event.block.timestamp;
-                tx.recipent = event.transaction.from.toHexString();
+                tx.recipent = event.params._trader.toHexString();
                 tx.hash = event.transaction.hash.toHexString();
                 tx.transActualValue = event.params._value.mod(BI_128);
                 tx.fromgoodActualQuanity = event.params._invest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
+                tx.excuter = event.transaction.from.toHexString();
+
                 tx.save();
 
 
@@ -1807,11 +2108,12 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 tx.togoodQuantity = event.params._valueprofit.mod(BI_128);
                 tx.togoodfee = event.params._valuedisvest.div(BI_128);;
                 tx.timestamp = event.block.timestamp;
-                tx.recipent = event.transaction.from.toHexString();
+                tx.recipent = event.params._trader.toHexString();
                 tx.hash = event.transaction.hash.toHexString();
                 tx.transActualValue = event.params._value.mod(BI_128).times(BigInt.fromString("2"));
                 tx.fromgoodActualQuanity = event.params._normaldisvest.mod(BI_128);
                 tx.togoodActualQuantity = event.params._valuedisvest.mod(BI_128);
+                tx.excuter = event.transaction.from.toHexString();
                 tx.save();
                 let proofstate = marketmanage.try_getProofState(event.params._proofNo);
                 if (!proofstate.reverted) {
@@ -2085,10 +2387,11 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 tx.fromgoodQuanity = event.params._normalprofit.mod(BI_128);
                 tx.fromgoodfee = event.params._normaldisvest.div(BI_128);
                 tx.timestamp = event.block.timestamp;
-                tx.recipent = event.transaction.from.toHexString();
-                tx.hash = event.transaction.hash.toHexString();
+                tx.recipent = event.params._trader.toHexString();
+                tx.hash = event.params._trader.toHexString();
                 tx.transActualValue = event.params._value.mod(BI_128).times(BigInt.fromString("2"));
                 tx.fromgoodActualQuanity = event.params._normaldisvest.mod(BI_128);
+                tx.excuter = event.transaction.from.toHexString();
                 tx.save();
                 let proofstate = marketmanage.try_getProofState(event.params._proofNo);
                 if (!proofstate.reverted) {
