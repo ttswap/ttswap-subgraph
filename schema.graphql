@@ -166,6 +166,9 @@ type GoodState @entity(immutable:false) {
   totalTradeCount: BigInt!
   totalInvestCount: BigInt!
   totalDisinvestCount: BigInt!
+  promisecurrency:GoodState
+  promisevalue:BigInt
+  PromiseQuantity:BigInt
   modifiedTime: BigInt!
   txCount:BigInt!
   create_time: BigInt!
@@ -242,6 +245,9 @@ type GoodData @entity(immutable:false) {
   totalTradeCount: BigInt!
   totalInvestCount: BigInt!
   totalDisinvestCount: BigInt!
+  promisecurrency:GoodState
+  promisevalue:BigInt
+  PromiseQuantity:BigInt
   open: BigInt!
   high: BigInt!
   low: BigInt!
