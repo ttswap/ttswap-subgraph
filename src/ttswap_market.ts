@@ -23,6 +23,7 @@ import {
         e_collectcommission,
         e_goodWelfare,
         e_payGood,
+        e_getPromiseProof
 } from "../generated/TTSwap_Market/TTSwap_Market";
 
 import {
@@ -2583,4 +2584,51 @@ export function handle_e_changegoodowner(event: e_changegoodowner): void {
         normal_good.save();
 }
 
+export function handle_e_getPromiseProof(event: e_getPromiseProof): void {
+        let normalgoodid=event.params._goodid.toHexString();
+        let normal_good = GoodState.load(normalgoodid);
+        let promiseproof= ProofState.load(event.params._proofid.toString());
+ 
+        if (normal_good === null) {
+                normal_good = new GoodState(normalgoodid);
+                normal_good.goodseq = ZERO_BI;
+                normal_good.isvaluegood = false;
+                normal_good.islockgood = false;
+                normal_good.tokenname = "#";
+                normal_good.tokensymbol = "#";
+                normal_good.tokentotalsuply = ZERO_BI;
+                normal_good.tokendecimals = ZERO_BI;
+                normal_good.owner = "#";
+                normal_good.erc20Address = "#";
+                normal_good.goodConfig = ZERO_BI;
+                normal_good.virtualQuantity = ZERO_BI;
+                normal_good.currentValue = ZERO_BI;
+                normal_good.currentQuantity = ZERO_BI;
+                normal_good.investQuantity = ZERO_BI;
+                normal_good.investShares = ZERO_BI;
+                normal_good.investActualQuantity = ZERO_BI;
+                normal_good.feeQuantity = ZERO_BI;
+                normal_good.totalTradeQuantity = ZERO_BI;
+                normal_good.totalInvestQuantity = ZERO_BI;
+                normal_good.totalDisinvestQuantity = ZERO_BI;
+                normal_good.totalProfit = ZERO_BI;
+                normal_good.totalTradeCount = ZERO_BI;
+                normal_good.totalInvestCount = ZERO_BI;
+                normal_good.totalDisinvestCount = ZERO_BI;
+                normal_good.modifiedTime = ZERO_BI;
+                normal_good.txCount = ZERO_BI;
+                normal_good.create_time = ZERO_BI;
+                normal_good.name_lower = "#";
+                normal_good.symbol_lower = "#";
+        }
 
+        if(promiseproof===null){
+                promiseproof=new ProofState(event.params._proofid.toString());
+                promiseproof.good2ActualQuantity=ZERO_BI;
+                promiseproof.proofActualValue=ZERO_BI;
+        }
+        normal_good.PromiseQuantity=promiseproof.good2ActualQuantity;
+        normal_good.promisecurrency=normal_good.id;
+        normal_good.promisevalue=promiseproof.proofActualValue;
+        normal_good.save();
+}

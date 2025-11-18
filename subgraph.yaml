@@ -63,6 +63,8 @@ dataSources:
           handler: handle_e_changegoodowner
         - event: e_payGood(indexed address,indexed address,uint256,uint256,uint256,address,address,uint256)
           handler: handle_e_paygood
+        - event: e_getPromiseProof(address,uint256)
+          handler: handle_e_getPromiseProof
   - kind: ethereum/contract
     name: TTSwap_Token
     network: hoodi

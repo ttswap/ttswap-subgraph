@@ -46,7 +46,7 @@ export function log_GoodData(
                 goodData_hour.investActualQuantity = normal_good.investActualQuantity;
                 goodData_hour.feeQuantity = normal_good.feeQuantity;
 
-              
+
                 goodData_hour.totalTradeQuantity = normal_good.totalTradeQuantity;
                 goodData_hour.totalInvestQuantity = normal_good.totalInvestQuantity;
                 goodData_hour.totalDisinvestQuantity =
@@ -60,6 +60,9 @@ export function log_GoodData(
                 goodData_hour.low = price;
                 goodData_hour.close = price;
 
+                goodData_hour.PromiseQuantity = normal_good.PromiseQuantity;
+                goodData_hour.promisecurrency = normal_good.promisecurrency;
+                goodData_hour.promisevalue = normal_good.promisevalue;
                 goodData_hour.modifiedTime = modifiedTime;
                 goodData_hour.save();
         }
@@ -84,8 +87,8 @@ export function log_GoodData(
                 goodData_hour.feeQuantity = normal_good.feeQuantity;
 
 
-      
-                
+
+
                 goodData_hour.totalTradeQuantity = normal_good.totalTradeQuantity;
                 goodData_hour.totalInvestQuantity = normal_good.totalInvestQuantity;
                 goodData_hour.totalDisinvestQuantity =
@@ -94,6 +97,9 @@ export function log_GoodData(
                 goodData_hour.totalTradeCount = normal_good.totalTradeCount;
                 goodData_hour.totalInvestCount = normal_good.totalInvestCount;
                 goodData_hour.totalDisinvestCount = normal_good.totalDisinvestCount;
+                goodData_hour.PromiseQuantity = normal_good.PromiseQuantity;
+                goodData_hour.promisecurrency = normal_good.promisecurrency;
+                goodData_hour.promisevalue = normal_good.promisevalue;
 
                 if (
                         goodData_hour.modifiedTime
@@ -149,7 +155,7 @@ export function log_GoodData(
                 goodData_day.feeQuantity = goodData_hour.feeQuantity;
 
 
-               
+
                 goodData_day.totalTradeQuantity =
                         goodData_hour.totalTradeQuantity;
                 goodData_day.totalInvestQuantity =
@@ -162,6 +168,9 @@ export function log_GoodData(
                 goodData_day.totalDisinvestCount =
                         goodData_hour.totalDisinvestCount;
 
+                goodData_day.PromiseQuantity = goodData_hour.PromiseQuantity;
+                goodData_day.promisecurrency = goodData_hour.promisecurrency;
+                goodData_day.promisevalue = goodData_hour.promisevalue;
                 goodData_day.modifiedTime = modifiedTime;
                 goodData_day.open = price;
                 goodData_day.high = price;
@@ -189,7 +198,7 @@ export function log_GoodData(
                 goodData_day.feeQuantity = goodData_hour.feeQuantity;
 
 
-                
+
                 goodData_day.totalTradeQuantity =
                         goodData_hour.totalTradeQuantity;
                 goodData_day.totalInvestQuantity =
@@ -201,7 +210,9 @@ export function log_GoodData(
                 goodData_day.totalInvestCount = goodData_hour.totalInvestCount;
                 goodData_day.totalDisinvestCount =
                         goodData_hour.totalDisinvestCount;
-
+                goodData_day.PromiseQuantity = goodData_hour.PromiseQuantity;
+                goodData_day.promisecurrency = goodData_hour.promisecurrency;
+                goodData_day.promisevalue = goodData_hour.promisevalue;
                 goodData_day.modifiedTime = modifiedTime;
                 if (
                         goodData_day.modifiedTime
@@ -258,7 +269,7 @@ export function log_GoodData(
                 goodData_week.investActualQuantity = goodData_day.investActualQuantity;
                 goodData_week.feeQuantity = goodData_day.feeQuantity;
 
-                
+
                 goodData_week.totalTradeQuantity =
                         goodData_day.totalTradeQuantity;
                 goodData_week.totalInvestQuantity =
@@ -270,6 +281,9 @@ export function log_GoodData(
                 goodData_week.totalInvestCount = goodData_day.totalInvestCount;
                 goodData_week.totalDisinvestCount =
                         goodData_day.totalDisinvestCount;
+                goodData_week.PromiseQuantity = goodData_day.PromiseQuantity;
+                goodData_week.promisecurrency = goodData_day.promisecurrency;
+                goodData_week.promisevalue = goodData_day.promisevalue;
                 goodData_week.modifiedTime = modifiedTime;
                 goodData_week.open = price;
                 goodData_week.high = price;
@@ -286,7 +300,7 @@ export function log_GoodData(
                 goodData_week.decimals = goodData_day.decimals;
                 goodData_week.goodConfig = goodData_day.goodConfig;
                 goodData_week.isvaluegood = goodData_day.isvaluegood;
-              
+
                 goodData_week.virtualQuantity = goodData_day.virtualQuantity;
                 goodData_week.currentValue = goodData_day.currentValue;
                 goodData_week.currentQuantity = goodData_day.currentQuantity;
@@ -295,7 +309,7 @@ export function log_GoodData(
                 goodData_week.investActualQuantity = goodData_day.investActualQuantity;
                 goodData_week.feeQuantity = goodData_day.feeQuantity;
 
-                
+
                 goodData_week.totalTradeQuantity =
                         goodData_day.totalTradeQuantity;
                 goodData_week.totalInvestQuantity =
@@ -367,7 +381,7 @@ export function log_GoodData(
                 goodData_month.feeQuantity = goodData_week.feeQuantity;
 
 
-                
+
                 goodData_month.totalTradeQuantity =
                         goodData_week.totalTradeQuantity;
                 goodData_month.totalInvestQuantity =
@@ -380,6 +394,9 @@ export function log_GoodData(
                         goodData_week.totalInvestCount;
                 goodData_month.totalDisinvestCount =
                         goodData_week.totalDisinvestCount;
+                goodData_week.PromiseQuantity = goodData_day.PromiseQuantity;
+                goodData_week.promisecurrency = goodData_day.promisecurrency;
+                goodData_week.promisevalue = goodData_day.promisevalue;
                 goodData_month.modifiedTime = modifiedTime;
                 goodData_month.open = price;
                 goodData_month.high = price;
@@ -398,7 +415,7 @@ export function log_GoodData(
                 goodData_month.isvaluegood = goodData_week.isvaluegood;
 
 
-               
+
                 goodData_month.virtualQuantity = goodData_week.virtualQuantity;
                 goodData_month.currentValue = goodData_week.currentValue;
                 goodData_month.currentQuantity = goodData_week.currentQuantity;
@@ -407,7 +424,7 @@ export function log_GoodData(
                 goodData_month.investActualQuantity = goodData_week.investActualQuantity;
                 goodData_month.feeQuantity = goodData_week.feeQuantity;
 
-                
+
                 goodData_month.totalTradeQuantity =
                         goodData_week.totalTradeQuantity;
                 goodData_month.totalInvestQuantity =
@@ -420,6 +437,9 @@ export function log_GoodData(
                         goodData_week.totalInvestCount;
                 goodData_month.totalDisinvestCount =
                         goodData_week.totalDisinvestCount;
+                goodData_month.PromiseQuantity = goodData_week.PromiseQuantity;
+                goodData_month.promisecurrency = goodData_week.promisecurrency;
+                goodData_month.promisevalue = goodData_week.promisevalue;
                 goodData_month.modifiedTime = modifiedTime;
                 if (
                         goodData_month.modifiedTime
@@ -496,7 +516,9 @@ export function log_GoodData(
                         goodData_month.totalInvestCount;
                 goodData_year.totalDisinvestCount =
                         goodData_month.totalDisinvestCount;
-
+                goodData_year.PromiseQuantity = goodData_month.PromiseQuantity;
+                goodData_year.promisecurrency = goodData_month.promisecurrency;
+                goodData_year.promisevalue = goodData_month.promisevalue;
                 goodData_year.modifiedTime = modifiedTime;
                 goodData_year.save();
         }
@@ -516,7 +538,7 @@ export function log_GoodData(
                 goodData_year.investShares = goodData_month.investShares;
                 goodData_year.investActualQuantity = goodData_month.investActualQuantity;
                 goodData_year.feeQuantity = goodData_month.feeQuantity;
-                
+
                 goodData_year.totalTradeQuantity =
                         goodData_month.totalTradeQuantity;
                 goodData_year.totalInvestQuantity =
@@ -529,7 +551,9 @@ export function log_GoodData(
                         goodData_month.totalInvestCount;
                 goodData_year.totalDisinvestCount =
                         goodData_month.totalDisinvestCount;
-
+                goodData_year.PromiseQuantity = goodData_month.PromiseQuantity;
+                goodData_year.promisecurrency = goodData_month.promisecurrency;
+                goodData_year.promisevalue = goodData_month.promisevalue;
                 goodData_year.modifiedTime = modifiedTime;
                 if (
                         goodData_year.modifiedTime.div(BigInt.fromU32(432000)) <
