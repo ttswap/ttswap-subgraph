@@ -1075,76 +1075,76 @@ export function handle_e_paygood(event: e_payGood): void {
         let to_quantity = event.params.good2change.mod(BI_128);
         let to_fee = event.params.good2change.div(BI_128);
         let marketstate = MarketState.load("1");
-                if (marketstate === null) {
-                        marketstate = new MarketState("1");
+        if (marketstate === null) {
+                marketstate = new MarketState("1");
 
-                        marketstate.marketCreator = "#";
-                        marketstate.goodCount = ZERO_BI;
-                        marketstate.proofCount = ZERO_BI;
-                        marketstate.userCount = BigInt.fromU64(100000);
-                        marketstate.txCount = ZERO_BI;
-                        marketstate.totalTradeCount = ZERO_BI;
-                        marketstate.totalInvestCount = ZERO_BI;
-                        marketstate.totalDisinvestCount = ZERO_BI;
-                        marketstate.totalDisinvestValue = ZERO_BI;
-                        marketstate.totalInvestValue = ZERO_BI;
-                        marketstate.totalTradeValue = ZERO_BI;
-                }
-                let from_good = GoodState.load(fromgood);
-                if (from_good === null) {
-                        from_good = new GoodState(fromgood);
-                        from_good.goodseq = ZERO_BI;
-                        from_good.isvaluegood = false;
-                        from_good.islockgood = false;
-                        from_good.tokenname = "#";
-                        from_good.tokensymbol = "#";
-                        from_good.tokentotalsuply = ZERO_BI;
-                        from_good.tokendecimals = ZERO_BI;
-                        from_good.owner = "#";
-                        from_good.erc20Address = "#";
-                        from_good.goodConfig = ZERO_BI;
-                        from_good.virtualQuantity = ZERO_BI;
-                        from_good.currentValue = ZERO_BI;
-                        from_good.currentQuantity = ZERO_BI;
-                        from_good.investQuantity = ZERO_BI;
-                        from_good.investShares = ZERO_BI;
-                        from_good.investActualQuantity = ZERO_BI;
-                        from_good.feeQuantity = ZERO_BI;
-                        from_good.totalTradeQuantity = ZERO_BI;
-                        from_good.totalInvestQuantity = ZERO_BI;
-                        from_good.totalDisinvestQuantity = ZERO_BI;
-                        from_good.totalProfit = ZERO_BI;
-                        from_good.totalTradeCount = ZERO_BI;
-                        from_good.totalInvestCount = ZERO_BI;
-                        from_good.totalDisinvestCount = ZERO_BI;
-                        from_good.modifiedTime = ZERO_BI;
-                        from_good.txCount = ZERO_BI;
-                        from_good.create_time = ZERO_BI;
-                        from_good.name_lower = "#";
-                        from_good.symbol_lower = "#";
-                }
-                let goodcurrentstate = TTSwap_Market.bind(
-                        event.address
-                ).try_getGoodState(event.params.sellgood);
+                marketstate.marketCreator = "#";
+                marketstate.goodCount = ZERO_BI;
+                marketstate.proofCount = ZERO_BI;
+                marketstate.userCount = BigInt.fromU64(100000);
+                marketstate.txCount = ZERO_BI;
+                marketstate.totalTradeCount = ZERO_BI;
+                marketstate.totalInvestCount = ZERO_BI;
+                marketstate.totalDisinvestCount = ZERO_BI;
+                marketstate.totalDisinvestValue = ZERO_BI;
+                marketstate.totalInvestValue = ZERO_BI;
+                marketstate.totalTradeValue = ZERO_BI;
+        }
+        let from_good = GoodState.load(fromgood);
+        if (from_good === null) {
+                from_good = new GoodState(fromgood);
+                from_good.goodseq = ZERO_BI;
+                from_good.isvaluegood = false;
+                from_good.islockgood = false;
+                from_good.tokenname = "#";
+                from_good.tokensymbol = "#";
+                from_good.tokentotalsuply = ZERO_BI;
+                from_good.tokendecimals = ZERO_BI;
+                from_good.owner = "#";
+                from_good.erc20Address = "#";
+                from_good.goodConfig = ZERO_BI;
+                from_good.virtualQuantity = ZERO_BI;
+                from_good.currentValue = ZERO_BI;
+                from_good.currentQuantity = ZERO_BI;
+                from_good.investQuantity = ZERO_BI;
+                from_good.investShares = ZERO_BI;
+                from_good.investActualQuantity = ZERO_BI;
+                from_good.feeQuantity = ZERO_BI;
+                from_good.totalTradeQuantity = ZERO_BI;
+                from_good.totalInvestQuantity = ZERO_BI;
+                from_good.totalDisinvestQuantity = ZERO_BI;
+                from_good.totalProfit = ZERO_BI;
+                from_good.totalTradeCount = ZERO_BI;
+                from_good.totalInvestCount = ZERO_BI;
+                from_good.totalDisinvestCount = ZERO_BI;
+                from_good.modifiedTime = ZERO_BI;
+                from_good.txCount = ZERO_BI;
+                from_good.create_time = ZERO_BI;
+                from_good.name_lower = "#";
+                from_good.symbol_lower = "#";
+        }
+        let goodcurrentstate = TTSwap_Market.bind(
+                event.address
+        ).try_getGoodState(event.params.sellgood);
 
-                from_good.currentQuantity = from_good.currentQuantity.plus(from_quantity);
-                from_good.investQuantity = from_good.investQuantity.plus(from_fee);
-                from_good.investActualQuantity = from_good.investActualQuantity.plus(from_fee);
-                from_good.feeQuantity = from_good.feeQuantity.plus(from_fee);
-                if (!goodcurrentstate.reverted) {
+        from_good.currentQuantity = from_good.currentQuantity.plus(from_quantity);
+        from_good.investQuantity = from_good.investQuantity.plus(from_fee);
+        from_good.investActualQuantity = from_good.investActualQuantity.plus(from_fee);
+        from_good.feeQuantity = from_good.feeQuantity.plus(from_fee);
+        if (!goodcurrentstate.reverted) {
 
-                        from_good.currentValue = goodcurrentstate.value.investState.mod(BI_128);
-                        from_good.currentQuantity = goodcurrentstate.value.currentState.mod(BI_128);
-                        from_good.investQuantity = goodcurrentstate.value.currentState.div(BI_128)
-                        from_good.investActualQuantity = from_good.investQuantity.minus(from_good.virtualQuantity);
-                }
-                from_good.totalTradeCount = from_good.totalTradeCount.plus(ONE_BI);
-                from_good.totalTradeQuantity = from_good.totalTradeQuantity.plus(
-                        from_quantity
-                );
-                from_good.txCount = from_good.txCount.plus(ONE_BI);
-                from_good.modifiedTime = event.block.timestamp;
-                from_good.save();
+                from_good.currentValue = goodcurrentstate.value.investState.mod(BI_128);
+                from_good.currentQuantity = goodcurrentstate.value.currentState.mod(BI_128);
+                from_good.investQuantity = goodcurrentstate.value.currentState.div(BI_128)
+                from_good.investActualQuantity = from_good.investQuantity.minus(from_good.virtualQuantity);
+        }
+        from_good.totalTradeCount = from_good.totalTradeCount.plus(ONE_BI);
+        from_good.totalTradeQuantity = from_good.totalTradeQuantity.plus(
+                from_quantity
+        );
+        from_good.txCount = from_good.txCount.plus(ONE_BI);
+        from_good.modifiedTime = event.block.timestamp;
+        from_good.save();
         if (togood !== ADDRESS_ZERO) {
                 let to_good = GoodState.load(togood);
                 if (to_good === null) {
@@ -1333,7 +1333,7 @@ export function handle_e_paygood(event: e_payGood): void {
                 log_MarketData(marketstate, event.block.timestamp);
         } else {
                 let transid =
-                from_good.id.toString() +
+                        from_good.id.toString() +
                         from_good.txCount.mod(BigInt.fromU32(500)).toString();
                 let tx = Transaction.load(transid);
                 if (tx === null) {
@@ -2585,10 +2585,10 @@ export function handle_e_changegoodowner(event: e_changegoodowner): void {
 }
 
 export function handle_e_getPromiseProof(event: e_getPromiseProof): void {
-        let normalgoodid=event.params._goodid.toHexString();
+        let normalgoodid = event.params._goodid.toHexString();
         let normal_good = GoodState.load(normalgoodid);
-        let promiseproof= ProofState.load(event.params._proofid.toString());
- 
+        let promiseproof = ProofState.load(event.params._proofid.toString());
+
         if (normal_good === null) {
                 normal_good = new GoodState(normalgoodid);
                 normal_good.goodseq = ZERO_BI;
@@ -2622,13 +2622,20 @@ export function handle_e_getPromiseProof(event: e_getPromiseProof): void {
                 normal_good.symbol_lower = "#";
         }
 
-        if(promiseproof===null){
-                promiseproof=new ProofState(event.params._proofid.toString());
-                promiseproof.good2ActualQuantity=ZERO_BI;
-                promiseproof.proofActualValue=ZERO_BI;
+        if (promiseproof === null) {
+                promiseproof = new ProofState(event.params._proofid.toString());
+                promiseproof.good2ActualQuantity = ZERO_BI;
+                promiseproof.proofActualValue = ZERO_BI;
         }
-        normal_good.PromiseQuantity=promiseproof.good2ActualQuantity;
-        normal_good.promisecurrency=normal_good.id;
-        normal_good.promisevalue=promiseproof.proofActualValue;
-        normal_good.save();
+        if (promiseproof.good2ActualQuantity.equals(ZERO_BI)) {
+                normal_good.PromiseQuantity = promiseproof.good1ActualQuantity;
+                normal_good.promisecurrency = promiseproof.good1;
+                normal_good.promisevalue = promiseproof.proofActualValue;
+                normal_good.save();
+        } else {
+                normal_good.PromiseQuantity = promiseproof.good2ActualQuantity;
+                normal_good.promisecurrency = promiseproof.good2;
+                normal_good.promisevalue = promiseproof.proofActualValue.div(BigInt.fromString("2"));
+                normal_good.save();
+        }
 }
