@@ -1353,13 +1353,13 @@ export function handle_e_paygood(event: e_payGood): void {
                 }
                 tx.blockNumber = event.block.number;
                 tx.transtype = "pay";
-                tx.transvalue = event.params.swapvalue.div(BI_128);
+                tx.transvalue = event.params.swapvalue.mod(BI_128);
                 tx.fromgood = fromgood;
                 tx.togood = togood;
-                tx.fromgoodQuanity = event.params.good2change.div(BI_128);
+                tx.fromgoodQuanity = event.params.good1change.div(BI_128);
                 tx.fromgoodfee = ZERO_BI;
-                tx.togoodQuantity = event.params.good2change.mod(BI_128);;
-                tx.togoodfee = event.params.good1change;
+                tx.togoodQuantity = event.params.good2change.div(BI_128);
+                tx.togoodfee = event.params.good2change.mod(BI_128);
                 tx.timestamp = event.block.timestamp;
                 tx.recipent = event.params._trader.toHexString();
                 tx.hash = event.transaction.hash.toHexString();
@@ -2628,14 +2628,14 @@ export function handle_e_getPromiseProof(event: e_getPromiseProof): void {
                 promiseproof.proofActualValue = ZERO_BI;
         }
         if (promiseproof.good2ActualQuantity.equals(ZERO_BI)) {
-                normal_good.PromiseQuantity = promiseproof.good1ActualQuantity;
-                normal_good.promisecurrency = promiseproof.good1;
-                normal_good.promisevalue = promiseproof.proofActualValue;
+                normal_good.promiseQuantity = promiseproof.good1ActualQuantity;
+                normal_good.promiseCurrency = promiseproof.good1;
+                normal_good.promiseValue = promiseproof.proofActualValue;
                 normal_good.save();
         } else {
-                normal_good.PromiseQuantity = promiseproof.good2ActualQuantity;
-                normal_good.promisecurrency = promiseproof.good2;
-                normal_good.promisevalue = promiseproof.proofActualValue.div(BigInt.fromString("2"));
+                normal_good.promiseQuantity = promiseproof.good2ActualQuantity;
+                normal_good.promiseCurrency = promiseproof.good2;
+                normal_good.promiseValue = promiseproof.proofActualValue.div(BigInt.fromString("2"));
                 normal_good.save();
         }
 }
