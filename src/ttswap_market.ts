@@ -58,8 +58,22 @@ export function handle_e_updateGoodConfig(event: e_updateGoodConfig): void {
         if (from_good !== null) {
                 // Update good configuration
                 from_good.goodConfig = event.params._goodConfig;
+                //2**254
+                if (
+                        from_good.goodConfig.div(
+                                BigInt.fromString(
+                                        "28948022309329048855892746252171976963317496166410141009864396001978282409984"
+                                )
+                        ).mod(BigInt.fromString("2")) == ONE_BI
+                ) {
+                        from_good.islockgood = true;
+                } else {
+                        from_good.islockgood = false;
+                }
+
                 from_good.save();
         }
+        
 }
 
 /**
