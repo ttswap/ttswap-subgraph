@@ -1,6 +1,11 @@
 {
   "name": "ttswap",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "<https://github.com/ttswap/ttswap-subgraph>"
+  },
+  "version": "v1.16.0",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
