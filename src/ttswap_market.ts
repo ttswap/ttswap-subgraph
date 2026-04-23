@@ -2549,7 +2549,7 @@ export function handle_e_collectcommission(event: e_collectcommission): void {
                 gate.getfromstake = ZERO_BI;
         }
         gate.totalcommissionvalue = gate.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
-        let goodidarrary = event.params._gooid;
+        let goodidarrary = event.params._goodid;
         let commissionarray = event.params._commisionamount;
         for (let aa = 0; aa < goodidarrary.length; aa++) {
                 let good = GoodState.load(goodidarrary[aa].toHexString());
