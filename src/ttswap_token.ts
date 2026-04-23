@@ -346,6 +346,7 @@ export function handle_e_publicsell(event: e_publicsell): void {
                 newcustomer.publicsaleusdt = ZERO_BI;
                 newcustomer.publicsaletts = ZERO_BI;
         }
+        marketstate.save();
         if (newcustomer.publicsaleusdt === ZERO_BI) {
                 ttsenv.publicsaleusercount = ttsenv.publicsaleusercount.plus(ONE_BI);
         }
