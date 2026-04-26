@@ -284,12 +284,12 @@ type tts_env  @entity(immutable:false) {
   dao_admin:String!
   marketcontract:String!
   usdtcontract:String!
-  publicsell:BigInt!
+  publicsell:BigInt! #sell tts amount
   lsttime:BigInt!
-  actual_amount:BigInt!
+  actual_amount:BigInt! # total mint tts amount
   shares_index:BigInt!
-  left_share:BigInt!
-  usdt_amount:BigInt!
+  left_share:BigInt! 
+  usdt_amount:BigInt! #get usdt amount
   lasttime:BigInt!
   publicsaleusercount:BigInt!
 }
@@ -300,11 +300,6 @@ type tts_share @entity(immutable:false){
   share_leftamount:BigInt!
   share_metric:BigInt!
   share_chips:BigInt!
-}
-
-type tts_auth @entity(immutable:false){
-  id:ID! #user
-  priv:BigInt!
 }
 
 type ttswap_publicsell_log @entity(immutable:true){
