@@ -1,4 +1,4 @@
-import { BigInt, dataSource } from "@graphprotocol/graph-ts";
+import { BigInt } from "@graphprotocol/graph-ts";
 
 import {
         Customer,
@@ -6,7 +6,8 @@ import {
         tts_env,
         tts_share,
         Refer,
-        Gate, ttswap_publicsell_log
+        Gate, 
+        ttswap_publicsell_log,
 } from "../generated/schema";
 
 import {
@@ -36,7 +37,7 @@ export function handle_e_setenv(event: e_setenv): void {
                 ttsenv.lsttime = ZERO_BI;
                 ttsenv.actual_amount = ZERO_BI;
                 ttsenv.shares_index = ZERO_BI;
-                ttsenv.left_share = ZERO_BI;
+                ttsenv.left_share = BigInt.fromString("45000000000000000000");
                 ttsenv.usdt_amount = ZERO_BI;
                 ttsenv.lasttime = ZERO_BI;
                 ttsenv.publicsaleusercount = ZERO_BI;
@@ -63,7 +64,7 @@ export function handle_e_addShare(event: e_addShare): void {
                 ttsenv.lsttime = ZERO_BI;
                 ttsenv.actual_amount = ZERO_BI;
                 ttsenv.shares_index = ZERO_BI;
-                ttsenv.left_share = ZERO_BI;
+                ttsenv.left_share = BigInt.fromString("45000000000000000000");
                 ttsenv.usdt_amount = ZERO_BI;
                 ttsenv.lasttime = ZERO_BI;
                 ttsenv.publicsaleusercount = ZERO_BI;
@@ -75,10 +76,22 @@ export function handle_e_addShare(event: e_addShare): void {
                 ttsshare.share_leftamount = event.params.leftamount;
                 ttsshare.share_metric = event.params.metric;
                 ttsshare.share_chips = BigInt.fromU32(event.params.chips);
-                ttsshare.save();
+                ttsenv.shares_index = ttsenv.shares_index.plus(ONE_BI);
+        } else if (ttsshare.share_leftamount.equals(ZERO_BI)) {
+                // 与合约 if (shares[owner].leftamount == 0) 分支一致 → 整体覆盖
+                ttsshare.share_owner = event.params.recipient.toHexString();
+                ttsshare.share_leftamount = event.params.leftamount;
+                ttsshare.share_metric = event.params.metric;
+                ttsshare.share_chips = BigInt.fromU32(event.params.chips);
+        } else {
+                // 累加 + 取大
+                ttsshare.share_leftamount = ttsshare.share_leftamount.plus(event.params.leftamount);
+                let newChips = BigInt.fromU32(event.params.chips);
+                if (newChips.gt(ttsshare.share_chips)) ttsshare.share_chips = newChips;
+                if (event.params.metric.gt(ttsshare.share_metric)) ttsshare.share_metric = event.params.metric;
         }
-        ttsenv.shares_index = ttsenv.shares_index.plus(ONE_BI);
-        ttsenv.left_share = ttsenv.left_share.plus(event.params.leftamount);
+        ttsshare.save();
+        ttsenv.left_share = ttsenv.left_share.minus(event.params.leftamount);
         ttsenv.save();
 }
 
@@ -97,19 +110,18 @@ export function handle_e_shareMint(event: e_shareMint): void {
                 ttsenv.lsttime = ZERO_BI;
                 ttsenv.actual_amount = ZERO_BI;
                 ttsenv.shares_index = ZERO_BI;
-                ttsenv.left_share = ZERO_BI;
+                ttsenv.left_share = BigInt.fromString("45000000000000000000");
                 ttsenv.usdt_amount = ZERO_BI;
                 ttsenv.lasttime = ZERO_BI;
                 ttsenv.publicsaleusercount = ZERO_BI;
         }
-        ttsenv.left_share = ttsenv.left_share.minus(event.params.mintamount);
         ttsenv.actual_amount = ttsenv.actual_amount.plus(
                 event.params.mintamount
         );
 
         ttsenv.save();
 
-        let ttsshare = tts_share.load(event.params.owner.toString());
+        let ttsshare = tts_share.load(event.params.owner.toHexString());
         if (ttsshare !== null) {
                 ttsshare.share_leftamount = ttsshare.share_leftamount.minus(
                         event.params.mintamount
@@ -133,7 +145,7 @@ export function handle_e_burnShare(event: e_burnShare): void {
                 ttsenv.lsttime = ZERO_BI;
                 ttsenv.actual_amount = ZERO_BI;
                 ttsenv.shares_index = ZERO_BI;
-                ttsenv.left_share = ZERO_BI;
+                ttsenv.left_share = BigInt.fromString("45000000000000000000");
                 ttsenv.usdt_amount = ZERO_BI;
                 ttsenv.lasttime = ZERO_BI;
                 ttsenv.publicsaleusercount = ZERO_BI;
@@ -147,7 +159,7 @@ export function handle_e_burnShare(event: e_burnShare): void {
                 ttsshare.share_chips = ZERO_BI;
         }
 
-        ttsenv.left_share = ttsenv.left_share.minus(ttsshare.share_leftamount);
+        ttsenv.left_share = ttsenv.left_share.plus(ttsshare.share_leftamount);
         ttsenv.save();
         ttsshare.share_owner = "#";
         ttsshare.share_leftamount = ZERO_BI;
@@ -156,7 +168,7 @@ export function handle_e_burnShare(event: e_burnShare): void {
         ttsshare.save();
 }
 
-export function handle_e_addreferer(event: e_addreferral): void {
+export function handle_e_addreferral(event: e_addreferral): void {
         let marketstate = MarketState.load("1");
         if (marketstate === null) {
                 marketstate = new MarketState("1");
@@ -224,33 +236,32 @@ export function handle_e_addreferer(event: e_addreferral): void {
                 referralcus.publicsaleusdt = ZERO_BI;
                 referralcus.publicsaletts = ZERO_BI;
         }
+        referralcus.lastoptime = event.block.timestamp;
         referralcus.referralnum = referralcus.referralnum.plus(ONE_BI);
         referralcus.save();
 
-
-
-        let gate = Gate.load(referralcus.lastgate as string);
-        if (gate === null) {
-                gate = new Gate(
-                        referralcus.lastgate as string
-                );
-                gate.tradeValue = ZERO_BI;
-                gate.investValue = ZERO_BI;
-                gate.disinvestValue = ZERO_BI;
-                gate.tradeCount = ZERO_BI;
-                gate.investCount = ZERO_BI;
-                gate.disinvestCount = ZERO_BI;
-                gate.totalprofitvalue = ZERO_BI;
-                gate.totalcommissionvalue = ZERO_BI;
-                gate.referralnum = ZERO_BI;
-                gate.stakettsvalue = ZERO_BI;
-                gate.stakettscontruct = ZERO_BI;
-                gate.getfromstake = ZERO_BI;
+        let gateKey = referralcus.lastgate as string;
+        if (gateKey != "#") {
+                let gate = Gate.load(gateKey);
+                if (gate === null) {
+                        gate = new Gate(gateKey);
+                        gate.tradeValue = ZERO_BI;
+                        gate.investValue = ZERO_BI;
+                        gate.disinvestValue = ZERO_BI;
+                        gate.tradeCount = ZERO_BI;
+                        gate.investCount = ZERO_BI;
+                        gate.disinvestCount = ZERO_BI;
+                        gate.totalprofitvalue = ZERO_BI;
+                        gate.totalcommissionvalue = ZERO_BI;
+                        gate.referralnum = ZERO_BI;
+                        gate.stakettsvalue = ZERO_BI;
+                        gate.stakettscontruct = ZERO_BI;
+                        gate.getfromstake = ZERO_BI;
+                }
+                gate.referralnum = gate.referralnum.plus(ONE_BI);
+                gate.lastoptime = event.block.timestamp;
+                gate.save();
         }
-        gate.referralnum = gate.referralnum.plus(ONE_BI);
-        gate.lastoptime = event.block.timestamp;
-        gate.save();
-
 
         let refer = Refer.load(event.params.referal.toHexString());
 
@@ -310,7 +321,7 @@ export function handle_e_publicsell(event: e_publicsell): void {
                 ttsenv.lsttime = ZERO_BI;
                 ttsenv.actual_amount = ZERO_BI;
                 ttsenv.shares_index = ZERO_BI;
-                ttsenv.left_share = ZERO_BI;
+                ttsenv.left_share = BigInt.fromString("45000000000000000000");
                 ttsenv.usdt_amount = ZERO_BI;
                 ttsenv.lasttime = ZERO_BI;
                 ttsenv.publicsaleusercount = ZERO_BI;
@@ -347,7 +358,7 @@ export function handle_e_publicsell(event: e_publicsell): void {
                 newcustomer.publicsaletts = ZERO_BI;
         }
         marketstate.save();
-        if (newcustomer.publicsaleusdt === ZERO_BI) {
+        if (newcustomer.publicsaleusdt.equals(ZERO_BI)) {
                 ttsenv.publicsaleusercount = ttsenv.publicsaleusercount.plus(ONE_BI);
         }
         ttsenv.save();
@@ -356,7 +367,8 @@ export function handle_e_publicsell(event: e_publicsell): void {
         newcustomer.lastoptime = event.block.timestamp;
         newcustomer.save();
 
-        let ttswap_publicsell_log1 = new ttswap_publicsell_log(event.transaction.hash);
+        let id = event.transaction.hash.concatI32(event.logIndex.toI32());
+        let ttswap_publicsell_log1 = new ttswap_publicsell_log(id);
         ttswap_publicsell_log1.create_time = event.block.timestamp;
         ttswap_publicsell_log1.user = event.transaction.from.toHexString();
         ttswap_publicsell_log1.ttsamount = event.params.ttsamount;
@@ -408,58 +420,69 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
                 newcustomer.publicsaletts = ZERO_BI;
         }
 
-        let refer = Refer.load(newcustomer.refer as string);
-        if (refer === null) {
-                refer = new Refer(
-                        newcustomer.refer as string
-                );
-                refer.tradeValue = ZERO_BI;
-                refer.investValue = ZERO_BI;
-                refer.disinvestValue = ZERO_BI;
-                refer.tradeCount = ZERO_BI;
-                refer.investCount = ZERO_BI;
-                refer.disinvestCount = ZERO_BI;
-                refer.totalprofitvalue = ZERO_BI;
-                refer.totalcommissionvalue = ZERO_BI;
+        let referStr = newcustomer.refer;
+        let hasRefer = referStr != null && referStr != "#";
+        let gateKey = newcustomer.lastgate as string;
+        let hasGate = gateKey != "#";
 
-                refer.referralnum = ZERO_BI;
-                refer.stakettsvalue = ZERO_BI;
-                refer.stakettscontruct = ZERO_BI;
-                refer.getfromstake = ZERO_BI;
+        if (hasRefer) {
+                let rid = referStr as string;
+                let refer = Refer.load(rid);
+                if (refer === null) {
+                        refer = new Refer(rid);
+                        refer.tradeValue = ZERO_BI;
+                        refer.investValue = ZERO_BI;
+                        refer.disinvestValue = ZERO_BI;
+                        refer.tradeCount = ZERO_BI;
+                        refer.investCount = ZERO_BI;
+                        refer.disinvestCount = ZERO_BI;
+                        refer.totalprofitvalue = ZERO_BI;
+                        refer.totalcommissionvalue = ZERO_BI;
+
+                        refer.referralnum = ZERO_BI;
+                        refer.stakettsvalue = ZERO_BI;
+                        refer.stakettscontruct = ZERO_BI;
+                        refer.getfromstake = ZERO_BI;
+                }
+                refer.stakettsvalue = refer.stakettsvalue.minus(
+                        newcustomer.stakettsvalue
+                );
+                refer.stakettscontruct = refer.stakettscontruct.minus(
+                        newcustomer.stakettscontruct
+                );
+                refer.save();
         }
 
-        refer.stakettsvalue = refer.stakettsvalue.minus(newcustomer.stakettsvalue);
-        refer.stakettscontruct = refer.stakettscontruct.minus(newcustomer.stakettscontruct);
-
-
-
-        let gate = Gate.load(newcustomer.lastgate as string);
-        if (gate === null) {
-                gate = new Gate(
-                        newcustomer.lastgate as string
+        if (hasGate) {
+                let gate = Gate.load(gateKey);
+                if (gate === null) {
+                        gate = new Gate(gateKey);
+                        gate.tradeValue = ZERO_BI;
+                        gate.investValue = ZERO_BI;
+                        gate.disinvestValue = ZERO_BI;
+                        gate.tradeCount = ZERO_BI;
+                        gate.investCount = ZERO_BI;
+                        gate.disinvestCount = ZERO_BI;
+                        gate.totalprofitvalue = ZERO_BI;
+                        gate.totalcommissionvalue = ZERO_BI;
+                        gate.referralnum = ZERO_BI;
+                        gate.stakettsvalue = ZERO_BI;
+                        gate.stakettscontruct = ZERO_BI;
+                        gate.getfromstake = ZERO_BI;
+                }
+                gate.stakettsvalue = gate.stakettsvalue.minus(
+                        newcustomer.stakettsvalue
                 );
-                gate.tradeValue = ZERO_BI;
-                gate.investValue = ZERO_BI;
-                gate.disinvestValue = ZERO_BI;
-                gate.tradeCount = ZERO_BI;
-                gate.investCount = ZERO_BI;
-                gate.disinvestCount = ZERO_BI;
-                gate.totalprofitvalue = ZERO_BI;
-                gate.totalcommissionvalue = ZERO_BI;
-                gate.referralnum = ZERO_BI;
-                gate.stakettsvalue = ZERO_BI;
-                gate.stakettscontruct = ZERO_BI;
-                gate.getfromstake = ZERO_BI;
+                gate.stakettscontruct = gate.stakettscontruct.minus(
+                        newcustomer.stakettscontruct
+                );
+                gate.save();
         }
-
-        gate.stakettsvalue = gate.stakettsvalue.minus(newcustomer.stakettsvalue);
-        gate.stakettscontruct = gate.stakettscontruct.minus(newcustomer.stakettscontruct);
-
 
         let proofvalue = event.params.proofvalue.div(BI_128);
         let proofcontrunct = event.params.proofvalue.mod(BI_128);
         let profit = event.params.unstakestate.mod(BI_128);
-        if (event.params.unstakestate.div(BI_128) !== ZERO_BI) {
+        if (event.params.unstakestate.div(BI_128).gt(ZERO_BI)) {
                 newcustomer.getfromstake = newcustomer.getfromstake.plus(profit);
         }
         newcustomer.stakettsvalue = proofvalue;
@@ -467,16 +490,33 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
         newcustomer.lastoptime = event.block.timestamp;
         newcustomer.save();
 
-        refer.stakettsvalue = refer.stakettsvalue.plus(newcustomer.stakettsvalue);
-        refer.stakettscontruct = refer.stakettscontruct.plus(newcustomer.stakettscontruct);
-        refer.lastoptime = event.block.timestamp;
-        refer.save();
+        if (hasRefer) {
+                let refer = Refer.load(referStr as string);
+                if (refer !== null) {
+                        refer.stakettsvalue = refer.stakettsvalue.plus(
+                                newcustomer.stakettsvalue
+                        );
+                        refer.stakettscontruct = refer.stakettscontruct.plus(
+                                newcustomer.stakettscontruct
+                        );
+                        refer.lastoptime = event.block.timestamp;
+                        refer.save();
+                }
+        }
 
-        gate.stakettsvalue = gate.stakettsvalue.plus(newcustomer.stakettsvalue);
-        gate.stakettscontruct = gate.stakettscontruct.plus(newcustomer.stakettscontruct);
-        gate.lastoptime = event.block.timestamp;
-        gate.save();
-
+        if (hasGate) {
+                let gate = Gate.load(gateKey);
+                if (gate !== null) {
+                        gate.stakettsvalue = gate.stakettsvalue.plus(
+                                newcustomer.stakettsvalue
+                        );
+                        gate.stakettscontruct = gate.stakettscontruct.plus(
+                                newcustomer.stakettscontruct
+                        );
+                        gate.lastoptime = event.block.timestamp;
+                        gate.save();
+                }
+        }
 
         let ttsenv = tts_env.load("1");
         if (ttsenv === null) {
@@ -492,7 +532,7 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
                 ttsenv.lsttime = ZERO_BI;
                 ttsenv.actual_amount = ZERO_BI;
                 ttsenv.shares_index = ZERO_BI;
-                ttsenv.left_share = ZERO_BI;
+                ttsenv.left_share = BigInt.fromString("45000000000000000000");
                 ttsenv.usdt_amount = ZERO_BI;
                 ttsenv.lasttime = ZERO_BI;
                 ttsenv.publicsaleusercount = ZERO_BI;
