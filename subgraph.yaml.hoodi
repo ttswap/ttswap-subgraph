@@ -18,18 +18,19 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/ttswap_market.ts
       entities:
+        - Customer
+        - CustomerData
+        - Refer
+        - ReferData
+        - Gate
+        - GateData
         - MarketState
         - GoodState
         - ProofState
         - Transaction
-        - Customer
-        - Refer
-        - Gate
-        - MarketData
         - GoodData
-        - CustomerData
-        - ReferData
-        - GateData
+        - MarketData
+        - tts_env
       abis:
         - name: TTSwap_Market
           file: ./abis/TTSwap_Market.json
@@ -78,18 +79,17 @@ dataSources:
       file: ./src/ttswap_token.ts
       entities:
         - Customer
-        - MarketState
-        - tts_env
-        - tts_share
         - Refer
         - Gate
-        - ttswap_publicsell_log
+        - tts_restake
+        - tts_share
+        - tts_auth
       abis:
         - name: TTSwap_Token
           file: ./abis/TTSwap_Token.json
       eventHandlers:
         - event: e_addreferral(address,address)
-          handler: handle_e_addreferral
+          handler: handle_e_addreferer
         - event: e_publicsell(uint256,uint256)
           handler: handle_e_publicsell
         - event: e_setenv(address)
