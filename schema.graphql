@@ -285,7 +285,6 @@ type tts_env  @entity(immutable:false) {
   marketcontract:String!
   usdtcontract:String!
   publicsell:BigInt! #sell tts amount
-  lsttime:BigInt!
   actual_amount:BigInt! # total mint tts amount
   shares_index:BigInt!
   left_share:BigInt! 

@@ -34,6 +34,7 @@ export function getOrCreateCustomer(
     customer.lastgate = "#";
     customer.publicsaleusdt = ZERO_BI;
     customer.publicsaletts = ZERO_BI;
+    customer.lastoptime = ZERO_BI;
     if (marketstate !== null) {
       marketstate.userCount = marketstate.userCount.plus(ONE_BI);
       customer.customerno = marketstate.userCount;
@@ -153,7 +154,6 @@ export function getOrCreateTtsEnv(): tts_env {
     env.marketcontract = "#";
     env.usdtcontract = "#";
     env.publicsell = ZERO_BI;
-    env.lsttime = ZERO_BI;
     env.actual_amount = ZERO_BI;
     env.shares_index = ZERO_BI;
     env.left_share = BigInt.fromString("45000000000000000000");

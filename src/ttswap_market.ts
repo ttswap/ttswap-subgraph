@@ -1,4 +1,4 @@
-import { bigInt, BigInt, Bytes, dataSource } from "@graphprotocol/graph-ts";
+import { bigInt, BigInt } from "@graphprotocol/graph-ts";
 
 import {
         MarketState,
@@ -1405,7 +1405,7 @@ export function handle_e_investGood(event: e_investGood): void {
 
                         refer.lastoptime = event.block.timestamp;
                         refer.save();
-                        log_ReferData(refer,event.block.timestamp);
+                        log_ReferData(refer, event.block.timestamp);
                 }
 
                 log_CustomerData(newcustomer, event.block.timestamp);
