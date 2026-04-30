@@ -47,6 +47,18 @@ import { log_MarketData } from "./util/marketData";
 import { log_CustomerData } from "./util/customer";
 import { log_GateData } from "./util/gate";
 import { log_ReferData } from "./util/refer";
+import {
+        getOrCreateCustomer,
+        getOrCreateGate,
+        getOrCreateRefer,
+} from "./util/entities";
+
+function safeDiv(numerator: BigInt, denominator: BigInt): BigInt {
+        if (denominator.isZero()) {
+                return ZERO_BI;
+        }
+        return numerator.div(denominator);
+}
 
 
 /**
@@ -157,74 +169,27 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
                         event.transaction.from.toHexString();
         }
 
-        let newcustomer = Customer.load(event.transaction.from.toHexString());
-        if (newcustomer === null) {
-                newcustomer = new Customer(
-                        event.transaction.from.toHexString()
-                );
-                newcustomer.refer = "#";
-                newcustomer.tradeValue = ZERO_BI;
-                newcustomer.investValue = ZERO_BI;
-                newcustomer.disinvestValue = ZERO_BI;
-                newcustomer.tradeCount = ZERO_BI;
-                newcustomer.investCount = ZERO_BI;
-                newcustomer.disinvestCount = ZERO_BI;
-                newcustomer.userConfig = ZERO_BI;
-                marketstate.userCount = marketstate.userCount.plus(ONE_BI);
-                newcustomer.customerno = marketstate.userCount;
-                newcustomer.totalprofitvalue = ZERO_BI;
-                newcustomer.totalcommissionvalue = ZERO_BI;
-                newcustomer.referralnum = ZERO_BI;
-                newcustomer.getfromstake = ZERO_BI;
-                newcustomer.stakettsvalue = ZERO_BI;
-                newcustomer.stakettscontruct = ZERO_BI;
-                newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
-                newcustomer.publicsaletts = ZERO_BI;
-        }
-        let gate = Gate.load(newcustomer.lastgate);
-        if (gate === null) {
-                gate = new Gate(
-                        newcustomer.lastgate
-                );
-                gate.tradeValue = ZERO_BI;
-                gate.investValue = ZERO_BI;
-                gate.disinvestValue = ZERO_BI;
-                gate.tradeCount = ZERO_BI;
-                gate.investCount = ZERO_BI;
-                gate.disinvestCount = ZERO_BI;
-                gate.totalprofitvalue = ZERO_BI;
-                gate.totalcommissionvalue = ZERO_BI;
-                gate.referralnum = ZERO_BI;
-                gate.stakettsvalue = ZERO_BI;
-                gate.stakettscontruct = ZERO_BI;
-                gate.getfromstake = ZERO_BI;
-        }
-        gate.investValue = gate.investValue.minus(newcustomer.investValue);
-        gate.investCount = gate.investCount.plus(ONE_BI);
-
-        let refer = Refer.load(newcustomer.refer as string);
-        if (refer === null) {
-                refer = new Refer(
-                        newcustomer.refer as string
-                );
-                refer.tradeValue = ZERO_BI;
-                refer.investValue = ZERO_BI;
-                refer.disinvestValue = ZERO_BI;
-                refer.tradeCount = ZERO_BI;
-                refer.investCount = ZERO_BI;
-                refer.disinvestCount = ZERO_BI;
-                refer.totalprofitvalue = ZERO_BI;
-                refer.totalcommissionvalue = ZERO_BI;
-                refer.referralnum = ZERO_BI;
-                refer.stakettsvalue = ZERO_BI;
-                refer.stakettscontruct = ZERO_BI;
-                refer.getfromstake = ZERO_BI;
+        let newcustomer = getOrCreateCustomer(
+                event.transaction.from.toHexString(),
+                marketstate
+        );
+        let gateKey = newcustomer.lastgate;
+        let hasGate = gateKey != "#";
+        let gate = hasGate ? getOrCreateGate(gateKey) : null;
+        if (hasGate && gate !== null) {
+                gate.investValue = gate.investValue.minus(newcustomer.investValue);
+                gate.investCount = gate.investCount.plus(ONE_BI);
         }
 
+        let referKey = newcustomer.refer as string;
+        let hasRefer = referKey != "#";
+        let refer = hasRefer ? getOrCreateRefer(referKey) : null;
 
-        refer.lastoptime = event.block.timestamp;
-        refer.investValue = refer.investValue.minus(newcustomer.investValue);
-        refer.investCount = refer.investCount.plus(ONE_BI);
+        if (hasRefer && refer !== null) {
+                refer.lastoptime = event.block.timestamp;
+                refer.investValue = refer.investValue.minus(newcustomer.investValue);
+                refer.investCount = refer.investCount.plus(ONE_BI);
+        }
 
 
         newcustomer.investValue = newcustomer.investValue.plus(trade_value);
@@ -232,20 +197,19 @@ export function handle_e_initMetaGood(event: e_initMetaGood): void {
         newcustomer.lastoptime = modifiedTime;
         newcustomer.save();
 
-        gate.investValue = gate.investValue.plus(newcustomer.investValue);
+        if (hasGate && gate !== null) {
+                gate.investValue = gate.investValue.plus(newcustomer.investValue);
+                gate.lastoptime = event.block.timestamp;
+                gate.save();
+                log_GateData(gate, modifiedTime);
+        }
 
-        gate.lastoptime = event.block.timestamp;
-        gate.save();
-
-        log_GateData(gate, modifiedTime);
-
-
-        refer.investValue = refer.investValue.plus(newcustomer.investValue);
-
-        refer.lastoptime = modifiedTime;
-
-        refer.save();
-        log_ReferData(refer, modifiedTime);
+        if (hasRefer && refer !== null) {
+                refer.investValue = refer.investValue.plus(newcustomer.investValue);
+                refer.lastoptime = modifiedTime;
+                refer.save();
+                log_ReferData(refer, modifiedTime);
+        }
 
         log_CustomerData(newcustomer, modifiedTime);
 
@@ -496,77 +460,33 @@ export function handle_e_initGood(event: e_initGood): void {
                 marketstate.totalInvestValue = ZERO_BI;
                 marketstate.totalTradeValue = ZERO_BI;
         }
-        let newcustomer = Customer.load(event.transaction.from.toHexString());
-        if (newcustomer === null) {
-                newcustomer = new Customer(
-                        event.transaction.from.toHexString()
-                );
-                newcustomer.refer = "#";
-                newcustomer.tradeValue = ZERO_BI;
-                newcustomer.investValue = ZERO_BI;
-                newcustomer.disinvestValue = ZERO_BI;
-                newcustomer.tradeCount = ZERO_BI;
-                newcustomer.investCount = ZERO_BI;
-                newcustomer.disinvestCount = ZERO_BI;
-                newcustomer.userConfig = ZERO_BI;
-                marketstate.userCount = marketstate.userCount.plus(ONE_BI);
-                newcustomer.customerno = marketstate.userCount;
-                newcustomer.totalprofitvalue = ZERO_BI;
-                newcustomer.totalcommissionvalue = ZERO_BI;
-                newcustomer.referralnum = ZERO_BI;
-                newcustomer.getfromstake = ZERO_BI;
-                newcustomer.stakettsvalue = ZERO_BI;
-                newcustomer.stakettscontruct = ZERO_BI;
-                newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
-                newcustomer.publicsaletts = ZERO_BI;
+        let newcustomer = getOrCreateCustomer(
+                event.transaction.from.toHexString(),
+                marketstate
+        );
+
+        let gateKey = newcustomer.lastgate as string;
+        let hasGate = gateKey != "#";
+        let gate = hasGate ? getOrCreateGate(gateKey) : null;
+        if (hasGate && gate !== null) {
+                gate.investValue = gate.investValue.minus(newcustomer.investValue);
+                gate.investCount = gate.investCount.plus(ONE_BI);
         }
 
-        let gate = Gate.load(newcustomer.lastgate as string);
-        if (gate === null) {
-                gate = new Gate(
-                        newcustomer.lastgate as string
-                );
-                gate.tradeValue = ZERO_BI;
-                gate.investValue = ZERO_BI;
-                gate.disinvestValue = ZERO_BI;
-                gate.tradeCount = ZERO_BI;
-                gate.investCount = ZERO_BI;
-                gate.disinvestCount = ZERO_BI;
-                gate.totalprofitvalue = ZERO_BI;
-                gate.totalcommissionvalue = ZERO_BI;
-                gate.referralnum = ZERO_BI;
-                gate.stakettsvalue = ZERO_BI;
-                gate.stakettscontruct = ZERO_BI;
-                gate.getfromstake = ZERO_BI;
-        }
-        gate.investValue = gate.investValue.minus(newcustomer.investValue);
-        gate.investCount = gate.investCount.plus(ONE_BI);
+        let referKey = newcustomer.refer as string;
+        let hasRefer = referKey != "#";
+        let refer = hasRefer ? getOrCreateRefer(referKey) : null;
 
-        let refer = Refer.load(newcustomer.refer as string);
-        if (refer === null) {
-                refer = new Refer(
-                        newcustomer.refer as string
-                );
-                refer.tradeValue = ZERO_BI;
-                refer.investValue = ZERO_BI;
-                refer.disinvestValue = ZERO_BI;
-                refer.tradeCount = ZERO_BI;
-                refer.investCount = ZERO_BI;
-                refer.disinvestCount = ZERO_BI;
-                refer.totalprofitvalue = ZERO_BI;
-                refer.totalcommissionvalue = ZERO_BI;
-                refer.referralnum = ZERO_BI;
-                refer.stakettsvalue = ZERO_BI;
-                refer.stakettscontruct = ZERO_BI;
-                refer.getfromstake = ZERO_BI;
+        if (hasRefer && refer !== null) {
+                refer.lastoptime = event.block.timestamp;
+                refer.investValue = refer.investValue.minus(newcustomer.investValue);
+                refer.investCount = refer.investCount.plus(ONE_BI);
         }
 
-
-        refer.lastoptime = event.block.timestamp;
-
-        refer.investValue = refer.investValue.minus(newcustomer.investValue);
-        refer.investCount = refer.investCount.plus(ONE_BI);
-
+        // H01 rationale:
+        // initGood is dual-asset bootstrap (normal good + value good).
+        // We intentionally account investValue twice to keep the same "both legs counted" metric
+        // used by totalInvestValue/transvalue in this handler.
         newcustomer.investValue = newcustomer.investValue.plus(trade_value);
         newcustomer.investValue = newcustomer.investValue.plus(trade_value);
         newcustomer.investCount = newcustomer.investCount.plus(ONE_BI);
@@ -575,20 +495,20 @@ export function handle_e_initGood(event: e_initGood): void {
         newcustomer.stakettscontruct = newcustomer.stakettscontruct.plus(stakecontruct);
         newcustomer.save();
 
-        gate.investValue = gate.investValue.plus(newcustomer.investValue);
+        if (hasGate && gate !== null) {
+                gate.investValue = gate.investValue.plus(newcustomer.investValue);
+                gate.stakettsvalue = gate.stakettsvalue.plus(trade_value.times(bigInt.fromString('2')));
+                gate.stakettscontruct = gate.stakettscontruct.plus(stakecontruct);
+                gate.lastoptime = event.block.timestamp;
+                gate.save();
+                log_GateData(gate, modifiedTime);
+        }
 
-        gate.stakettsvalue = gate.stakettsvalue.plus(trade_value.times(bigInt.fromString('2')));
-        gate.stakettscontruct = gate.stakettscontruct.plus(stakecontruct);
-        gate.lastoptime = event.block.timestamp;
-        gate.save();
-
-
-
-        log_GateData(gate, modifiedTime);
-
-        refer.investValue = refer.investValue.plus(newcustomer.investValue);
-        refer.save();
-        log_ReferData(refer, modifiedTime);
+        if (hasRefer && refer !== null) {
+                refer.investValue = refer.investValue.plus(newcustomer.investValue);
+                refer.save();
+                log_ReferData(refer, modifiedTime);
+        }
 
         log_CustomerData(newcustomer, modifiedTime);
         let normal_good = GoodState.load(normalgoodid);
@@ -797,6 +717,9 @@ export function handle_e_initGood(event: e_initGood): void {
         tx.togoodActualQuantity = trade_valuegood_quantity;
         tx.excuter = event.transaction.from.toHexString();
         tx.save();
+        // H01 rationale:
+        // for dual-good init, market aggregate uses double-leg accounting:
+        // one increment for normal side, one increment for value side.
         marketstate.totalInvestValue =
                 marketstate.totalInvestValue.plus(trade_value);
         marketstate.totalInvestValue =
@@ -959,74 +882,28 @@ export function handle_e_buyGood(event: e_buyGood): void {
         to_good.modifiedTime = event.block.timestamp;
         to_good.txCount = to_good.txCount.plus(ONE_BI);
         to_good.save();
-        let newcustomer = Customer.load(event.params._trader.toHexString());
-        if (newcustomer === null) {
-                newcustomer = new Customer(
-                        event.params._trader.toHexString()
-                );
-                newcustomer.refer = "#";
-                newcustomer.tradeValue = ZERO_BI;
-                newcustomer.investValue = ZERO_BI;
-                newcustomer.disinvestValue = ZERO_BI;
-                newcustomer.tradeCount = ZERO_BI;
-                newcustomer.investCount = ZERO_BI;
-                newcustomer.disinvestCount = ZERO_BI;
-                newcustomer.userConfig = ZERO_BI;
-                marketstate.userCount = marketstate.userCount.plus(ONE_BI);
-                newcustomer.customerno = marketstate.userCount;
-                newcustomer.totalprofitvalue = ZERO_BI;
-                newcustomer.totalcommissionvalue = ZERO_BI;
-                newcustomer.referralnum = ZERO_BI;
-                newcustomer.getfromstake = ZERO_BI;
-                newcustomer.stakettsvalue = ZERO_BI;
-                newcustomer.stakettscontruct = ZERO_BI;
-                newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
-                newcustomer.publicsaletts = ZERO_BI;
+        let newcustomer = getOrCreateCustomer(
+                event.params._trader.toHexString(),
+                marketstate
+        );
+
+        let gateKey = newcustomer.lastgate as string;
+        let hasGate = gateKey != "#";
+        let gate = hasGate ? getOrCreateGate(gateKey) : null;
+        if (hasGate && gate !== null) {
+                gate.tradeValue = gate.tradeValue.minus(newcustomer.tradeValue);
+                gate.tradeCount = gate.tradeCount.plus(ONE_BI);
         }
 
-        let gate = Gate.load(newcustomer.lastgate as string);
-        if (gate === null) {
-                gate = new Gate(
-                        newcustomer.lastgate as string
-                );
-                gate.tradeValue = ZERO_BI;
-                gate.investValue = ZERO_BI;
-                gate.disinvestValue = ZERO_BI;
-                gate.tradeCount = ZERO_BI;
-                gate.investCount = ZERO_BI;
-                gate.disinvestCount = ZERO_BI;
-                gate.totalprofitvalue = ZERO_BI;
-                gate.totalcommissionvalue = ZERO_BI;
-                gate.referralnum = ZERO_BI;
-                gate.stakettsvalue = ZERO_BI;
-                gate.stakettscontruct = ZERO_BI;
-                gate.getfromstake = ZERO_BI;
-        }
-        gate.tradeValue = gate.tradeValue.minus(newcustomer.tradeValue);
-        gate.tradeCount = gate.tradeCount.plus(ONE_BI);
+        let referKey = newcustomer.refer as string;
+        let hasRefer = referKey != "#";
+        let refer = hasRefer ? getOrCreateRefer(referKey) : null;
 
-        let refer = Refer.load(newcustomer.refer as string);
-        if (refer === null) {
-                refer = new Refer(
-                        newcustomer.refer as string
-                );
-                refer.tradeValue = ZERO_BI;
-                refer.investValue = ZERO_BI;
-                refer.disinvestValue = ZERO_BI;
-                refer.tradeCount = ZERO_BI;
-                refer.investCount = ZERO_BI;
-                refer.disinvestCount = ZERO_BI;
-                refer.totalprofitvalue = ZERO_BI;
-                refer.totalcommissionvalue = ZERO_BI;
-                refer.referralnum = ZERO_BI;
-                refer.stakettsvalue = ZERO_BI;
-                refer.stakettscontruct = ZERO_BI;
-                refer.getfromstake = ZERO_BI;
+        if (hasRefer && refer !== null) {
+                refer.lastoptime = event.block.timestamp;
+                refer.tradeValue = refer.tradeValue.minus(newcustomer.tradeValue);
+                refer.tradeCount = refer.tradeCount.plus(ONE_BI);
         }
-
-        refer.lastoptime = event.block.timestamp;
-        refer.tradeValue = refer.tradeValue.minus(newcustomer.tradeValue);
-        refer.tradeCount = refer.tradeCount.plus(ONE_BI);
 
         newcustomer.tradeValue =
                 newcustomer.tradeValue.plus(event.params.swapvalue);
@@ -1034,17 +911,19 @@ export function handle_e_buyGood(event: e_buyGood): void {
         newcustomer.tradeCount = newcustomer.tradeCount.plus(ONE_BI);
         newcustomer.lastoptime = event.block.timestamp;
         newcustomer.save();
-        gate.tradeValue = gate.tradeValue.plus(newcustomer.tradeValue);
+        if (hasGate && gate !== null) {
+                gate.tradeValue = gate.tradeValue.plus(newcustomer.tradeValue);
+                gate.lastoptime = event.block.timestamp;
+                gate.save();
+                log_GateData(gate, event.block.timestamp);
+        }
 
-        gate.lastoptime = event.block.timestamp;
-        gate.save();
-        log_GateData(gate, event.block.timestamp);
-
-        refer.tradeValue = refer.tradeValue.plus(newcustomer.tradeValue);
-        refer.lastoptime = event.block.timestamp;
-
-        refer.save();
-        log_ReferData(refer, event.block.timestamp);
+        if (hasRefer && refer !== null) {
+                refer.tradeValue = refer.tradeValue.plus(newcustomer.tradeValue);
+                refer.lastoptime = event.block.timestamp;
+                refer.save();
+                log_ReferData(refer, event.block.timestamp);
+        }
 
         log_CustomerData(newcustomer, event.block.timestamp);
         marketstate.txCount = marketstate.txCount.plus(ONE_BI);
@@ -1236,90 +1115,46 @@ export function handle_e_paygood(event: e_payGood): void {
                 to_good.modifiedTime = event.block.timestamp;
                 to_good.txCount = to_good.txCount.plus(ONE_BI);
                 to_good.save();
-                let newcustomer = Customer.load(event.transaction.from.toHexString());
-                if (newcustomer === null) {
-                        newcustomer = new Customer(
-                                event.transaction.from.toHexString()
-                        );
-                        newcustomer.refer = "#";
-                        newcustomer.tradeValue = ZERO_BI;
-                        newcustomer.investValue = ZERO_BI;
-                        newcustomer.disinvestValue = ZERO_BI;
-                        newcustomer.tradeCount = ZERO_BI;
-                        newcustomer.investCount = ZERO_BI;
-                        newcustomer.disinvestCount = ZERO_BI;
-                        newcustomer.userConfig = ZERO_BI;
-                        marketstate.userCount = marketstate.userCount.plus(ONE_BI);
-                        newcustomer.customerno = marketstate.userCount;
-                        newcustomer.totalprofitvalue = ZERO_BI;
-                        newcustomer.totalcommissionvalue = ZERO_BI;
-                        newcustomer.referralnum = ZERO_BI;
-                        newcustomer.getfromstake = ZERO_BI;
-                        newcustomer.stakettsvalue = ZERO_BI;
-                        newcustomer.stakettscontruct = ZERO_BI;
-                        newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
-                        newcustomer.publicsaletts = ZERO_BI;
+                let newcustomer = getOrCreateCustomer(
+                        event.params._trader.toHexString(),
+                        marketstate
+                );
+
+                let gateKey = newcustomer.lastgate as string;
+                let hasGate = gateKey != "#";
+                let gate = hasGate ? getOrCreateGate(gateKey) : null;
+                if (hasGate && gate !== null) {
+                        gate.tradeValue = gate.tradeValue.minus(newcustomer.tradeValue);
+                        gate.tradeCount = gate.tradeCount.plus(ONE_BI);
                 }
 
-                let gate = Gate.load(newcustomer.lastgate as string);
-                if (gate === null) {
-                        gate = new Gate(
-                                newcustomer.lastgate as string
-                        );
-                        gate.tradeValue = ZERO_BI;
-                        gate.investValue = ZERO_BI;
-                        gate.disinvestValue = ZERO_BI;
-                        gate.tradeCount = ZERO_BI;
-                        gate.investCount = ZERO_BI;
-                        gate.disinvestCount = ZERO_BI;
-                        gate.totalprofitvalue = ZERO_BI;
-                        gate.totalcommissionvalue = ZERO_BI;
-                        gate.referralnum = ZERO_BI;
-                        gate.stakettsvalue = ZERO_BI;
-                        gate.stakettscontruct = ZERO_BI;
-                        gate.getfromstake = ZERO_BI;
-                }
-                gate.tradeValue = gate.tradeValue.minus(newcustomer.tradeValue);
-                gate.tradeCount = gate.tradeCount.plus(ONE_BI);
+                let referKey = newcustomer.refer as string;
+                let hasRefer = referKey != "#";
+                let refer = hasRefer ? getOrCreateRefer(referKey) : null;
 
-                let refer = Refer.load(newcustomer.refer as string);
-                if (refer === null) {
-                        refer = new Refer(
-                                newcustomer.refer as string
-                        );
-                        refer.tradeValue = ZERO_BI;
-                        refer.investValue = ZERO_BI;
-                        refer.disinvestValue = ZERO_BI;
-                        refer.tradeCount = ZERO_BI;
-                        refer.investCount = ZERO_BI;
-                        refer.disinvestCount = ZERO_BI;
-                        refer.totalprofitvalue = ZERO_BI;
-                        refer.totalcommissionvalue = ZERO_BI;
-                        refer.referralnum = ZERO_BI;
-                        refer.stakettsvalue = ZERO_BI;
-                        refer.stakettscontruct = ZERO_BI;
-                        refer.getfromstake = ZERO_BI;
+                if (hasRefer && refer !== null) {
+                        refer.lastoptime = event.block.timestamp;
+                        refer.tradeValue = refer.tradeValue.minus(newcustomer.tradeValue);
+                        refer.tradeCount = refer.tradeCount.plus(ONE_BI);
                 }
-
-                refer.lastoptime = event.block.timestamp;
-                refer.tradeValue = refer.tradeValue.minus(newcustomer.tradeValue);
-                refer.tradeCount = refer.tradeCount.plus(ONE_BI);
 
                 newcustomer.tradeValue = event.params.swapvalue.div(BI_128);
                 newcustomer.tradeCount = newcustomer.tradeCount.plus(ONE_BI);
                 newcustomer.lastoptime = event.block.timestamp;
                 newcustomer.save();
-                gate.tradeValue = gate.tradeValue.plus(newcustomer.tradeValue);
+                if (hasGate && gate !== null) {
+                        gate.tradeValue = gate.tradeValue.plus(newcustomer.tradeValue);
+                        gate.lastoptime = event.block.timestamp;
+                        gate.save();
+                        log_GateData(gate, event.block.timestamp);
+                }
 
-                gate.lastoptime = event.block.timestamp;
-                gate.save();
-                log_GateData(gate, event.block.timestamp);
-
-                refer.tradeValue = refer.tradeValue.plus(newcustomer.tradeValue);
-                refer.lastoptime = event.block.timestamp;
-
-                refer.save();
-                log_ReferData(refer, event.block.timestamp);
+                if (hasRefer && refer !== null) {
+                        refer.tradeValue = refer.tradeValue.plus(newcustomer.tradeValue);
+                        refer.lastoptime = event.block.timestamp;
+                        refer.save();
+                        log_ReferData(refer, event.block.timestamp);
+                }
 
                 log_CustomerData(newcustomer, event.block.timestamp);
                 marketstate.txCount = marketstate.txCount.plus(ONE_BI);
@@ -1559,78 +1394,26 @@ export function handle_e_investGood(event: e_investGood): void {
                 marketstate.totalTradeValue = ZERO_BI;
         }
         if (valuegoodid != ADDRESS_ZERO) {
-                let newcustomer = Customer.load(
-                        event.transaction.from.toHexString()
+                let newcustomer = getOrCreateCustomer(
+                        event.transaction.from.toHexString(),
+                        marketstate
                 );
-                if (newcustomer === null) {
-                        newcustomer = new Customer(
-                                event.transaction.from.toHexString()
-                        );
-                        newcustomer.refer = "#";
-                        newcustomer.tradeValue = ZERO_BI;
-                        newcustomer.investValue = ZERO_BI;
-                        newcustomer.disinvestValue = ZERO_BI;
-                        newcustomer.tradeCount = ZERO_BI;
-                        newcustomer.investCount = ZERO_BI;
-                        newcustomer.disinvestCount = ZERO_BI;
-                        newcustomer.userConfig = ZERO_BI;
-                        marketstate.userCount =
-                                marketstate.userCount.plus(ONE_BI);
-                        newcustomer.customerno = marketstate.userCount;
-                        newcustomer.totalprofitvalue = ZERO_BI;
-                        newcustomer.totalcommissionvalue = ZERO_BI;
-                        newcustomer.referralnum = ZERO_BI;
-                        newcustomer.getfromstake = ZERO_BI;
-                        newcustomer.stakettsvalue = ZERO_BI;
-                        newcustomer.stakettscontruct = ZERO_BI;
-                        newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
-                        newcustomer.publicsaletts = ZERO_BI;
+
+                let referKey = newcustomer.refer as string;
+                let hasRefer = referKey != "#";
+                let refer = hasRefer ? getOrCreateRefer(referKey) : null;
+                if (hasRefer && refer !== null) {
+                        refer.investValue = refer.investValue.minus(newcustomer.investValue);
+                        refer.investCount = refer.investCount.plus(ONE_BI);
                 }
 
-                let refer = Refer.load(newcustomer.refer as string);
-                if (refer === null) {
-                        refer = new Refer(
-                                newcustomer.refer as string
-                        );
-                        refer.tradeValue = ZERO_BI;
-                        refer.investValue = ZERO_BI;
-                        refer.disinvestValue = ZERO_BI;
-                        refer.tradeCount = ZERO_BI;
-                        refer.investCount = ZERO_BI;
-                        refer.disinvestCount = ZERO_BI;
-                        refer.totalprofitvalue = ZERO_BI;
-                        refer.totalcommissionvalue = ZERO_BI;
-                        refer.referralnum = ZERO_BI;
-                        refer.stakettsvalue = ZERO_BI;
-                        refer.stakettscontruct = ZERO_BI;
-                        refer.getfromstake = ZERO_BI;
+                let gateKey = newcustomer.lastgate as string;
+                let hasGate = gateKey != "#";
+                let gate = hasGate ? getOrCreateGate(gateKey) : null;
+                if (hasGate && gate !== null) {
+                        gate.investValue = gate.investValue.minus(newcustomer.investValue);
+                        gate.investCount = gate.investCount.plus(ONE_BI);
                 }
-
-                refer.investValue = refer.investValue.minus(newcustomer.investValue);
-                refer.investCount = refer.investCount.plus(ONE_BI);
-
-
-                let gate = Gate.load(newcustomer.lastgate as string);
-                if (gate === null) {
-                        gate = new Gate(
-                                newcustomer.lastgate as string
-                        );
-                        gate.tradeValue = ZERO_BI;
-                        gate.investValue = ZERO_BI;
-                        gate.disinvestValue = ZERO_BI;
-                        gate.tradeCount = ZERO_BI;
-                        gate.investCount = ZERO_BI;
-                        gate.disinvestCount = ZERO_BI;
-                        gate.totalprofitvalue = ZERO_BI;
-                        gate.totalcommissionvalue = ZERO_BI;
-                        gate.referralnum = ZERO_BI;
-                        gate.stakettsvalue = ZERO_BI;
-                        gate.stakettscontruct = ZERO_BI;
-                        gate.getfromstake = ZERO_BI;
-                }
-
-                gate.investValue = gate.investValue.minus(newcustomer.investValue);
-                gate.investCount = gate.investCount.plus(ONE_BI);
 
                 newcustomer.investValue = newcustomer.investValue.minus(
                         proof.proofValue
@@ -1647,16 +1430,17 @@ export function handle_e_investGood(event: e_investGood): void {
 
                 newcustomer.save();
 
-                gate.investValue = gate.investValue.plus(newcustomer.investValue);
+                if (hasGate && gate !== null) {
+                        gate.investValue = gate.investValue.plus(newcustomer.investValue);
+                        gate.lastoptime = event.block.timestamp;
+                        gate.save();
+                }
 
-                gate.lastoptime = event.block.timestamp;
-                gate.save();
-
-                refer.investValue = refer.investValue.minus(newcustomer.investValue);
-
-                refer.lastoptime = event.block.timestamp;
-
-                refer.save()
+                if (hasRefer && refer !== null) {
+                        refer.investValue = refer.investValue.minus(newcustomer.investValue);
+                        refer.lastoptime = event.block.timestamp;
+                        refer.save();
+                }
 
                 log_CustomerData(newcustomer, event.block.timestamp);
                 let value_good = GoodState.load(valuegoodid);
@@ -1786,8 +1570,19 @@ export function handle_e_investGood(event: e_investGood): void {
                 tx.recipent = event.params._trader.toHexString();
                 tx.hash = event.transaction.hash.toHexString();
                 tx.transActualValue = event.params._value.mod(BI_128).times(BigInt.fromString("2"));
-                tx.fromgoodActualQuanity = event.params._invest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
-                tx.togoodActualQuantity = event.params._valueinvest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
+                let investValueDenominator = event.params._value.div(BI_128);
+                tx.fromgoodActualQuanity = safeDiv(
+                        event.params._invest
+                                .mod(BI_128)
+                                .times(event.params._value.mod(BI_128)),
+                        investValueDenominator
+                );
+                tx.togoodActualQuantity = safeDiv(
+                        event.params._valueinvest
+                                .mod(BI_128)
+                                .times(event.params._value.mod(BI_128)),
+                        investValueDenominator
+                );
                 tx.excuter = event.transaction.from.toHexString();
                 tx.save();
 
@@ -1796,78 +1591,26 @@ export function handle_e_investGood(event: e_investGood): void {
                 log_GoodData(normal_good, event.block.timestamp);
                 log_MarketData(marketstate, event.block.timestamp);
         } else {
-                let newcustomer = Customer.load(
-                        event.transaction.from.toHexString()
+                let newcustomer = getOrCreateCustomer(
+                        event.transaction.from.toHexString(),
+                        marketstate
                 );
-                if (newcustomer === null) {
-                        newcustomer = new Customer(
-                                event.transaction.from.toHexString()
-                        );
-                        newcustomer.refer = "#";
-                        newcustomer.tradeValue = ZERO_BI;
-                        newcustomer.investValue = ZERO_BI;
-                        newcustomer.disinvestValue = ZERO_BI;
-                        newcustomer.tradeCount = ZERO_BI;
-                        newcustomer.investCount = ZERO_BI;
-                        newcustomer.disinvestCount = ZERO_BI;
-                        newcustomer.userConfig = ZERO_BI;
-                        marketstate.userCount =
-                                marketstate.userCount.plus(ONE_BI);
-                        newcustomer.customerno = marketstate.userCount;
-                        newcustomer.totalprofitvalue = ZERO_BI;
-                        newcustomer.totalcommissionvalue = ZERO_BI;
-                        newcustomer.referralnum = ZERO_BI;
-                        newcustomer.getfromstake = ZERO_BI;
-                        newcustomer.stakettsvalue = ZERO_BI;
-                        newcustomer.stakettscontruct = ZERO_BI;
-                        newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
-                        newcustomer.publicsaletts = ZERO_BI;
+
+                let referKey = newcustomer.refer as string;
+                let hasRefer = referKey != "#";
+                let refer = hasRefer ? getOrCreateRefer(referKey) : null;
+                if (hasRefer && refer !== null) {
+                        refer.investValue = refer.investValue.minus(newcustomer.investValue);
+                        refer.investCount = refer.investCount.plus(ONE_BI);
                 }
 
-                let refer = Refer.load(newcustomer.refer as string);
-                if (refer === null) {
-                        refer = new Refer(
-                                newcustomer.refer as string
-                        );
-                        refer.tradeValue = ZERO_BI;
-                        refer.investValue = ZERO_BI;
-                        refer.disinvestValue = ZERO_BI;
-                        refer.tradeCount = ZERO_BI;
-                        refer.investCount = ZERO_BI;
-                        refer.disinvestCount = ZERO_BI;
-                        refer.totalprofitvalue = ZERO_BI;
-                        refer.totalcommissionvalue = ZERO_BI;
-                        refer.referralnum = ZERO_BI;
-                        refer.stakettsvalue = ZERO_BI;
-                        refer.stakettscontruct = ZERO_BI;
-                        refer.getfromstake = ZERO_BI;
+                let gateKey = newcustomer.lastgate as string;
+                let hasGate = gateKey != "#";
+                let gate = hasGate ? getOrCreateGate(gateKey) : null;
+                if (hasGate && gate !== null) {
+                        gate.investValue = gate.investValue.minus(newcustomer.investValue);
+                        gate.investCount = gate.investCount.plus(ONE_BI);
                 }
-
-                refer.investValue = refer.investValue.minus(newcustomer.investValue);
-                refer.investCount = refer.investCount.plus(ONE_BI);
-
-
-                let gate = Gate.load(newcustomer.lastgate as string);
-                if (gate === null) {
-                        gate = new Gate(
-                                newcustomer.lastgate as string
-                        );
-                        gate.tradeValue = ZERO_BI;
-                        gate.investValue = ZERO_BI;
-                        gate.disinvestValue = ZERO_BI;
-                        gate.tradeCount = ZERO_BI;
-                        gate.investCount = ZERO_BI;
-                        gate.disinvestCount = ZERO_BI;
-                        gate.totalprofitvalue = ZERO_BI;
-                        gate.totalcommissionvalue = ZERO_BI;
-                        gate.referralnum = ZERO_BI;
-                        gate.stakettsvalue = ZERO_BI;
-                        gate.stakettscontruct = ZERO_BI;
-                        gate.getfromstake = ZERO_BI;
-                }
-
-                gate.investValue = gate.investValue.minus(newcustomer.investValue);
-                gate.investCount = gate.investCount.plus(ONE_BI);
 
                 newcustomer.investValue = newcustomer.investValue.minus(
                         proof.proofValue
@@ -1878,16 +1621,18 @@ export function handle_e_investGood(event: e_investGood): void {
                 newcustomer.lastoptime = event.block.timestamp;
 
                 newcustomer.save();
-                gate.investValue = gate.investValue.plus(newcustomer.investValue);
+                if (hasGate && gate !== null) {
+                        gate.investValue = gate.investValue.plus(newcustomer.investValue);
+                        gate.lastoptime = event.block.timestamp;
+                        gate.save();
+                }
 
-                gate.lastoptime = event.block.timestamp;
-                gate.save();
+                if (hasRefer && refer !== null) {
+                        refer.investValue = refer.investValue.plus(newcustomer.investValue);
 
-                refer.investValue = refer.investValue.plus(newcustomer.investValue);
-
-                refer.lastoptime = event.block.timestamp;
-
-                refer.save()
+                        refer.lastoptime = event.block.timestamp;
+                        refer.save();
+                }
 
                 log_CustomerData(newcustomer, event.block.timestamp);
                 marketstate.totalInvestValue =
@@ -1924,7 +1669,13 @@ export function handle_e_investGood(event: e_investGood): void {
                 tx.recipent = event.params._trader.toHexString();
                 tx.hash = event.transaction.hash.toHexString();
                 tx.transActualValue = event.params._value.mod(BI_128);
-                tx.fromgoodActualQuanity = event.params._invest.mod(BI_128).times(event.params._value.mod(BI_128)).div(event.params._value.div(BI_128));
+                let singleInvestValueDenominator = event.params._value.div(BI_128);
+                tx.fromgoodActualQuanity = safeDiv(
+                        event.params._invest
+                                .mod(BI_128)
+                                .times(event.params._value.mod(BI_128)),
+                        singleInvestValueDenominator
+                );
                 tx.excuter = event.transaction.from.toHexString();
 
                 tx.save();
@@ -2150,6 +1901,9 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 value_good.modifiedTime = event.block.timestamp;
                 value_good.txCount = value_good.txCount.plus(ONE_BI);
                 value_good.save();
+                // H01 rationale:
+                // dual-good disinvest mirrors dual-good invest accounting.
+                // We count both legs in aggregate disinvest value.
                 marketstate.totalDisinvestValue =
                         marketstate.totalDisinvestValue.plus(devestvalue);
                 marketstate.totalDisinvestValue =
@@ -2205,84 +1959,34 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
 
                 }
                 proof.save();
-                let newcustomer = Customer.load(
-                        event.transaction.from.toHexString()
+                let newcustomer = getOrCreateCustomer(
+                        event.transaction.from.toHexString(),
+                        marketstate
                 );
-                if (newcustomer === null) {
-                        newcustomer = new Customer(
-                                event.transaction.from.toHexString()
-                        );
-                        newcustomer.refer = "#";
-                        newcustomer.tradeValue = ZERO_BI;
-                        newcustomer.investValue = ZERO_BI;
-                        newcustomer.disinvestValue = ZERO_BI;
-                        newcustomer.tradeCount = ZERO_BI;
-                        newcustomer.investCount = ZERO_BI;
-                        newcustomer.disinvestCount = ZERO_BI;
-                        newcustomer.userConfig = ZERO_BI;
-                        marketstate.userCount =
-                                marketstate.userCount.plus(ONE_BI);
-                        newcustomer.customerno = marketstate.userCount;
-                        newcustomer.totalprofitvalue = ZERO_BI;
-                        newcustomer.totalcommissionvalue = ZERO_BI;
-                        newcustomer.referralnum = ZERO_BI;
-                        newcustomer.getfromstake = ZERO_BI;
-                        newcustomer.stakettsvalue = ZERO_BI;
-                        newcustomer.stakettscontruct = ZERO_BI;
-                        newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
-                        newcustomer.publicsaletts = ZERO_BI;
-                }
 
                 newcustomer.lastgate = event.params._gate.toHexString();
 
-                let refer = Refer.load(newcustomer.refer as string);
-                if (refer === null) {
-                        refer = new Refer(
-                                newcustomer.refer as string
-                        );
-                        refer.tradeValue = ZERO_BI;
-                        refer.investValue = ZERO_BI;
-                        refer.disinvestValue = ZERO_BI;
-                        refer.tradeCount = ZERO_BI;
-                        refer.investCount = ZERO_BI;
-                        refer.disinvestCount = ZERO_BI;
-                        refer.totalprofitvalue = ZERO_BI;
-                        refer.totalcommissionvalue = ZERO_BI;
-                        refer.referralnum = ZERO_BI;
-                        refer.stakettsvalue = ZERO_BI;
-                        refer.stakettscontruct = ZERO_BI;
-                        refer.getfromstake = ZERO_BI;
+                let referKey = newcustomer.refer as string;
+                let hasRefer = referKey != "#";
+                let refer = hasRefer ? getOrCreateRefer(referKey) : null;
+
+                if (hasRefer && refer !== null) {
+                        refer.getfromstake = refer.getfromstake.minus(newcustomer.getfromstake);
+                        refer.disinvestValue = refer.disinvestValue.minus(newcustomer.disinvestValue);
+                        refer.disinvestCount = refer.disinvestCount.plus(ONE_BI);
+                        refer.totalprofitvalue = refer.totalprofitvalue.minus(newcustomer.totalprofitvalue);
                 }
 
-                refer.getfromstake = refer.getfromstake.minus(newcustomer.getfromstake);
-                refer.disinvestValue = refer.disinvestValue.minus(newcustomer.disinvestValue);
-                refer.disinvestCount = refer.disinvestCount.plus(ONE_BI);
-                refer.totalprofitvalue = refer.totalprofitvalue.minus(newcustomer.totalprofitvalue);
+                let gateKey = newcustomer.lastgate as string;
+                let hasGate = gateKey != "#";
+                let gate = hasGate ? getOrCreateGate(gateKey) : null;
 
-
-                let gate = Gate.load(newcustomer.lastgate as string);
-                if (gate === null) {
-                        gate = new Gate(
-                                newcustomer.lastgate as string
-                        );
-                        gate.tradeValue = ZERO_BI;
-                        gate.investValue = ZERO_BI;
-                        gate.disinvestValue = ZERO_BI;
-                        gate.tradeCount = ZERO_BI;
-                        gate.investCount = ZERO_BI;
-                        gate.disinvestCount = ZERO_BI;
-                        gate.totalprofitvalue = ZERO_BI;
-                        gate.totalcommissionvalue = ZERO_BI;
-                        gate.referralnum = ZERO_BI;
-                        gate.stakettsvalue = ZERO_BI;
-                        gate.stakettscontruct = ZERO_BI;
-                        gate.getfromstake = ZERO_BI;
+                if (hasGate && gate !== null) {
+                        gate.getfromstake = gate.getfromstake.minus(newcustomer.getfromstake);
+                        gate.disinvestValue = gate.disinvestValue.minus(newcustomer.disinvestValue);
+                        gate.disinvestCount = gate.disinvestCount.plus(ONE_BI);
+                        gate.totalprofitvalue = gate.totalprofitvalue.minus(newcustomer.totalprofitvalue);
                 }
-
-                gate.getfromstake = gate.getfromstake.minus(newcustomer.getfromstake);
-                gate.disinvestValue = gate.disinvestValue.minus(newcustomer.disinvestValue);
-                gate.disinvestCount = gate.disinvestCount.plus(ONE_BI);
-                gate.totalprofitvalue = gate.totalprofitvalue.minus(newcustomer.totalprofitvalue);
 
                 newcustomer.getfromstake =
                         newcustomer.getfromstake.plus(tts_stakeproof);
@@ -2292,116 +1996,73 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                         newcustomer.disinvestCount.plus(ONE_BI);
                 newcustomer.totalprofitvalue =
                         newcustomer.totalprofitvalue.plus(
-                                normal_good.currentValue
-                                        .times(event.params._normalprofit.div(BI_128))
-                                        .div(normal_good.currentQuantity)
+                                safeDiv(
+                                        normal_good.currentValue.times(
+                                                event.params._normalprofit.div(BI_128)
+                                        ),
+                                        normal_good.currentQuantity
+                                )
                         );
                 newcustomer.totalprofitvalue =
                         newcustomer.totalprofitvalue.plus(
-                                value_good.currentValue
-                                        .times(event.params._valueprofit.div(BI_128))
-                                        .div(value_good.currentQuantity)
+                                safeDiv(
+                                        value_good.currentValue.times(
+                                                event.params._valueprofit.div(BI_128)
+                                        ),
+                                        value_good.currentQuantity
+                                )
                         );
                 newcustomer.lastoptime = event.block.timestamp;
                 newcustomer.lastgate = event.params._gate.toHexString();
                 newcustomer.save();
-                refer.getfromstake = refer.getfromstake.plus(newcustomer.getfromstake);
-                refer.disinvestValue = refer.disinvestValue.plus(newcustomer.disinvestValue);
-                refer.totalprofitvalue = refer.totalprofitvalue.plus(newcustomer.totalprofitvalue);
-
-                refer.lastoptime = event.block.timestamp;
-                refer.save();
-                log_ReferData(refer, event.block.timestamp);
-                gate.getfromstake = gate.getfromstake.plus(newcustomer.getfromstake);
-                gate.disinvestValue = gate.disinvestValue.plus(newcustomer.disinvestValue);
-                gate.totalprofitvalue = gate.totalprofitvalue.plus(newcustomer.totalprofitvalue);
-
-                gate.lastoptime = event.block.timestamp;
-                gate.save();
-
-                log_GateData(gate, event.block.timestamp);
+                if (hasRefer && refer !== null) {
+                        refer.getfromstake = refer.getfromstake.plus(newcustomer.getfromstake);
+                        refer.disinvestValue = refer.disinvestValue.plus(newcustomer.disinvestValue);
+                        refer.totalprofitvalue = refer.totalprofitvalue.plus(newcustomer.totalprofitvalue);
+                        refer.lastoptime = event.block.timestamp;
+                        refer.save();
+                        log_ReferData(refer, event.block.timestamp);
+                }
+                if (hasGate && gate !== null) {
+                        gate.getfromstake = gate.getfromstake.plus(newcustomer.getfromstake);
+                        gate.disinvestValue = gate.disinvestValue.plus(newcustomer.disinvestValue);
+                        gate.totalprofitvalue = gate.totalprofitvalue.plus(newcustomer.totalprofitvalue);
+                        gate.lastoptime = event.block.timestamp;
+                        gate.save();
+                        log_GateData(gate, event.block.timestamp);
+                }
                 log_CustomerData(newcustomer, event.block.timestamp);
                 log_GoodData(value_good, event.block.timestamp);
                 log_GoodData(normal_good, event.block.timestamp);
                 log_MarketData(marketstate, event.block.timestamp);
         } else {
-                let newcustomer = Customer.load(
-                        event.transaction.from.toHexString()
+                let newcustomer = getOrCreateCustomer(
+                        event.transaction.from.toHexString(),
+                        marketstate
                 );
-                if (newcustomer === null) {
-                        newcustomer = new Customer(
-                                event.transaction.from.toHexString()
-                        );
-                        newcustomer.refer = "#";
-                        newcustomer.tradeValue = ZERO_BI;
-                        newcustomer.investValue = ZERO_BI;
-                        newcustomer.disinvestValue = ZERO_BI;
-                        newcustomer.tradeCount = ZERO_BI;
-                        newcustomer.investCount = ZERO_BI;
-                        newcustomer.disinvestCount = ZERO_BI;
-                        newcustomer.userConfig = ZERO_BI;
-                        marketstate.userCount =
-                                marketstate.userCount.plus(ONE_BI);
-                        newcustomer.customerno = marketstate.userCount;
-                        newcustomer.totalprofitvalue = ZERO_BI;
-                        newcustomer.totalcommissionvalue = ZERO_BI;
-                        newcustomer.referralnum = ZERO_BI;
-                        newcustomer.getfromstake = ZERO_BI;
-                        newcustomer.stakettsvalue = ZERO_BI;
-                        newcustomer.stakettscontruct = ZERO_BI;
-                        newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
-                        newcustomer.publicsaletts = ZERO_BI;
-                }
 
                 newcustomer.lastgate = event.params._gate.toHexString();
-                let refer = Refer.load(newcustomer.refer as string);
-                if (refer === null) {
-                        refer = new Refer(
-                                newcustomer.refer as string
-                        );
-                        refer.tradeValue = ZERO_BI;
-                        refer.investValue = ZERO_BI;
-                        refer.disinvestValue = ZERO_BI;
-                        refer.tradeCount = ZERO_BI;
-                        refer.investCount = ZERO_BI;
-                        refer.disinvestCount = ZERO_BI;
-                        refer.totalprofitvalue = ZERO_BI;
-                        refer.totalcommissionvalue = ZERO_BI;
-                        refer.referralnum = ZERO_BI;
-                        refer.stakettsvalue = ZERO_BI;
-                        refer.stakettscontruct = ZERO_BI;
-                        refer.getfromstake = ZERO_BI;
+                let referKey = newcustomer.refer as string;
+                let hasRefer = referKey != "#";
+                let refer = hasRefer ? getOrCreateRefer(referKey) : null;
+
+                if (hasRefer && refer !== null) {
+                        refer.getfromstake = refer.getfromstake.minus(newcustomer.getfromstake);
+                        refer.disinvestValue = refer.disinvestValue.minus(newcustomer.disinvestValue);
+                        refer.disinvestCount = refer.disinvestCount.plus(ONE_BI);
+                        refer.totalprofitvalue = refer.totalprofitvalue.minus(newcustomer.totalprofitvalue);
                 }
 
-                refer.getfromstake = refer.getfromstake.minus(newcustomer.getfromstake);
-                refer.disinvestValue = refer.disinvestValue.minus(newcustomer.disinvestValue);
-                refer.disinvestCount = refer.disinvestCount.plus(ONE_BI);
-                refer.totalprofitvalue = refer.totalprofitvalue.minus(newcustomer.totalprofitvalue);
+                let gateKey = newcustomer.lastgate as string;
+                let hasGate = gateKey != "#";
+                let gate = hasGate ? getOrCreateGate(gateKey) : null;
 
-
-                let gate = Gate.load(newcustomer.lastgate as string);
-                if (gate === null) {
-                        gate = new Gate(
-                                newcustomer.lastgate as string
-                        );
-                        gate.tradeValue = ZERO_BI;
-                        gate.investValue = ZERO_BI;
-                        gate.disinvestValue = ZERO_BI;
-                        gate.tradeCount = ZERO_BI;
-                        gate.investCount = ZERO_BI;
-                        gate.disinvestCount = ZERO_BI;
-                        gate.totalprofitvalue = ZERO_BI;
-                        gate.totalcommissionvalue = ZERO_BI;
-                        gate.referralnum = ZERO_BI;
-                        gate.stakettsvalue = ZERO_BI;
-                        gate.stakettscontruct = ZERO_BI;
-                        gate.getfromstake = ZERO_BI;
+                if (hasGate && gate !== null) {
+                        gate.getfromstake = gate.getfromstake.minus(newcustomer.getfromstake);
+                        gate.disinvestValue = gate.disinvestValue.minus(newcustomer.disinvestValue);
+                        gate.disinvestCount = gate.disinvestCount.plus(ONE_BI);
+                        gate.totalprofitvalue = gate.totalprofitvalue.minus(newcustomer.totalprofitvalue);
                 }
-
-                gate.getfromstake = gate.getfromstake.minus(newcustomer.getfromstake);
-                gate.disinvestValue = gate.disinvestValue.minus(newcustomer.disinvestValue);
-                gate.disinvestCount = gate.disinvestCount.plus(ONE_BI);
-                gate.totalprofitvalue = gate.totalprofitvalue.minus(newcustomer.totalprofitvalue);
 
                 newcustomer.disinvestValue =
                         newcustomer.disinvestValue.plus(devestvalue);
@@ -2409,28 +2070,32 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                         newcustomer.disinvestCount.plus(ONE_BI);
                 newcustomer.totalprofitvalue =
                         newcustomer.totalprofitvalue.plus(
-                                normal_good.currentValue
-                                        .times(event.params._normalprofit.div(BI_128))
-                                        .div(normal_good.currentQuantity)
+                                safeDiv(
+                                        normal_good.currentValue.times(
+                                                event.params._normalprofit.div(BI_128)
+                                        ),
+                                        normal_good.currentQuantity
+                                )
                         );
                 newcustomer.lastoptime = event.block.timestamp;
                 newcustomer.save();
 
-                refer.getfromstake = refer.getfromstake.plus(newcustomer.getfromstake);
-                refer.disinvestValue = refer.disinvestValue.plus(newcustomer.disinvestValue);
-                refer.totalprofitvalue = refer.totalprofitvalue.plus(newcustomer.totalprofitvalue);
-
-                refer.lastoptime = event.block.timestamp;
-                refer.save();
-                log_ReferData(refer, event.block.timestamp);
-                gate.getfromstake = gate.getfromstake.plus(newcustomer.getfromstake);
-                gate.disinvestValue = gate.disinvestValue.plus(newcustomer.disinvestValue);
-                gate.totalprofitvalue = gate.totalprofitvalue.plus(newcustomer.totalprofitvalue);
-
-                gate.lastoptime = event.block.timestamp;
-                gate.save();
-
-                log_GateData(gate, event.block.timestamp);
+                if (hasRefer && refer !== null) {
+                        refer.getfromstake = refer.getfromstake.plus(newcustomer.getfromstake);
+                        refer.disinvestValue = refer.disinvestValue.plus(newcustomer.disinvestValue);
+                        refer.totalprofitvalue = refer.totalprofitvalue.plus(newcustomer.totalprofitvalue);
+                        refer.lastoptime = event.block.timestamp;
+                        refer.save();
+                        log_ReferData(refer, event.block.timestamp);
+                }
+                if (hasGate && gate !== null) {
+                        gate.getfromstake = gate.getfromstake.plus(newcustomer.getfromstake);
+                        gate.disinvestValue = gate.disinvestValue.plus(newcustomer.disinvestValue);
+                        gate.totalprofitvalue = gate.totalprofitvalue.plus(newcustomer.totalprofitvalue);
+                        gate.lastoptime = event.block.timestamp;
+                        gate.save();
+                        log_GateData(gate, event.block.timestamp);
+                }
 
                 log_CustomerData(newcustomer, event.block.timestamp);
                 marketstate.totalDisinvestValue =
@@ -2487,68 +2152,23 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
 }
 
 export function handle_e_collectcommission(event: e_collectcommission): void {
-        let newcustomer = Customer.load(event.transaction.from.toHexString());
-        if (newcustomer === null) {
-                newcustomer = new Customer(
-                        event.transaction.from.toHexString()
-                );
-                newcustomer.tradeValue = ZERO_BI;
-                newcustomer.investValue = ZERO_BI;
-                newcustomer.disinvestValue = ZERO_BI;
-                newcustomer.tradeCount = ZERO_BI;
-                newcustomer.investCount = ZERO_BI;
-                newcustomer.disinvestCount = ZERO_BI;
-                newcustomer.userConfig = ZERO_BI;
-                newcustomer.refer = "#";
-                newcustomer.customerno = ZERO_BI;
-                newcustomer.totalprofitvalue = ZERO_BI;
-                newcustomer.totalcommissionvalue = ZERO_BI;
-                newcustomer.referralnum = ZERO_BI;
-                newcustomer.getfromstake = ZERO_BI;
-                newcustomer.stakettsvalue = ZERO_BI;
-                newcustomer.stakettscontruct = ZERO_BI;
-                newcustomer.lastgate = "#"; newcustomer.publicsaleusdt = ZERO_BI;
-                newcustomer.publicsaletts = ZERO_BI;
-        }
+        let newcustomer = getOrCreateCustomer(
+                event.transaction.from.toHexString(),
+                null
+        );
 
-        let refer = Refer.load(newcustomer.refer as string);
-        if (refer === null) {
-                refer = new Refer(
-                        newcustomer.refer as string
-                );
-                refer.tradeValue = ZERO_BI;
-                refer.investValue = ZERO_BI;
-                refer.disinvestValue = ZERO_BI;
-                refer.tradeCount = ZERO_BI;
-                refer.investCount = ZERO_BI;
-                refer.disinvestCount = ZERO_BI;
-                refer.totalprofitvalue = ZERO_BI;
-                refer.totalcommissionvalue = ZERO_BI;
-                refer.referralnum = ZERO_BI;
-                refer.stakettsvalue = ZERO_BI;
-                refer.stakettscontruct = ZERO_BI;
-                refer.getfromstake = ZERO_BI;
+        let referKey = newcustomer.refer as string;
+        let hasRefer = referKey != "#";
+        let refer = hasRefer ? getOrCreateRefer(referKey) : null;
+        if (hasRefer && refer !== null) {
+                refer.totalcommissionvalue = refer.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
         }
-        refer.totalcommissionvalue = refer.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
-        let gate = Gate.load(newcustomer.lastgate as string);
-        if (gate === null) {
-                gate = new Gate(
-                        newcustomer.lastgate as string
-                );
-                gate.tradeValue = ZERO_BI;
-                gate.investValue = ZERO_BI;
-                gate.disinvestValue = ZERO_BI;
-                gate.tradeCount = ZERO_BI;
-                gate.investCount = ZERO_BI;
-                gate.disinvestCount = ZERO_BI;
-                gate.totalprofitvalue = ZERO_BI;
-                gate.totalcommissionvalue = ZERO_BI;
-                gate.referralnum = ZERO_BI;
-                gate.stakettsvalue = ZERO_BI;
-                gate.stakettscontruct = ZERO_BI;
-                gate.getfromstake = ZERO_BI;
+        let gateKey = newcustomer.lastgate as string;
+        let hasGate = gateKey != "#";
+        let gate = hasGate ? getOrCreateGate(gateKey) : null;
+        if (hasGate && gate !== null) {
+                gate.totalcommissionvalue = gate.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
         }
-        gate.totalcommissionvalue = gate.totalcommissionvalue.minus(newcustomer.totalcommissionvalue);
         let goodidarrary = event.params._goodid;
         let commissionarray = event.params._commisionamount;
         for (let aa = 0; aa < goodidarrary.length; aa++) {
@@ -2562,16 +2182,18 @@ export function handle_e_collectcommission(event: e_collectcommission): void {
                 }
         }
         newcustomer.save();
-        refer.totalcommissionvalue = refer.totalcommissionvalue.plus(newcustomer.totalcommissionvalue);
-
-        refer.lastoptime = event.block.timestamp;
-        refer.save();
-        log_ReferData(refer, event.block.timestamp);
-        gate.totalcommissionvalue = gate.totalcommissionvalue.plus(newcustomer.totalcommissionvalue);
-        gate.lastoptime = event.block.timestamp;
-        gate.save();
-
-        log_GateData(gate, event.block.timestamp);
+        if (hasRefer && refer !== null) {
+                refer.totalcommissionvalue = refer.totalcommissionvalue.plus(newcustomer.totalcommissionvalue);
+                refer.lastoptime = event.block.timestamp;
+                refer.save();
+                log_ReferData(refer, event.block.timestamp);
+        }
+        if (hasGate && gate !== null) {
+                gate.totalcommissionvalue = gate.totalcommissionvalue.plus(newcustomer.totalcommissionvalue);
+                gate.lastoptime = event.block.timestamp;
+                gate.save();
+                log_GateData(gate, event.block.timestamp);
+        }
         log_CustomerData(newcustomer, event.block.timestamp);
 }
 
@@ -2697,12 +2319,9 @@ export function handle_e_getPromiseProof(event: e_getPromiseProof): void {
                 normal_good.name_lower = "#";
                 normal_good.symbol_lower = "#";
         }
-
-        if (promiseproof === null) {
-                promiseproof = new ProofState(event.params._proofid.toString());
-                promiseproof.good2ActualQuantity = ZERO_BI;
-                promiseproof.proofActualValue = ZERO_BI;
-        }
+        // H-04 fix: avoid reading fields from a partially initialized ProofState.
+        // If proof is missing in store, skip this event safely.
+        if (promiseproof === null) return;
         if (promiseproof.good2ActualQuantity.equals(ZERO_BI)) {
                 normal_good.promiseQuantity = promiseproof.good1ActualQuantity;
                 normal_good.promiseCurrency = promiseproof.good1;
