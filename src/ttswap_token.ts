@@ -1,10 +1,9 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 
 import {
-        Customer,
         tts_share,
         Refer,
-        Gate, 
+        Gate,
         ttswap_publicsell_log,
 } from "../generated/schema";
 
@@ -151,7 +150,6 @@ export function handle_e_publicsell(event: e_publicsell): void {
         if (newcustomer.publicsaleusdt.equals(ZERO_BI)) {
                 ttsenv.publicsaleusercount = ttsenv.publicsaleusercount.plus(ONE_BI);
         }
-        ttsenv.save();
         newcustomer.publicsaleusdt = newcustomer.publicsaleusdt.plus(event.params.usdtamount);
         newcustomer.publicsaletts = newcustomer.publicsaletts.plus(event.params.ttsamount);
         newcustomer.lastoptime = event.block.timestamp;
@@ -164,6 +162,7 @@ export function handle_e_publicsell(event: e_publicsell): void {
         ttswap_publicsell_log1.ttsamount = event.params.ttsamount;
         ttswap_publicsell_log1.usdtamount = event.params.usdtamount;
         ttswap_publicsell_log1.save();
+        ttsenv.save();
 
 }
 
@@ -202,11 +201,13 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
                 gate.save();
         }
 
+        let ttsenv = getOrCreateTtsEnv();
         let proofvalue = event.params.proofvalue.div(BI_128);
         let proofcontrunct = event.params.proofvalue.mod(BI_128);
         let profit = event.params.unstakestate.mod(BI_128);
         if (event.params.unstakestate.div(BI_128).gt(ZERO_BI)) {
                 newcustomer.getfromstake = newcustomer.getfromstake.plus(profit);
+                ttsenv.actual_amount = ttsenv.actual_amount.plus(profit);
         }
         newcustomer.stakettsvalue = proofvalue;
         newcustomer.stakettscontruct = proofcontrunct;
@@ -241,9 +242,7 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
                 }
         }
 
-        let ttsenv = getOrCreateTtsEnv();
-        ttsenv.lsttime = event.block.timestamp;
-        ttsenv.actual_amount = ttsenv.actual_amount.plus(profit);
+        ttsenv.lasttime = event.block.timestamp;
         ttsenv.poolcontruct = event.params.poolstate.mod(BI_128);
         ttsenv.poolvalue = event.params.stakestate.mod(BI_128);
         ttsenv.poolasset = event.params.poolstate.div(BI_128);
