@@ -1568,8 +1568,9 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
 
 
 
-                value_good.virtualQuantity = value_good.virtualQuantity.minus(event.params._valueprofit.mod(BI_128));
-                value_good.virtualQuantity = value_good.virtualQuantity.plus(event.params._valuedisvest.mod(BI_128));
+                value_good.virtualQuantity = value_good.virtualQuantity.plus(event.params._valueprofit.mod(BI_128));
+                value_good.virtualQuantity = value_good.virtualQuantity.minus(event.params._valuedisvest.mod(BI_128));
+
                 value_good.currentValue = value_good.currentValue.minus(event.params._value.div(BI_128));
 
                 value_good.currentQuantity = value_good.currentQuantity.minus(event.params._valueprofit.mod(BI_128));
@@ -1602,7 +1603,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
 
                 value_good.totalDisinvestQuantity =
                         value_good.totalDisinvestQuantity.plus(
-                                event.params._valueprofit.mod(BI_128)
+                                event.params._valuedisvest.mod(BI_128)
                         );
                 value_good.totalDisinvestCount =
                         value_good.totalDisinvestCount.plus(ONE_BI);
