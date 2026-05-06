@@ -243,7 +243,6 @@ export function handle_e_stakeinfo(event: e_stakeinfo): void {
         }
 
         ttsenv.lasttime = event.block.timestamp;
-        ttsenv.actual_amount = ttsenv.actual_amount.plus(profit);
         ttsenv.poolcontruct = event.params.poolstate.mod(BI_128);
         ttsenv.poolvalue = event.params.stakestate.mod(BI_128);
         ttsenv.poolasset = event.params.poolstate.div(BI_128);

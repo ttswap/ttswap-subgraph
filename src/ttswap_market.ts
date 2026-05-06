@@ -1602,7 +1602,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
 
                 value_good.totalDisinvestQuantity =
                         value_good.totalDisinvestQuantity.plus(
-                                event.params._valueprofit.mod(BI_128)
+                                event.params._valuedisvest.mod(BI_128)
                         );
                 value_good.totalDisinvestCount =
                         value_good.totalDisinvestCount.plus(ONE_BI);
