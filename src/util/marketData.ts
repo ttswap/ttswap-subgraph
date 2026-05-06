@@ -32,7 +32,7 @@ export function log_MarketData(
         }
         if (
                 marketData_hour.modifiedTime.plus(BigInt.fromU32(60)) <
-                marketData_hour.modifiedTime
+                modifiedTime
         ) {
                 marketData_hour.goodCount = marketstate.goodCount;
                 marketData_hour.proofCount = marketstate.proofCount;

@@ -69,7 +69,7 @@ export function log_GoodData(
 
         if (
                 goodData_hour.modifiedTime.plus(BigInt.fromU32(60)) <
-                normal_good.modifiedTime
+                modifiedTime
         ) {
                 goodData_hour.modifiedTime = ZERO_BI;
                 goodData_hour.timetype = "h";

@@ -2,6 +2,7 @@ import { BigInt } from "@graphprotocol/graph-ts";
 import {
   Customer,
   Gate,
+  GoodState,
   MarketState,
   Refer,
   tts_env,
@@ -33,6 +34,7 @@ export function getOrCreateCustomer(
     customer.lastgate = "#";
     customer.publicsaleusdt = ZERO_BI;
     customer.publicsaletts = ZERO_BI;
+    customer.lastoptime = ZERO_BI;
     if (marketstate !== null) {
       marketstate.userCount = marketstate.userCount.plus(ONE_BI);
       customer.customerno = marketstate.userCount;
@@ -104,6 +106,43 @@ export function getOrCreateMarketState(): MarketState {
   return marketstate as MarketState;
 }
 
+export function getOrCreateGoodState(id: string): GoodState {
+  let good = GoodState.load(id);
+  if (good === null) {
+    good = new GoodState(id);
+    good.goodseq = ZERO_BI;
+    good.isvaluegood = false;
+    good.islockgood = false;
+    good.tokenname = "#";
+    good.tokensymbol = "#";
+    good.tokentotalsuply = ZERO_BI;
+    good.tokendecimals = ZERO_BI;
+    good.owner = "#";
+    good.erc20Address = "#";
+    good.goodConfig = ZERO_BI;
+    good.virtualQuantity = ZERO_BI;
+    good.currentValue = ZERO_BI;
+    good.currentQuantity = ZERO_BI;
+    good.investQuantity = ZERO_BI;
+    good.investShares = ZERO_BI;
+    good.investActualQuantity = ZERO_BI;
+    good.feeQuantity = ZERO_BI;
+    good.totalTradeQuantity = ZERO_BI;
+    good.totalInvestQuantity = ZERO_BI;
+    good.totalDisinvestQuantity = ZERO_BI;
+    good.totalProfit = ZERO_BI;
+    good.totalTradeCount = ZERO_BI;
+    good.totalInvestCount = ZERO_BI;
+    good.totalDisinvestCount = ZERO_BI;
+    good.modifiedTime = ZERO_BI;
+    good.txCount = ZERO_BI;
+    good.create_time = ZERO_BI;
+    good.name_lower = good.tokenname.toLowerCase();
+    good.symbol_lower = good.tokensymbol.toLowerCase();
+  }
+  return good as GoodState;
+}
+
 export function getOrCreateTtsEnv(): tts_env {
   let env = tts_env.load("1");
   if (env === null) {
@@ -115,7 +154,6 @@ export function getOrCreateTtsEnv(): tts_env {
     env.marketcontract = "#";
     env.usdtcontract = "#";
     env.publicsell = ZERO_BI;
-    env.lsttime = ZERO_BI;
     env.actual_amount = ZERO_BI;
     env.shares_index = ZERO_BI;
     env.left_share = BigInt.fromString("45000000000000000000");
