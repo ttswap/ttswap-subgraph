@@ -45,7 +45,9 @@ dataSources:
         - event: e_initGood(uint256,address,address,uint256,uint256,uint256,uint256,address)
           handler: handle_e_initGood
         - event: e_buyGood(indexed address,indexed address,uint256,uint256,uint256,address)
-          handler: handle_e_buyGood
+          handler: handle_e_buyGood_v1_14        
+        - event: e_buyGood(indexed address,indexed address,uint256,uint256,uint256,address,uint256)
+          handler: handle_e_buyGood_v1_16
         - event: e_investGood(indexed uint256,address,address,uint256,uint256,uint256,address)
           handler: handle_e_investGood
         - event: e_disinvestProof(indexed uint256,address,address,address,uint256,uint256,uint256,uint256,uint256,address)
