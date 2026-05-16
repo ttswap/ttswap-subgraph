@@ -1,691 +1,328 @@
-# TTSWAP subgraph
-## 1.Instruction
-TTSWAP (token-token swap) is an automated market-making protocol built on the EVM blockchain, which means it doesn't rely on centralized institutions or individuals to facilitate trades. The coreprinciple of TTSWAP is to automatically trigger market value transfers based on user actions, creating a platform based on a constant value trading model.
-To effectively track and analyze ttswap avtivities, we  have published  a subgraph for ttswap contract using The Graph. You can use the Query Url to request data or test it directly in the playground.
-## 2.Core events
-these are many events used in the subgraph.
-### 2.1.e_initMetaGood
-Trigger when initial first goods in market after deploy market contracts.
-### 2.2.e_initGood
-Trigger when customer create goods         
-### 2.3.e_buyGood
-Trigger when custemer buy goods          
-### 2.4.e_buyGoodForPay
-Trigger when custemer pay goods
-### 2.5.e_investGood
-Trigger when custemer pay goods       
-### 2.6.e_disinvestProof
-Trigger when customer devest proof or remove liquidity          
-### 2.7.e_collectProof
-Trigger when customer collect proof profit
-### 2.8.e_setMarketConfig
-Trigger when market manager change config          
-### 2.9.e_changeOwner
-Trigger when good's owner change by marketor
-### 2.10.e_updateGoodConfig
-Triggr when update Good Config by goods' owner
-### 2.11.e_modifyGoodConfig
-Trigger when update Good Config by marketor    
-### 2.12.e_addbanlist
-Trigger when need to ban customer   by marketor    
-### 2.13.e_removebanlist
-Trigger when need to remove customer out of banlist by marketor 
-### 2.14.e_addreferal
-Trigger when customer add referal
-### 2.15.Transfer
-Trigger when proof transfer
-## 3.Entities
-Based on these events , we build these entities:
-### 3.1.marketState
-* Represent the market state such as total trade, total user,total invest amount.
-* Field
-  * id
-  * marketConfig
-  * pargoodCount
-  * goodCount
-  * proofCount
-  * userCount
-  * txCount
-  * totalTradeValue
-  * totalInvestValue
-  * totalDisinvestValue
-  * totalTradeCount
-  * totalInvestCount
-  * totalDisinvestCount
-  * marketCreator # marketcreator's address
-### 3.2.marketData
-* Snapshot marketstate 
-* Field
-  * id
-  * timetype 
-    h:total 121 rows data from record every minute;
-    d:total 145 rows data from record every 20 mimutes;
-    w:total 113 rows data from record every 3 hours;
-    m:total 70 rows data from record every 12 hours;
-    y:record every 5 days
-  * marketConfig
-  * pargoodCount
-  * goodCount
-  * proofCount
-  * userCount
-  * txCount
-  * totalTradeValue
-  * totalInvestValue
-  * totalDisinvestValue
-  * totalTradeCount
-  * totalInvestCount
-  * totalDisinvestCount
-  * modifiedTime
-### 3.3.goodState
-* Represent the goods state such as total trade, total user,total invest amount.
-* Field
-  * id
-  * goodseq
-  * pargood:ParGoodState!
-  * isvaluegood
-  * tokenname
-  * tokensymbol
-  * tokentotalsuply
-  * tokendecimals
-  * owner
-  * erc20Address
-  * goodConfig
-  * currentValue
-  * currentQuantity
-  * investValue
-  * investQuantity
-  * feeQuantity
-  * contructFee
-  * totalTradeQuantity
-  * totalInvestQuantity
-  * totalDisinvestQuantity
-  * totalProfit
-  * totalTradeCount
-  * totalInvestCount
-  * totalDisinvestCount
-  * modifiedTime
-  * txCount
-  * create_time
-  * normalProof_v: [ProofState!] @derivedFrom(field: "good2")
-  * normalProof_n: [ProofState!] @derivedFrom(field: "good1")
-  * goodData: [GoodData!] @derivedFrom(field: "good")
-### 3.4.goodData
-* Snapshot good state
-* Field
-  * id
-  * good
-  * timetype
-    h:total 121 rows data from record every minute;
-    d:total 145 rows data from record every 20 mimutes;
-    w:total 113 rows data from record every 3 hours;
-    m:total 70 rows data from record every 12 hours;
-    y:record every 5 days
-  * modifiedTime
-  * goodConfig
-  * isvaluegood
-  * decimals
-  * currentValue
-  * currentQuantity
-  * investValue
-  * investQuantity
-  * feeQuantity
-  * contructFee
-  * totalTradeQuantity
-  * totalInvestQuantity
-  * totalDisinvestQuantity
-  * totalProfit
-  * totalTradeCount
-  * totalInvestCount
-  * totalDisinvestCount
-  * open
-  * high
-  * low
-  * close
-### 3.5.pargoodState
-* Represent pargood state such as total trade, total user,total invest amount.
-* Field
-  * id
-  * tokenname
-  * tokensymbol
-  * tokentotalsuply
-  * tokendecimals
-  * erc20Address
-  * currentValue
-  * currentQuantity
-  * investValue
-  * investQuantity
-  * feeQuantity
-  * contructFee
-  * totalTradeQuantity
-  * totalInvestQuantity
-  * totalDisinvestQuantity
-  * totalProfit
-  * totalTradeCount
-  * totalInvestCount
-  * totalDisinvestCount
-  * goodCount  
-  * txCount
-  * Goodlist:[GoodState!] @derivedFrom(field: "pargood")
-  * parGooddata:[ParGoodData!] @derivedFrom(field: "pargood")
-### 3.6.pargoodData
-* Snapshot the pargood states 
-* Field
-  * id
-  * pargood: ParGoodState!
-  * timetype
-    h:total 121 rows data from record every minute;
-    d:total 145 rows data from record every 20 mimutes;
-    w:total 113 rows data from record every 3 hours;
-    m:total 70 rows data from record every 12 hours;
-    y:record every 5 days
-  * modifiedTime
-  * decimals
-  * currentValue
-  * currentQuantity
-  * investValue
-  * investQuantity
-  * feeQuantity
-  * contructFee
-  * totalTradeQuantity
-  * totalInvestQuantity
-  * totalDisinvestQuantity
-  * totalProfit
-  * totalTradeCount
-  * totalInvestCount
-  * totalDisinvestCount
-  * open
-  * high
-  * low
-  * close
-### 3.7.customer
-* Represent customer's information,such as referal,trade count.
-* Field
-  * id
-  * refer
-  * tradeValue
-  * investValue
-  * disinvestValue
-  * tradeCount
-  * investCount
-  * disinvestCount
-  * isBanlist
-  * customerno
-### 3.8.proofState
-* Represent proof status such as proof's owner,value good quantity,normal good quantity.
-* Field
-  * id
-  * owner
-  * good1
-  * good2
-  * proofValue
-  * good1ContructFee
-  * good1Quantity
-  * good2ContructFee
-  * good2Quantity
-  * createTime
-### 3.9.transaction
-* Represent user's transaction detail such as fromgood,togood,from quantity,to quantity,fee quantity
-* Field
-  * id
-  * blockNumber
-  * transtype
-  * transvalue
-  * fromgood:GoodState!
-  * togood:GoodState!
-  * frompargood:ParGoodState!
-  * topargood:ParGoodState!
-  * fromgoodQuanity
-  * fromgoodfee
-  * togoodQuantity
-  * togoodfee
-  * hash
-  * recipent
-  * timestamp
+# TTSwap Subgraph
 
-## 4.Examples
+[TTSwap](https://github.com/ttswap) is an EVM automated market-making protocol built on a constant-value trading model. This repository is a [The Graph](https://thegraph.com/) subgraph that indexes on-chain activity from **TTSwap_Market** and **TTSwap_Token**, exposing queryable GraphQL entities for dashboards, analytics, and integrations.
 
-### 4.1.Query Market State Information
-* Query
+## Overview
+
+| Data source     | Contract role                                      | Mapping handler        |
+|-----------------|----------------------------------------------------|------------------------|
+| `TTSwap_Market` | Goods, proofs, swaps, invest/divest, commissions   | `src/ttswap_market.ts` |
+| `TTSwap_Token`  | Referrals, public sale, shares, staking, env       | `src/ttswap_token.ts`  |
+
+Shared utilities live under `src/util/` (`entities`, `good`, `marketData`, `customer`, `refer`, `gate`, `token`, `constants`).
+
+The manifest in `subgraph.yaml` targets **Hoodi** testnet by default (update `network`, `source.address`, and `startBlock` before deploying elsewhere). See `deploy_hoodi.md`, `deploy_sepolia.md`, and `deploy_bnbtest.md` for network-specific deploy notes.
+
+### Default contract addresses (mainnet)
+
+| Contract       | Address                                      | Start block |
+|----------------|----------------------------------------------|-------------|
+| TTSwap_Market  | `0x5C70a413fcb7ea8c8D478D06F31f8963cE4EE635` | 24211660     |
+| TTSwap_Token   | `0xE9D469b641bDCC9967AC19aefC038710d98F0B5d` | 24211545     |
+
+### Default contract addresses (Hoodi)
+
+| Contract       | Address                                      | Start block |
+|----------------|----------------------------------------------|-------------|
+| TTSwap_Market  | `0x3Dcd9C893aC962bE5d77eE9DD99ddE0F3280f132` | 1956415     |
+| TTSwap_Token   | `0x9f01cba9ce7Acf87A896A394f016297ce141A989` | 1956410     |
+
+## Indexed events
+
+### TTSwap_Market
+
+| Event | Handler | Purpose |
+|-------|---------|---------|
+| `e_initMetaGood` | `handle_e_initMetaGood` | Initialize the first (meta) good in the market |
+| `e_initGood` | `handle_e_initGood` | Create a new good |
+| `e_buyGood` (6 args) | `handle_e_buyGood_v1_14` | Buy / swap (legacy event shape) |
+| `e_buyGood` (7 args) | `handle_e_buyGood_v1_16` | Buy / swap (current event shape) |
+| `e_payGood` | `handle_e_paygood` | Pay-style good transfer |
+| `e_investGood` | `handle_e_investGood` | Add liquidity / invest |
+| `e_disinvestProof` | `handle_e_disinvestProof` | Remove liquidity / divest proof |
+| `e_updateGoodConfig` | `handle_e_updateGoodConfig` | Good owner updates config |
+| `e_modifyGoodConfig` | `handle_e_modifyGoodConfig` | Market operator updates config |
+| `e_collectcommission` | `handle_e_collectcommission` | Commission collection |
+| `e_goodWelfare` | `handle_e_goodWelfare` | Good welfare distribution |
+| `e_changegoodowner` | `handle_e_changegoodowner` | Transfer good ownership |
+| `e_getPromiseProof` | `handle_e_getPromiseProof` | Promise proof assignment |
+
+### TTSwap_Token
+
+| Event | Handler | Purpose |
+|-------|---------|---------|
+| `e_setenv` | `handle_e_setenv` | Link market contract in token env |
+| `e_addreferral` | `handle_e_addreferral` | Bind referral relationship |
+| `e_publicsell` | `handle_e_publicsell` | Public TTS sale (USDT) |
+| `e_addShare` | `handle_e_addShare` | Allocate share chips |
+| `e_shareMint` | `handle_e_shareMint` | Mint from share balance |
+| `e_burnShare` | `handle_e_burnShare` | Burn share |
+| `e_stakeinfo` | `handle_e_stakeinfo` | Staking state update |
+
+## GraphQL schema
+
+Entity definitions are in `schema.graphql`. Names below match GraphQL types (camelCase in queries).
+
+### Protocol & market
+
+- **MarketState** — Global counters: goods, proofs, users, txs, trade/invest/divest totals. `id` = market contract address.
+- **MarketData** — Rolling snapshots of `MarketState` by `timetype` (`h`, `d`, `w`, `m`, `y`).
+- **GoodState** — Per-good AMM state: ERC-20 metadata, config flags (`isvaluegood`, `islockgood`), reserves (`currentValue`, `currentQuantity`, `virtualQuantity`), invest/fee totals, optional promise pair (`promiseCurrency`, `promiseValue`, `promiseQuantity`), and relations to proofs and `GoodData`.
+- **ProofState** — Liquidity proof linking two goods (`good1`, `good2`) with shares and quantities.
+- **Transaction** — Per-tx record. `transtype` includes `meta`, `init`, `buy`, `pay`, `invest`, `divest`, and `null`. Links `fromgood` / `togood`, fees, `payhash`, `excuter`, `receive`.
+- **GoodData** — OHLC-style snapshots per good (`open`, `high`, `low`, `close` derived from value/quantity price) plus state fields, keyed by `timetype`.
+
+### Users, referrals & gates
+
+- **Customer** — Wallet-level aggregates: trade/invest/divest value and counts, referral id, commission/profit, stake and public-sale totals, `lastgate`, `userConfig`, `customerno`.
+- **CustomerData** — Time-stamped snapshots of customer metrics (`create_time`).
+- **Refer** / **ReferData** — Referral-tree aggregates and historical snapshots.
+- **Gate** / **GateData** — Gate-level aggregates and historical snapshots.
+
+### TTS token
+
+- **tts_env** — Singleton protocol env: pool value/asset/construct, DAO admin, linked contracts, public sale counters, share index.
+- **tts_share** — Per-recipient share position (`share_leftamount`, `share_metric`, `share_chips`).
+- **ttswap_publicsell_log** — Immutable log of each public sale (`user`, `ttsamount`, `usdtamount`, `create_time`).
+
+### Time-series `timetype` buckets
+
+`MarketData` and `GoodData` use fixed-size rolling windows (see comments in `schema.graphql`):
+
+| `timetype` | Bucket size   | Max rows |
+|------------|---------------|----------|
+| `h`        | 1 minute      | 60       |
+| `d`        | 20 minutes    | 72       |
+| `w`        | 3 hours       | 56       |
+| `m`        | 12 hours      | 62       |
+| `y`        | 5 days        | 73       |
+
+`GoodData.id` is `{goodId}{timetype}{bucketIndex}`; `MarketData.id` is `{timetype}{bucketIndex}`.
+
+## Development
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (LTS recommended)
+- [Graph CLI](https://github.com/graphprotocol/graph-cli) — installed via this repo’s `package.json`
+
+```bash
+npm install
+```
+
+### Build
+
+```bash
+npm run codegen   # generate types from schema + ABIs
+npm run build     # compile AssemblyScript mappings to WASM
+```
+
+### Deploy
+
+Subgraph Studio (default slug `ttswap`):
+
+```bash
+npm run deploy
+```
+
+Or the full pipeline used on Hoodi:
+
+```bash
+graph clean && graph codegen && graph build && graph deploy ttswap -l <version-label>
+```
+
+Authenticate with Studio before deploying: `graph auth --studio <DEPLOY_KEY>`.
+
+### Local / custom node
+
+```bash
+npm run create-local
+npm run deploy-local
+npm run remove-local
+```
+
+Adjust node and IPFS URLs in `package.json` for your environment.
+
+### Tests
+
+```bash
+npm test
+```
+
+Uses [Matchstick](https://github.com/LimeChain/matchstick) (`matchstick-as`).
+
+## Example queries
+
+### Market state
+
 ```graphql
 {
   marketStates(first: 1) {
     id
-    marketConfig
     marketCreator
     goodCount
-    pargoodCount
     proofCount
-    totalDisinvestCount
-    totalDisinvestValue
-    totalInvestCount
-    totalInvestValue
-    totalTradeCount
-    totalTradeValue
-    txCount
     userCount
+    txCount
+    totalTradeValue
+    totalInvestValue
+    totalDisinvestValue
+    totalTradeCount
+    totalInvestCount
+    totalDisinvestCount
   }
 }
 ```
-* Response
-```json
-{
-  "data": {
-    "marketStates": [
-      {
-        "id": "0xC564c491EF1639C83b6F721374b5531ba6A1EcEb",
-        "marketConfig": "0",
-        "marketCreator": "0x0f18a2428c934db7b9e040f8fc6e08975cbef07a",
-        "goodCount": "4",
-        "pargoodCount": "3",
-        "proofCount": "3",
-        "totalDisinvestCount": "1",
-        "totalDisinvestValue": "131986800000",
-        "totalInvestCount": "5",
-        "totalInvestValue": "13636907477922",
-        "totalTradeCount": "68",
-        "totalTradeValue": "5878527659184",
-        "txCount": "74",
-        "userCount": "3"
-      }
-    ]
-  }
-}
-```
-### 4.2.Query Market Snapshot Information
-* Query
+
+### Latest daily market snapshot
+
 ```graphql
 {
   marketDatas(
     first: 1
-    where: {timetype: "d"}
+    where: { timetype: "d" }
     orderBy: modifiedTime
     orderDirection: desc
   ) {
-    goodCount
     id
-    marketConfig
+    timetype
     modifiedTime
-    pargoodCount
+    goodCount
     proofCount
-    timetype
-    totalDisinvestCount
-    totalDisinvestValue
-    totalInvestCount
-    totalInvestValue
-    totalTradeCount
-    totalTradeValue
-    txCount
     userCount
+    txCount
+    totalTradeValue
+    totalInvestValue
+    totalDisinvestValue
   }
 }
 ```
-* Response
-```json
-{
-  "data": {
-    "marketDatas": [
-      {
-        "goodCount": "4",
-        "id": "d14",
-        "marketConfig": "0",
-        "modifiedTime": "1723460052",
-        "pargoodCount": "3",
-        "proofCount": "3",
-        "timetype": "d",
-        "totalDisinvestCount": "1",
-        "totalDisinvestValue": "131986800000",
-        "totalInvestCount": "5",
-        "totalInvestValue": "13636907477922",
-        "totalTradeCount": "67",
-        "totalTradeValue": "5872619836063",
-        "txCount": "73",
-        "userCount": "3"
-      }
-    ]
-  }
-}
-```
-### 4.3.Query Goods State Information
-* Query
-```graphql
-{
-  goodStates(
-    where: {id: "62228789954470825507986060196042077180472255078656628425209115580690578781452"}
-  ) {
-    id
-    isvaluegood
-    erc20Address
-    goodConfig
-    currentQuantity
-    currentValue
-    investQuantity
-    investValue
-    feeQuantity
-    contructFee
-    create_time
-    modifiedTime
-    goodseq
-  }
-}
-```
-* Response
-```json
-{
-  "data": {
-    "goodStates": [
-      {
-        "id": "62228789954470825507986060196042077180472255078656628425209115580690578781452",
-        "isvaluegood": true,
-        "erc20Address": "0xa35e43e7a5839b31624dad3f35da63875e705934",
-        "goodConfig": "57896044618878725283973565542178138273236221817720714337193115789075381485568",
-        "currentQuantity": "6819420616060",
-        "currentValue": "6770056758680",
-        "investQuantity": "6816428290000",
-        "investValue": "6802510333961",
-        "feeQuantity": "6763451170",
-        "contructFee": "3174177404",
-        "create_time": "1722309996",
-        "modifiedTime": "1723446576",
-        "goodseq": "1"
-      }
-    ]
-  }
-}
-```
-### 4.4.Query Goods Snapshot Information
-* Query
-```graphql
-{
-  goodDatas(
-    orderBy: modifiedTime
-    orderDirection: desc
-    where: {timetype: "d"}
-    first: 1
-  ) {
-    id
-    feeQuantity
-    decimals
-    goodConfig
-    currentValue
-    currentQuantity
-    contructFee
-    investValue
-    investQuantity
-    isvaluegood
-    modifiedTime
-    timetype
-    totalTradeQuantity
-    totalTradeCount
-    totalProfit
-    totalInvestQuantity
-    totalInvestCount
-    totalDisinvestQuantity
-    totalDisinvestCount
-  }
-}
-```
-* Response
-```json
-{
-  "data": {
-    "goodDatas": [
-      {
-        "id": "8865411095942640069612110311771018411581514354974486424174672250950578377932d136",
-        "feeQuantity": "5052271",
-        "decimals": "8",
-        "goodConfig": "220627572189605533375050235459587831927582626647942524241000267776",
-        "currentValue": "3045230224124",
-        "currentQuantity": "5150964239",
-        "contructFee": "0",
-        "investValue": "3233676600000",
-        "investQuantity": "4900000000",
-        "isvaluegood": false,
-        "modifiedTime": "1723460052",
-        "timetype": "d",
-        "totalTradeQuantity": "8399237641",
-        "totalTradeCount": "56",
-        "totalProfit": "0",
-        "totalInvestQuantity": "5000000000",
-        "totalInvestCount": "1",
-        "totalDisinvestQuantity": "100000000",
-        "totalDisinvestCount": "1"
-      }
-    ]
-  }
-}
-```
-### 4.5.Query ParGoods State Information
-* Query
-```graphql
-{
-  parGoodStates(first: 1, orderBy: id, orderDirection: desc) {
-    contructFee
-    currentQuantity
-    currentValue
-    erc20Address
-    feeQuantity
-    goodCount
-    investQuantity
-    investValue
-    id
-    tokendecimals
-    tokenname
-    tokentotalsuply
-    tokensymbol
-  }
-}
-```
-* Response
-```json
-{
-  "data": {
-    "parGoodStates": [
-      {
-        "contructFee": "0",
-        "currentQuantity": "1087870273117029652256",
-        "currentValue": "3695541518239",
-        "erc20Address": "0xe5dbe53f4e408b9c53472226bc01fac57e40d0b3",
-        "feeQuantity": "294821134806936744",
-        "goodCount": "2",
-        "investQuantity": "1050000000000000000000",
-        "investValue": "3468733743961",
-        "id": "0xe5dbe53f4e408b9c53472226bc01fac57e40d0b3",
-        "tokendecimals": "18",
-        "tokenname": "Test WETH",
-        "tokentotalsuply": "0",
-        "tokensymbol": "WETH"
-      }
-    ]
-  }
-}
-```
-### 4.6.Query ParGoods Snapshot Information
-* Query
-```graphql
-{
-  parGoodDatas(
-    orderBy: modifiedTime
-    orderDirection: desc
-    where: {timetype: "d"}
-    first: 1
-  ) {
-    currentValue
-    currentQuantity
-    contructFee
-    investValue
-    investQuantity
-    modifiedTime
-    timetype
-    totalTradeQuantity
-    totalTradeCount
-    totalProfit
-    totalInvestQuantity
-    totalInvestCount
-    totalDisinvestQuantity
-    totalDisinvestCount
-  }
-}
-```
-* Response
-```json
-{
-  "data": {
-    "parGoodDatas": [
-      {
-        "currentValue": "3689633695118",
-        "currentQuantity": "1089945050754711379260",
-        "contructFee": "0",
-        "investValue": "3468733743961",
-        "investQuantity": "1050000000000000000000",
-        "modifiedTime": "1723460052",
-        "timetype": "d",
-        "totalTradeQuantity": "482739257708312844571",
-        "totalTradeCount": "30",
-        "totalProfit": "0",
-        "totalInvestQuantity": "1050000000000000000000",
-        "totalInvestCount": "2",
-        "totalDisinvestQuantity": "0",
-        "totalDisinvestCount": "0"
-      }
-    ]
-  }
-}
-```
-### 4.7.Query Customer Information
-* Query
-```graphql
-{
-  customers(where: {id: "0x09a69a513f777874dd03f953892a7879e5854959"}) {
-    id
-    customerno
-    refer
-    tradeCount
-    tradeValue
-    investValue
-    investCount
-    disinvestCount
-    disinvestValue
-    isBanlist
-  }
-}
-```
-* Response
-```json
-{
-  "data": {
-    "customers": [
-      {
-        "id": "0x09a69a513f777874dd03f953892a7879e5854959",
-        "customerno": "3",
-        "refer": "#",
-        "tradeCount": "6",
-        "tradeValue": "150902213349",
-        "investValue": "0",
-        "investCount": "0",
-        "disinvestCount": "0",
-        "disinvestValue": "0",
-        "isBanlist": false
-      }
-    ]
-  }
-}
-```  
 
-### 4.8.Query Proof Information
-* Query
+### Good with OHLC snapshot
+
 ```graphql
 {
-  proofStates(where: {id: "2"}) {
+  goodStates(first: 5, orderBy: modifiedTime, orderDirection: desc) {
+    id
+    tokenname
+    tokensymbol
+    isvaluegood
+    currentValue
+    currentQuantity
+    goodData(where: { timetype: "d" }, first: 1, orderBy: modifiedTime, orderDirection: desc) {
+      open
+      high
+      low
+      close
+      modifiedTime
+    }
+  }
+}
+```
+
+### Customer profile
+
+```graphql
+{
+  customers(where: { id: "0x..." }) {
+    id
+    refer
+    customerno
+    tradeValue
+    tradeCount
+    investValue
+    disinvestValue
+    totalprofitvalue
+    totalcommissionvalue
+    stakettsvalue
+    publicsaleusdt
+    publicsaletts
+    lastgate
+  }
+}
+```
+
+### Proof position
+
+```graphql
+{
+  proofStates(first: 10, orderBy: createTime, orderDirection: desc) {
     id
     owner
     proofValue
-    good1 {
-      id
-    }
-    good1ContructFee
+    good1 { id tokensymbol }
+    good2 { id tokensymbol }
     good1Quantity
-    good2 {
-      id
-    }
-    good2ContructFee
     good2Quantity
   }
 }
 ```
-* Response
-```json
-{
-  "data": {
-    "proofStates": [
-      {
-        "id": "2",
-        "owner": "0x0f18a2428c934db7b9e040f8fc6e08975cbef07a",
-        "proofValue": "3233676600000",
-        "good1": {
-          "id": "8865411095942640069612110311771018411581514354974486424174672250950578377932"
-        },
-        "good1ContructFee": "0",
-        "good1Quantity": "4900000000",
-        "good2": {
-          "id": "62228789954470825507986060196042077180472255078656628425209115580690578781452"
-        },
-        "good2ContructFee": "0",
-        "good2Quantity": "3233676600000"
-      }
-    ]
-  }
-}
-```
-### 4.9.Query Transaction Information
+
+### Recent transactions
+
 ```graphql
 {
-  transactions(
-    where: {id: "622287899544708255079860601960420771804722550786566284252091155806905787814521"}
-  ) {
+  transactions(first: 20, orderBy: timestamp, orderDirection: desc) {
     id
-    togoodQuantity
-    togoodfee
     transtype
     transvalue
     hash
-    blockNumber
-    fromgoodQuanity
-    fromgoodfee
-    frompargood {
-      id
-    }
-    togood {
-      id
-    }
-  }
-}
-```
-* Response
-```json
-{
-  "data": {
-    "transactions": [
-      {
-        "id": "622287899544708255079860601960420771804722550786566284252091155806905787814521",
-        "togoodQuantity": "0",
-        "togoodfee": "0",
-        "transtype": "meta",
-        "transvalue": "100000000000",
-        "hash": "0xdd949717f72575976191f9fcadb61bb4556def3cfbaa26b4089329d061887024",
-        "blockNumber": "6401309",
-        "fromgoodQuanity": "100000000000",
-        "fromgoodfee": "0",
-        "frompargood": {
-          "id": "0xa35e43e7a5839b31624dad3f35da63875e705934"
-        },
-        "togood": {
-          "id": "62228789954470825507986060196042077180472255078656628425209115580690578781452"
-        }
-      }
-    ]
+    timestamp
+    fromgood { tokensymbol }
+    togood { tokensymbol }
+    excuter
+    receive
   }
 }
 ```
 
-## 5.Query endpoint
-the dev endpoint:https://api.studio.thegraph.com/query/57827/ttswap/version/latest
+### TTS public sale & env
+
+```graphql
+{
+  tts_env(id: "1") {
+    poolvalue
+    publicsell
+    actual_amount
+    usdt_amount
+    publicsaleusercount
+    marketcontract
+  }
+  ttswap_publicsell_logs(first: 10, orderBy: create_time, orderDirection: desc) {
+    user
+    ttsamount
+    usdtamount
+    create_time
+  }
+}
+```
+
+## Query endpoint
+
+Published subgraph (Graph Studio):
+
+**https://api.studio.thegraph.com/query/57827/ttswap/version/latest**
+
+Use the Studio playground to explore the schema interactively.
+
+## Project layout
+
+```
+├── abis/                 # Contract ABIs
+├── schema.graphql        # Entity schema
+├── subgraph.yaml         # Manifest (network, contracts, handlers)
+├── src/
+│   ├── ttswap_market.ts  # Market event handlers
+│   ├── ttswap_token.ts   # Token event handlers
+│   └── util/             # Shared indexing logic
+├── deploy_*.md           # Per-network deploy commands
+└── package.json
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md). Bug reports and PRs are welcome; please open an issue before large schema or mapping changes.
+
+## License
+
+See `package.json` (`UNLICENSED`).
