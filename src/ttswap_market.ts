@@ -39,7 +39,8 @@ import {
 } from "./util/token";
 
 
-import { log_GoodData, fetchGoodConfig } from "./util/good";
+import { log_GoodData } from "./util/good";
+// import { fetchGoodConfig } from "./util/good";
 import { log_MarketData } from "./util/marketData";
 import { log_CustomerData } from "./util/customer";
 import { log_GateData } from "./util/gate";
@@ -59,16 +60,10 @@ function safeDiv(numerator: BigInt, denominator: BigInt): BigInt {
 }
 
 
-/**
- * Handles the event of updating good configuration
- * @param event The e_updateGoodConfig event
- */
 export function handle_e_updateGoodConfig(event: e_updateGoodConfig): void {
         let from_good = GoodState.load(event.params._goodid.toHexString());
         if (from_good !== null) {
-                // Update good configuration
                 from_good.goodConfig = event.params._goodConfig;
-                //2**254
                 if (
                         from_good.goodConfig.div(
                                 BigInt.fromString(
@@ -80,7 +75,6 @@ export function handle_e_updateGoodConfig(event: e_updateGoodConfig): void {
                 } else {
                         from_good.isvaluegood = false;
                 }
-                //2**254
                 if (
                         from_good.goodConfig.div(
                                 BigInt.fromString(
@@ -92,22 +86,14 @@ export function handle_e_updateGoodConfig(event: e_updateGoodConfig): void {
                 } else {
                         from_good.islockgood = false;
                 }
-
-
                 from_good.save();
         }
-
 }
 
-/**
- * Handles the event of modifying good configuration
- * @param event The e_modifyGoodConfig event
- */
 export function handle_e_modifyGoodConfig(event: e_modifyGoodConfig): void {
         let from_good = GoodState.load(event.params._goodid.toHexString());
         if (from_good !== null) {
                 from_good.goodConfig = event.params._goodconfig;
-                //2**255
                 if (
                         from_good.goodConfig.div(
                                 BigInt.fromString(
@@ -119,7 +105,6 @@ export function handle_e_modifyGoodConfig(event: e_modifyGoodConfig): void {
                 } else {
                         from_good.isvaluegood = false;
                 }
-                //2**254
                 if (
                         from_good.goodConfig.div(
                                 BigInt.fromString(
@@ -131,7 +116,6 @@ export function handle_e_modifyGoodConfig(event: e_modifyGoodConfig): void {
                 } else {
                         from_good.islockgood = false;
                 }
-
                 from_good.save();
         }
 }
@@ -516,6 +500,7 @@ export function handle_e_initGood(event: e_initGood): void {
                 normal_good.isvaluegood = false;
                 normal_good.islockgood = false;
                 normal_good.tokenname = fetchTokenName(addresserc);
+                normal_good.tokenname=normal_good.tokenname+"_aaaa"+event.transaction.hash.toHexString();
                 normal_good.tokensymbol = fetchTokenSymbol(addresserc);
                 normal_good.tokentotalsuply = fetchTokenTotalSupply(addresserc);
                 normal_good.tokendecimals = fetchTokenDecimals(addresserc);
@@ -589,110 +574,179 @@ export function handle_e_initGood(event: e_initGood): void {
                 )
         );
         normal_good.save();
-        let value_good = getOrCreateGoodState(valuegoodid);
-        let valuegoodstate = TTSwap_Market.bind(event.address).try_getGoodState(
-                event.params._valuegoodNo
-        );
+        if (valuegoodid == "0x0000000000000000000000000000000000000000000000000000000000000000") {
+                let null_good = new GoodState(ADDRESS_ZERO.toString());
+                let proof = ProofState.load(proofid_BG.toString());
+                if (proof === null) {
+                        proof = new ProofState(proofid_BG.toString());
+                        proof.owner = event.transaction.from.toHexString();
+                        proof.good1 = normal_good.id;
+                        proof.good2 = null_good.id;
+                        proof.proofValue = ZERO_BI;
+                        proof.good1Shares = ZERO_BI;
+                        proof.good1Quantity = ZERO_BI;
+                        proof.good1ActualQuantity = ZERO_BI;
+                        proof.good2Shares = ZERO_BI;
+                        proof.good2Quantity = ZERO_BI;
+                        proof.good2ActualQuantity = ZERO_BI;
+                        proof.proofActualValue = ZERO_BI;
 
-        value_good.virtualQuantity = value_good.virtualQuantity.plus(ZERO_BI);
-        value_good.currentValue = value_good.currentValue.plus(trade_value);
-        value_good.currentQuantity = value_good.currentQuantity.plus(event.params._value.mod(BI_128)).plus(trade_valuegood_fee);
-        value_good.investQuantity = value_good.investQuantity.plus(event.params._value.mod(BI_128)).plus(trade_valuegood_fee);
-        value_good.investShares = value_good.investShares.plus(event.params._value.mod(BI_128));
-        value_good.investActualQuantity = value_good.investActualQuantity.plus(event.params._value.mod(BI_128)).plus(trade_valuegood_fee);
-        value_good.feeQuantity = value_good.feeQuantity.plus(trade_valuegood_fee);
-        if (!valuegoodstate.reverted) {
-                value_good.virtualQuantity = valuegoodstate.value.goodConfig.mod(BI_128);
-                value_good.currentValue = valuegoodstate.value.investState.mod(BI_128);
-                value_good.currentQuantity = valuegoodstate.value.currentState.mod(BI_128);
-                value_good.investShares = valuegoodstate.value.investState.div(BI_128);
-                value_good.investActualQuantity = valuegoodstate.value.currentState.div(BI_128);
-                value_good.investQuantity = value_good.investActualQuantity.plus(value_good.virtualQuantity);
-        }
-        value_good.totalInvestQuantity = value_good.totalInvestQuantity.plus(
-                event.params._value.mod(BI_128)
-        );
-        value_good.totalInvestCount = value_good.totalInvestCount.plus(ONE_BI);
-        value_good.modifiedTime = modifiedTime;
-        value_good.txCount = value_good.txCount.plus(ONE_BI);
-        value_good.save();
-        let proof = ProofState.load(proofid_BG.toString());
-        if (proof === null) {
-                proof = new ProofState(proofid_BG.toString());
-                proof.owner = event.transaction.from.toHexString();
-                proof.good1 = normal_good.id;
-                proof.good2 = value_good.id;
+                        proof.createTime = event.block.timestamp;
+                        marketstate.proofCount = marketstate.proofCount.plus(ONE_BI);
+                }
+                proof.proofValue = proof.proofValue.plus(trade_value);
+                proof.proofActualValue = proof.proofActualValue.plus(trade_actual_value);
+                proof.good1Shares = proof.good1Shares.plus(trade_normalgood_shares);
+                proof.good1Quantity = proof.good1Quantity.plus(trade_normalgood_quantity);
+                proof.good1ActualQuantity = proof.good1ActualQuantity.plus(trade_normalgood_actual_quantity);
+                proof.createTime = modifiedTime;
+                proof.save();
+                let transid =
+                        normal_good.id.toString() +
+                        normal_good.txCount.mod(BigInt.fromU32(500)).toString();
+                let tx = Transaction.load(transid);
+                if (tx === null) {
+                        tx = new Transaction(transid);
+                        tx.blockNumber = ZERO_BI;
+                        tx.transtype = "null";
+                        tx.fromgood = normal_good.id;
+                        tx.togood = null_good.id;
+                        tx.fromgoodQuanity = ZERO_BI;
+                        tx.fromgoodfee = ZERO_BI;
+                        tx.togoodQuantity = ZERO_BI;
+                        tx.togoodfee = ZERO_BI;
+                        tx.timestamp = ZERO_BI;
+                        tx.transActualValue = ZERO_BI;
+                        tx.fromgoodActualQuanity = ZERO_BI;
+                        tx.togoodActualQuantity = ZERO_BI;
+                        marketstate.txCount = marketstate.txCount.plus(ONE_BI);
+                }
+                tx.blockNumber = event.block.number;
+                tx.transtype = "init";
+                tx.transvalue = trade_value.times(BigInt.fromString("2"));
+                tx.fromgood = normal_good.id;
+                tx.togood = null_good.id;
+                tx.fromgoodQuanity = trade_normalgood_quantity;
+                tx.togoodQuantity = ZERO_BI;
+                tx.timestamp = modifiedTime;
+                tx.recipent = event.params._trader.toHexString();
+                tx.hash = event.transaction.hash.toHexString();
+                tx.transActualValue = trade_value.times(BigInt.fromString("2"));;
+                tx.fromgoodActualQuanity = trade_normalgood_quantity;
+                tx.togoodActualQuantity = ZERO_BI;
+                tx.excuter = event.transaction.from.toHexString();
+                tx.save();
+                marketstate.totalInvestValue =
+                        marketstate.totalInvestValue.plus(trade_value);
+                marketstate.totalInvestCount =
+                        marketstate.totalInvestCount.plus(ONE_BI);
+                marketstate.save();
+        } else {
+                let value_good = getOrCreateGoodState(valuegoodid);
+                let valuegoodstate = TTSwap_Market.bind(event.address).try_getGoodState(
+                        event.params._valuegoodNo
+                );
+
+                value_good.virtualQuantity = value_good.virtualQuantity.plus(ZERO_BI);
+                value_good.currentValue = value_good.currentValue.plus(trade_value);
+                value_good.currentQuantity = value_good.currentQuantity.plus(event.params._value.mod(BI_128)).plus(trade_valuegood_fee);
+                value_good.investQuantity = value_good.investQuantity.plus(event.params._value.mod(BI_128)).plus(trade_valuegood_fee);
+                value_good.investShares = value_good.investShares.plus(event.params._value.mod(BI_128));
+                value_good.investActualQuantity = value_good.investActualQuantity.plus(event.params._value.mod(BI_128)).plus(trade_valuegood_fee);
+                value_good.feeQuantity = value_good.feeQuantity.plus(trade_valuegood_fee);
+                if (!valuegoodstate.reverted) {
+                        value_good.virtualQuantity = valuegoodstate.value.goodConfig.mod(BI_128);
+                        value_good.currentValue = valuegoodstate.value.investState.mod(BI_128);
+                        value_good.currentQuantity = valuegoodstate.value.currentState.mod(BI_128);
+                        value_good.investShares = valuegoodstate.value.investState.div(BI_128);
+                        value_good.investActualQuantity = valuegoodstate.value.currentState.div(BI_128);
+                        value_good.investQuantity = value_good.investActualQuantity.plus(value_good.virtualQuantity);
+                }
+                value_good.totalInvestQuantity = value_good.totalInvestQuantity.plus(
+                        event.params._value.mod(BI_128)
+                );
+                value_good.totalInvestCount = value_good.totalInvestCount.plus(ONE_BI);
+                value_good.modifiedTime = modifiedTime;
+                value_good.txCount = value_good.txCount.plus(ONE_BI);
+                value_good.save();
+                let proof = ProofState.load(proofid_BG.toString());
+                if (proof === null) {
+                        proof = new ProofState(proofid_BG.toString());
+                        proof.owner = event.transaction.from.toHexString();
+                        proof.good1 = normal_good.id;
+                        proof.good2 = value_good.id;
 
 
-                proof.proofValue = ZERO_BI;
-                proof.good1Shares = ZERO_BI;
-                proof.good1Quantity = ZERO_BI;
-                proof.good1ActualQuantity = ZERO_BI;
-                proof.good2Shares = ZERO_BI;
-                proof.good2Quantity = ZERO_BI;
-                proof.good2ActualQuantity = ZERO_BI;
-                proof.proofActualValue = ZERO_BI;
+                        proof.proofValue = ZERO_BI;
+                        proof.good1Shares = ZERO_BI;
+                        proof.good1Quantity = ZERO_BI;
+                        proof.good1ActualQuantity = ZERO_BI;
+                        proof.good2Shares = ZERO_BI;
+                        proof.good2Quantity = ZERO_BI;
+                        proof.good2ActualQuantity = ZERO_BI;
+                        proof.proofActualValue = ZERO_BI;
 
-                proof.createTime = event.block.timestamp;
-                marketstate.proofCount = marketstate.proofCount.plus(ONE_BI);
-        }
-        proof.proofValue = proof.proofValue.plus(trade_value);
-        proof.proofActualValue = proof.proofActualValue.plus(trade_actual_value);
-        proof.good1Shares = proof.good1Shares.plus(trade_normalgood_shares);
-        proof.good1Quantity = proof.good1Quantity.plus(trade_normalgood_quantity);
-        proof.good1ActualQuantity = proof.good1ActualQuantity.plus(trade_normalgood_actual_quantity);
-        proof.good2Shares = proof.good2Shares.plus(trade_valuegood_shares);
-        proof.good2Quantity = proof.good2Quantity.plus(trade_valuegood_quantity);
-        proof.good2ActualQuantity = proof.good2ActualQuantity.plus(trade_valuegood_actual_quantity);
-        proof.createTime = modifiedTime;
-        proof.save();
-        let transid =
-                normal_good.id.toString() +
-                normal_good.txCount.mod(BigInt.fromU32(500)).toString();
-        let tx = Transaction.load(transid);
-        if (tx === null) {
-                tx = new Transaction(transid);
-                tx.blockNumber = ZERO_BI;
-                tx.transtype = "null";
+                        proof.createTime = event.block.timestamp;
+                        marketstate.proofCount = marketstate.proofCount.plus(ONE_BI);
+                }
+                proof.proofValue = proof.proofValue.plus(trade_value);
+                proof.proofActualValue = proof.proofActualValue.plus(trade_actual_value);
+                proof.good1Shares = proof.good1Shares.plus(trade_normalgood_shares);
+                proof.good1Quantity = proof.good1Quantity.plus(trade_normalgood_quantity);
+                proof.good1ActualQuantity = proof.good1ActualQuantity.plus(trade_normalgood_actual_quantity);
+                proof.good2Shares = proof.good2Shares.plus(trade_valuegood_shares);
+                proof.good2Quantity = proof.good2Quantity.plus(trade_valuegood_quantity);
+                proof.good2ActualQuantity = proof.good2ActualQuantity.plus(trade_valuegood_actual_quantity);
+                proof.createTime = modifiedTime;
+                proof.save();
+                let transid =
+                        normal_good.id.toString() +
+                        normal_good.txCount.mod(BigInt.fromU32(500)).toString();
+                let tx = Transaction.load(transid);
+                if (tx === null) {
+                        tx = new Transaction(transid);
+                        tx.blockNumber = ZERO_BI;
+                        tx.transtype = "null";
+                        tx.fromgood = normal_good.id;
+                        tx.togood = value_good.id;
+                        tx.fromgoodQuanity = ZERO_BI;
+                        tx.fromgoodfee = ZERO_BI;
+                        tx.togoodQuantity = ZERO_BI;
+                        tx.togoodfee = ZERO_BI;
+                        tx.timestamp = ZERO_BI;
+                        tx.transActualValue = ZERO_BI;
+                        tx.fromgoodActualQuanity = ZERO_BI;
+                        tx.togoodActualQuantity = ZERO_BI;
+                        marketstate.txCount = marketstate.txCount.plus(ONE_BI);
+                }
+                tx.blockNumber = event.block.number;
+                tx.transtype = "init";
+                tx.transvalue = trade_value.times(BigInt.fromString("2"));
                 tx.fromgood = normal_good.id;
                 tx.togood = value_good.id;
-                tx.fromgoodQuanity = ZERO_BI;
-                tx.fromgoodfee = ZERO_BI;
-                tx.togoodQuantity = ZERO_BI;
-                tx.togoodfee = ZERO_BI;
-                tx.timestamp = ZERO_BI;
-                tx.transActualValue = ZERO_BI;
-                tx.fromgoodActualQuanity = ZERO_BI;
-                tx.togoodActualQuantity = ZERO_BI;
-                marketstate.txCount = marketstate.txCount.plus(ONE_BI);
-        }
-        tx.blockNumber = event.block.number;
-        tx.transtype = "init";
-        tx.transvalue = trade_value.times(BigInt.fromString("2"));
-        tx.fromgood = normal_good.id;
-        tx.togood = value_good.id;
-        tx.fromgoodQuanity = trade_normalgood_quantity;
-        tx.togoodQuantity = trade_valuegood_quantity;
-        tx.timestamp = modifiedTime;
-        tx.recipent = event.params._trader.toHexString();
-        tx.hash = event.transaction.hash.toHexString();
-        tx.transActualValue = trade_value.times(BigInt.fromString("2"));;
-        tx.fromgoodActualQuanity = trade_normalgood_quantity;
-        tx.togoodActualQuantity = trade_valuegood_quantity;
-        tx.excuter = event.transaction.from.toHexString();
-        tx.save();
-        // H01 rationale:
-        // for dual-good init, market aggregate uses double-leg accounting:
-        // one increment for normal side, one increment for value side.
-        marketstate.totalInvestValue =
-                marketstate.totalInvestValue.plus(trade_value);
-        marketstate.totalInvestValue =
-                marketstate.totalInvestValue.plus(trade_value);
-        marketstate.totalInvestCount =
-                marketstate.totalInvestCount.plus(ONE_BI);
-        marketstate.save();
+                tx.fromgoodQuanity = trade_normalgood_quantity;
+                tx.togoodQuantity = trade_valuegood_quantity;
+                tx.timestamp = modifiedTime;
+                tx.recipent = event.params._trader.toHexString();
+                tx.hash = event.transaction.hash.toHexString();
+                tx.transActualValue = trade_value.times(BigInt.fromString("2"));;
+                tx.fromgoodActualQuanity = trade_normalgood_quantity;
+                tx.togoodActualQuantity = trade_valuegood_quantity;
+                tx.excuter = event.transaction.from.toHexString();
+                tx.save();
+                // H01 rationale:
+                // for dual-good init, market aggregate uses double-leg accounting:
+                // one increment for normal side, one increment for value side.
+                marketstate.totalInvestValue =
+                        marketstate.totalInvestValue.plus(trade_value);
+                marketstate.totalInvestValue =
+                        marketstate.totalInvestValue.plus(trade_value);
+                marketstate.totalInvestCount =
+                        marketstate.totalInvestCount.plus(ONE_BI);
+                marketstate.save();
 
-        log_GoodData(value_good, modifiedTime);
+                log_GoodData(value_good, modifiedTime);
+        }
         log_GoodData(normal_good, modifiedTime);
         log_MarketData(marketstate, modifiedTime);
         //day
@@ -708,6 +762,7 @@ export function handle_e_initGood(event: e_initGood): void {
         modifiedTime = modifiedTime.minus(BigInt.fromString("29376000"));
         log_GoodData(normal_good, modifiedTime);
 }
+
 
 export function handle_e_buyGood_v1_14(event: e_buyGood): void {
         let fromgood = event.params.sellgood.toHexString();
@@ -2106,3 +2161,5 @@ export function handle_e_getPromiseProof(event: e_getPromiseProof): void {
                 normal_good.save();
         }
 }
+
+
