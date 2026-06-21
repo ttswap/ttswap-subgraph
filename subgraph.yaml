@@ -9,9 +9,9 @@ dataSources:
     name: TTSwap_Market
     network: hoodi
     source:
-      address: "0x3Dcd9C893aC962bE5d77eE9DD99ddE0F3280f132"
+      address: "0xa6B80426f60272D9208693CECe804A05711f6d27"
       abi: TTSwap_Market
-      startBlock: 1956415
+      startBlock: 3061290
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -40,37 +40,33 @@ dataSources:
         - name: ERC20SymbolBytes
           file: ./abis/ERC20SymbolBytes.json
       eventHandlers:
-        - event: e_initMetaGood(uint256,address,uint256,uint256,uint256)
-          handler: handle_e_initMetaGood
-        - event: e_initGood(uint256,address,address,uint256,uint256,uint256,uint256,address)
+        - event:  e_initGood(indexed uint256,indexed uint256,uint256,uint256,uint256,uint256,address)
           handler: handle_e_initGood
-        - event: e_buyGood(indexed address,indexed address,uint256,uint256,uint256,address)
+        - event: e_buyGood(indexed uint256,indexed uint256,uint256,uint256,uint256,address,uint256)
           handler: handle_e_buyGood
-        - event: e_investGood(indexed uint256,address,address,uint256,uint256,uint256,address)
+        - event: e_investGood(indexed uint256,indexed uint256,uint256,uint256,uint256,address)
           handler: handle_e_investGood
-        - event: e_disinvestProof(indexed uint256,address,address,address,uint256,uint256,uint256,uint256,uint256,address)
+        - event: e_disinvestProof(indexed uint256,uint256,address,uint256,uint256,uint256,address)
           handler: handle_e_disinvestProof
-        - event: e_updateGoodConfig(address,uint256,address)
+        - event: e_updateGoodConfig(indexed uint256,uint256,address)
           handler: handle_e_updateGoodConfig
-        - event: e_modifyGoodConfig(address,uint256,address)
+        - event: e_modifyGoodConfig(indexed uint256,uint256,address)
           handler: handle_e_modifyGoodConfig
-        - event: e_collectcommission(address[],uint256[],address)
+        - event: e_collectcommission(uint256[],uint256[],address)
           handler: handle_e_collectcommission
-        - event: e_goodWelfare(address,uint128,address)
+        - event: e_goodWelfare(indexed uint256,uint128,address)
           handler: handle_e_goodWelfare
-        - event: e_changegoodowner(address,address,address)
+        - event: e_changegoodowner(uint256,address,address)
           handler: handle_e_changegoodowner
-        - event: e_payGood(indexed address,indexed address,uint256,uint256,uint256,address,address,uint256)
-          handler: handle_e_paygood
-        - event: e_getPromiseProof(address,uint256)
+        - event: e_getPromiseProof(indexed uint256,uint256)
           handler: handle_e_getPromiseProof
   - kind: ethereum/contract
     name: TTSwap_Token
     network: hoodi
     source:
-      address: "0x9f01cba9ce7Acf87A896A394f016297ce141A989"
+      address: "0xee456a1744EB9C9ce45b8B27A7461a99594784f3"
       abi: TTSwap_Token
-      startBlock: 1956410
+      startBlock: 3061280
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

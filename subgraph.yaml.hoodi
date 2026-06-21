@@ -18,19 +18,18 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/ttswap_market.ts
       entities:
-        - Customer
-        - CustomerData
-        - Refer
-        - ReferData
-        - Gate
-        - GateData
         - MarketState
         - GoodState
         - ProofState
         - Transaction
-        - GoodData
+        - Customer
+        - Refer
+        - Gate
         - MarketData
-        - tts_env
+        - GoodData
+        - CustomerData
+        - ReferData
+        - GateData
       abis:
         - name: TTSwap_Market
           file: ./abis/TTSwap_Market.json
@@ -41,29 +40,25 @@ dataSources:
         - name: ERC20SymbolBytes
           file: ./abis/ERC20SymbolBytes.json
       eventHandlers:
-        - event: e_initMetaGood(uint256,address,uint256,uint256,uint256)
-          handler: handle_e_initMetaGood
-        - event: e_initGood(uint256,address,address,uint256,uint256,uint256,uint256,address)
+        - event:  e_initGood(indexed uint256,indexed uint256,uint256,uint256,uint256,uint256,address)
           handler: handle_e_initGood
-        - event: e_buyGood(indexed address,indexed address,uint256,uint256,uint256,address)
+        - event: e_buyGood(indexed uint256,indexed uint256,uint256,uint256,uint256,address,uint256)
           handler: handle_e_buyGood
-        - event: e_investGood(indexed uint256,address,address,uint256,uint256,uint256,address)
+        - event: e_investGood(indexed uint256,indexed uint256,uint256,uint256,uint256,address)
           handler: handle_e_investGood
-        - event: e_disinvestProof(indexed uint256,address,address,address,uint256,uint256,uint256,uint256,uint256,address)
+        - event: e_disinvestProof(indexed uint256,uint256,address,uint256,uint256,uint256,address)
           handler: handle_e_disinvestProof
-        - event: e_updateGoodConfig(address,uint256,address)
+        - event: e_updateGoodConfig(indexed uint256,uint256,address)
           handler: handle_e_updateGoodConfig
-        - event: e_modifyGoodConfig(address,uint256,address)
+        - event: e_modifyGoodConfig(indexed uint256,uint256,address)
           handler: handle_e_modifyGoodConfig
-        - event: e_collectcommission(address[],uint256[],address)
+        - event: e_collectcommission(uint256[],uint256[],address)
           handler: handle_e_collectcommission
-        - event: e_goodWelfare(address,uint128,address)
+        - event: e_goodWelfare(indexed uint256,uint128,address)
           handler: handle_e_goodWelfare
-        - event: e_changegoodowner(address,address,address)
+        - event: e_changegoodowner(uint256,address,address)
           handler: handle_e_changegoodowner
-        - event: e_payGood(indexed address,indexed address,uint256,uint256,uint256,address,address,uint256)
-          handler: handle_e_paygood
-        - event: e_getPromiseProof(address,uint256)
+        - event: e_getPromiseProof(indexed uint256,uint256)
           handler: handle_e_getPromiseProof
   - kind: ethereum/contract
     name: TTSwap_Token
@@ -79,17 +74,18 @@ dataSources:
       file: ./src/ttswap_token.ts
       entities:
         - Customer
+        - MarketState
+        - tts_env
+        - tts_share
         - Refer
         - Gate
-        - tts_restake
-        - tts_share
-        - tts_auth
+        - ttswap_publicsell_log
       abis:
         - name: TTSwap_Token
           file: ./abis/TTSwap_Token.json
       eventHandlers:
         - event: e_addreferral(address,address)
-          handler: handle_e_addreferer
+          handler: handle_e_addreferral
         - event: e_publicsell(uint256,uint256)
           handler: handle_e_publicsell
         - event: e_setenv(address)

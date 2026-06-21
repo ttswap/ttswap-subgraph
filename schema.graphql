@@ -140,17 +140,22 @@ type MarketState @entity(immutable:false) {
   totalDisinvestCount: BigInt!
 }
 
+# GoodState.id = event _goodid (uint256 good key, decimal string).
+# GoodState.goodno = event _good_id from e_initGood only (on-chain good sequence number).
 type GoodState @entity(immutable:false) {
   id: ID!
   goodseq:BigInt!
+  goodtype:String! # mirrors goodkey.goodtype
+  goodno:BigInt! # mirrors goodkey.id
   isvaluegood:Boolean!
   islockgood:Boolean!
+  ispromisegood:Boolean!
   tokenname: String!
   tokensymbol: String!
   tokentotalsuply: BigInt!
   tokendecimals: BigInt!
   owner: String!
-  erc20Address: String!
+  erc20Address: String! # mirrors goodkey.erc20Address
   goodConfig: BigInt!
   virtualQuantity:BigInt!
   currentValue:BigInt!
@@ -174,23 +179,19 @@ type GoodState @entity(immutable:false) {
   create_time: BigInt!
   name_lower:String!
   symbol_lower:String!
-  normalProof_v: [ProofState!] @derivedFrom(field: "good2")
-  normalProof_n: [ProofState!] @derivedFrom(field: "good1")
+  proofs: [ProofState!] @derivedFrom(field: "good")
   goodData: [GoodData!] @derivedFrom(field: "good")
 }
 
+# Single-good liquidity proof (v2 contract). Each proof links to one GoodState via `good`.
 type ProofState @entity(immutable:false) {
   id: ID!
   owner: String!
-  good1: GoodState!
-  good2: GoodState!
+  good: GoodState!
   proofValue:BigInt!
-  good1Shares: BigInt!
-  good1Quantity:BigInt!
-  good1ActualQuantity:BigInt!
-  good2Shares:BigInt!
-  good2Quantity:BigInt!
-  good2ActualQuantity: BigInt!
+  goodShares: BigInt!
+  goodQuantity:BigInt!
+  goodActualQuantity:BigInt!
   proofActualValue:BigInt!
   createTime: BigInt!
 }
@@ -202,14 +203,14 @@ type Transaction @entity(immutable:false) {
   transtype:String!
   transvalue:BigInt!
   fromgood:GoodState!
-  togood:GoodState!
+  togood:GoodState
   fromgoodQuanity:BigInt!
   fromgoodfee:BigInt!
-  togoodQuantity:BigInt!
-  togoodfee:BigInt!
+  togoodQuantity:BigInt
+  togoodfee:BigInt
   transActualValue:BigInt!
   fromgoodActualQuanity:BigInt!
-  togoodActualQuantity:BigInt!
+  togoodActualQuantity:BigInt
   hash:String!
   recipent:String!
   timestamp: BigInt!
@@ -229,7 +230,11 @@ type GoodData @entity(immutable:false) {
   timetype:String!
   modifiedTime: BigInt!
   goodConfig: BigInt!
+  goodtype:String!
+  goodno:BigInt! # mirrors goodkey.id
   isvaluegood:Boolean!
+  islockgood:Boolean!
+  ispromisegood:Boolean!
   decimals: BigInt!
   virtualQuantity:BigInt!
   currentValue:BigInt!
@@ -285,7 +290,6 @@ type tts_env  @entity(immutable:false) {
   marketcontract:String!
   usdtcontract:String!
   publicsell:BigInt! #sell tts amount
-  lsttime:BigInt!
   actual_amount:BigInt! # total mint tts amount
   shares_index:BigInt!
   left_share:BigInt! 
