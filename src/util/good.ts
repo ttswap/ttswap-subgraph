@@ -14,6 +14,25 @@ import {
 import { fetchTokenDecimals } from "./token";
 import { TTSwap_Market } from "../../generated/TTSwap_Market/TTSwap_Market";
 
+// goodConfig flag bits (MSB = bit 255)
+const CONFIG_BIT_IS_VALUE_GOOD: u8 = 255;
+const CONFIG_BIT_IS_FREEZE: u8 = 252;
+const CONFIG_BIT_IS_PROMISE: u8 = 250;
+
+function getConfigFlag(goodConfig: BigInt, bit: u8): boolean {
+        return goodConfig.rightShift(bit).bitAnd(ONE_BI).equals(ONE_BI);
+}
+
+export function syncGoodConfigFlags(
+        good: GoodState,
+        goodConfig: BigInt
+): void {
+        good.goodConfig = goodConfig;
+        good.isvaluegood = getConfigFlag(goodConfig, CONFIG_BIT_IS_VALUE_GOOD);
+        good.islockgood = getConfigFlag(goodConfig, CONFIG_BIT_IS_FREEZE);
+        good.ispromisegood = getConfigFlag(goodConfig, CONFIG_BIT_IS_PROMISE);
+}
+
 export function log_GoodData(
         normal_good: GoodState,
         modifiedTime: BigInt
@@ -35,7 +54,11 @@ export function log_GoodData(
                 goodData_hour.timetype = "h";
                 goodData_hour.good = normal_good.id;
                 goodData_hour.goodConfig = normal_good.goodConfig;
+                goodData_hour.goodtype = normal_good.goodtype;
+                goodData_hour.goodno = normal_good.goodno;
                 goodData_hour.isvaluegood = normal_good.isvaluegood;
+                goodData_hour.islockgood = normal_good.islockgood;
+                goodData_hour.ispromisegood = normal_good.ispromisegood;
                 goodData_hour.decimals = normal_good.tokendecimals;
 
                 goodData_hour.virtualQuantity = normal_good.virtualQuantity;
@@ -77,7 +100,11 @@ export function log_GoodData(
                 goodData_hour.goodConfig = normal_good.goodConfig;
                 goodData_hour.isvaluegood = normal_good.isvaluegood;
                 goodData_hour.decimals = normal_good.tokendecimals;
-
+                goodData_hour.goodtype = normal_good.goodtype;
+                goodData_hour.goodno = normal_good.goodno;
+                goodData_hour.isvaluegood = normal_good.isvaluegood;
+                goodData_hour.islockgood = normal_good.islockgood;
+                goodData_hour.ispromisegood = normal_good.ispromisegood;        
                 goodData_hour.virtualQuantity = normal_good.virtualQuantity;
                 goodData_hour.currentValue = normal_good.currentValue;
                 goodData_hour.currentQuantity = normal_good.currentQuantity;
@@ -145,6 +172,12 @@ export function log_GoodData(
                 goodData_day.decimals = goodData_hour.decimals;
                 goodData_day.goodConfig = goodData_hour.goodConfig;
                 goodData_day.isvaluegood = goodData_hour.isvaluegood;
+                goodData_day.goodtype = goodData_hour.goodtype;
+                goodData_day.goodno = goodData_hour.goodno;
+                goodData_day.isvaluegood = goodData_hour.isvaluegood;
+                goodData_day.islockgood = goodData_hour.islockgood;
+           
+                goodData_day.ispromisegood = goodData_hour.ispromisegood;
 
                 goodData_day.virtualQuantity = goodData_hour.virtualQuantity;
                 goodData_day.currentValue = goodData_hour.currentValue;
@@ -153,9 +186,6 @@ export function log_GoodData(
                 goodData_day.investShares = goodData_hour.investShares;
                 goodData_day.investActualQuantity = goodData_hour.investActualQuantity;
                 goodData_day.feeQuantity = goodData_hour.feeQuantity;
-
-
-
                 goodData_day.totalTradeQuantity =
                         goodData_hour.totalTradeQuantity;
                 goodData_day.totalInvestQuantity =
@@ -187,7 +217,12 @@ export function log_GoodData(
                 goodData_day.decimals = goodData_hour.decimals;
                 goodData_day.goodConfig = goodData_hour.goodConfig;
                 goodData_day.isvaluegood = goodData_hour.isvaluegood;
-
+                goodData_day.goodtype = goodData_hour.goodtype;
+                goodData_day.goodno = goodData_hour.goodno;
+                goodData_day.isvaluegood = goodData_hour.isvaluegood;
+                goodData_day.islockgood = goodData_hour.islockgood;
+             
+                goodData_day.ispromisegood = goodData_hour.ispromisegood;
 
                 goodData_day.virtualQuantity = goodData_hour.virtualQuantity;
                 goodData_day.currentValue = goodData_hour.currentValue;
@@ -260,7 +295,12 @@ export function log_GoodData(
                 goodData_week.decimals = goodData_day.decimals;
                 goodData_week.goodConfig = goodData_day.goodConfig;
                 goodData_week.isvaluegood = goodData_day.isvaluegood;
-
+                goodData_week.goodtype = goodData_day.goodtype;
+                goodData_week.goodno = goodData_day.goodno;
+                goodData_week.isvaluegood = goodData_day.isvaluegood;
+                goodData_week.islockgood = goodData_day.islockgood;
+              
+                goodData_week.ispromisegood = goodData_day.ispromisegood;
                 goodData_week.virtualQuantity = goodData_day.virtualQuantity;
                 goodData_week.currentValue = goodData_day.currentValue;
                 goodData_week.currentQuantity = goodData_day.currentQuantity;
@@ -299,8 +339,12 @@ export function log_GoodData(
                 goodData_week.good = goodData_day.good;
                 goodData_week.decimals = goodData_day.decimals;
                 goodData_week.goodConfig = goodData_day.goodConfig;
+                goodData_week.goodtype = goodData_day.goodtype;
+                goodData_week.goodno = goodData_day.goodno;
                 goodData_week.isvaluegood = goodData_day.isvaluegood;
-
+                goodData_week.islockgood = goodData_day.islockgood;
+              
+                goodData_week.ispromisegood = goodData_day.ispromisegood;
                 goodData_week.virtualQuantity = goodData_day.virtualQuantity;
                 goodData_week.currentValue = goodData_day.currentValue;
                 goodData_week.currentQuantity = goodData_day.currentQuantity;
@@ -366,11 +410,16 @@ export function log_GoodData(
                 );
                 goodData_month.modifiedTime = ZERO_BI;
 
-                goodData_month.timetype = "m"; goodData_month.good = goodData_week.good;
+                goodData_month.timetype = "m";
+                goodData_month.good = goodData_week.good;
                 goodData_month.decimals = goodData_week.decimals;
                 goodData_month.goodConfig = goodData_week.goodConfig;
+                goodData_month.goodtype = goodData_week.goodtype;
+                goodData_month.goodno = goodData_week.goodno;
                 goodData_month.isvaluegood = goodData_week.isvaluegood;
-
+                goodData_month.islockgood = goodData_week.islockgood;
+           
+                goodData_month.ispromisegood = goodData_week.ispromisegood;
 
                 goodData_month.virtualQuantity = goodData_week.virtualQuantity;
                 goodData_month.currentValue = goodData_week.currentValue;
@@ -394,9 +443,9 @@ export function log_GoodData(
                         goodData_week.totalInvestCount;
                 goodData_month.totalDisinvestCount =
                         goodData_week.totalDisinvestCount;
-                goodData_week.promiseQuantity = goodData_day.promiseQuantity;
-                goodData_week.promiseCurrency = goodData_day.promiseCurrency;
-                goodData_week.promiseValue = goodData_day.promiseValue;
+                goodData_month.promiseQuantity = goodData_week.promiseQuantity;
+                goodData_month.promiseCurrency = goodData_week.promiseCurrency;
+                goodData_month.promiseValue = goodData_week.promiseValue;
                 goodData_month.modifiedTime = modifiedTime;
                 goodData_month.open = price;
                 goodData_month.high = price;
@@ -412,9 +461,12 @@ export function log_GoodData(
                 goodData_month.good = goodData_week.good;
                 goodData_month.decimals = goodData_week.decimals;
                 goodData_month.goodConfig = goodData_week.goodConfig;
+                goodData_month.goodtype = goodData_week.goodtype;
+                goodData_month.goodno = goodData_week.goodno;
                 goodData_month.isvaluegood = goodData_week.isvaluegood;
-
-
+                goodData_month.islockgood = goodData_week.islockgood;
+           
+                goodData_month.ispromisegood = goodData_week.ispromisegood;
 
                 goodData_month.virtualQuantity = goodData_week.virtualQuantity;
                 goodData_month.currentValue = goodData_week.currentValue;
@@ -491,8 +543,12 @@ export function log_GoodData(
                 goodData_year.good = goodData_month.good;
                 goodData_year.decimals = goodData_month.decimals;
                 goodData_year.goodConfig = goodData_month.goodConfig;
+                goodData_year.goodtype = goodData_month.goodtype;
+                goodData_year.goodno = goodData_month.goodno;
                 goodData_year.isvaluegood = goodData_month.isvaluegood;
-
+                goodData_year.islockgood = goodData_month.islockgood;
+            
+                goodData_year.ispromisegood = goodData_month.ispromisegood;
 
                 goodData_year.virtualQuantity = goodData_month.virtualQuantity;
                 goodData_year.currentValue = goodData_month.currentValue;
@@ -530,7 +586,11 @@ export function log_GoodData(
                 goodData_year.good = goodData_month.good;
                 goodData_year.decimals = goodData_month.decimals;
                 goodData_year.goodConfig = goodData_month.goodConfig;
+                goodData_year.goodtype = goodData_month.goodtype;
+                goodData_year.goodno = goodData_month.goodno;
                 goodData_year.isvaluegood = goodData_month.isvaluegood;
+                goodData_year.islockgood = goodData_month.islockgood;
+                goodData_year.ispromisegood = goodData_month.ispromisegood;
                 goodData_year.virtualQuantity = goodData_month.virtualQuantity;
                 goodData_year.currentValue = goodData_month.currentValue;
                 goodData_year.currentQuantity = goodData_month.currentQuantity;
@@ -580,8 +640,8 @@ export function log_GoodData(
         }
 }
 
-export function fetchGoodDecimals(goodid: Address): BigInt {
-        let goodState = GoodState.load(goodid.toHexString());
+export function fetchGoodDecimals(goodno: Address): BigInt {
+        let goodState = GoodState.load(goodno.toHexString());
         let decimals = BigInt.fromString("0");
 
         if (goodState === null) {
@@ -589,17 +649,17 @@ export function fetchGoodDecimals(goodid: Address): BigInt {
         } else {
                 decimals = goodState.tokendecimals;
                 if (decimals == BigInt.fromString("0")) {
-                        decimals = fetchTokenDecimals(goodid);
+                        decimals = fetchTokenDecimals(goodno);
                 }
         }
         return decimals;
 }
 
-export function fetchGoodConfig(goodid: Address): BigInt {
+export function fetchGoodConfig(goodno: BigInt): BigInt {
         let contract = TTSwap_Market.bind(dataSource.address());
         // try types uint8 for decimals
         let decimalValue = BigInt.fromU32(0);
-        let decimalResult = contract.try_getGoodState(goodid);
+        let decimalResult = contract.try_getGoodState(goodno);
         if (!decimalResult.reverted) {
                 decimalValue = decimalResult.value.goodConfig;
         }

@@ -114,9 +114,7 @@ export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
 
                 let totalSupplyResult = contract.try_totalSupply();
                 if (!totalSupplyResult.reverted) {
-                        totalSupplyValue = BigInt.fromString(
-                                totalSupplyResult.value[0].toString()
-                        );
+                        totalSupplyValue = totalSupplyResult.value;
                 } else {
                         totalSupplyValue = BigInt.fromU32(0);
                 }
