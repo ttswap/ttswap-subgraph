@@ -90,7 +90,7 @@ export function handle_e_initGood(event: e_initGood): void {
         let erc20address = addressFromUint160(goodinfo.mod(BI_160));
         let erctype = goodinfo.div(BI_160).mod(BigInt.fromString("256"));
         let normalgoodid = event.params._goodid.toHexString();
-        let stakecontruct = event.params._construct.mod(BI_128);
+        
         let proofid_BG = event.params._proofNo;
         let marketmanage = TTSwap_Market.bind(event.address);
         let goodowner = event.transaction.from.toHexString();
@@ -156,13 +156,13 @@ export function handle_e_initGood(event: e_initGood): void {
         newcustomer.investCount = newcustomer.investCount.plus(ONE_BI);
         newcustomer.lastoptime = modifiedTime;
         newcustomer.stakettsvalue = newcustomer.stakettsvalue.plus(trade_value);
-        newcustomer.stakettscontruct = newcustomer.stakettscontruct.plus(stakecontruct);
+       
         newcustomer.save();
 
         if (hasGate && gate !== null) {
                 gate.investValue = gate.investValue.plus(newcustomer.investValue);
                 gate.stakettsvalue = gate.stakettsvalue.plus(trade_value);
-                gate.stakettscontruct = gate.stakettscontruct.plus(stakecontruct);
+             
                 gate.lastoptime = event.block.timestamp;
                 gate.save();
                 log_GateData(gate, modifiedTime);
@@ -214,6 +214,7 @@ export function handle_e_initGood(event: e_initGood): void {
                 normal_good.name_lower = normal_good.tokenname.toLowerCase();
                 normal_good.symbol_lower =
                         normal_good.tokensymbol.toLowerCase();
+                normal_good.ttsMintValue = ZERO_BI;
                 normal_good.owner = goodowner;
         }
 
@@ -254,6 +255,7 @@ export function handle_e_initGood(event: e_initGood): void {
                 proof = new ProofState(proofid_BG.toHexString());
                 proof.owner = event.transaction.from.toHexString();
                 proof.good = normal_good.id;
+                proof.ttsMintValue = ZERO_BI;
                 proof.proofValue = ZERO_BI;
                 proof.goodShares = ZERO_BI;
                 proof.goodQuantity = ZERO_BI;
@@ -499,6 +501,7 @@ export function handle_e_investGood(event: e_investGood): void {
         let invest_normal_quantity = ZERO_BI;
         let invest_normal_actual_quantity = ZERO_BI;
         let invest_actualvalue = ZERO_BI;
+        let invest_tts_mint_value = ZERO_BI;
 
         if (!proofstate.reverted) {
                 invest_normal_shares = proofstate.value.shares.div(BI_128);
@@ -506,6 +509,7 @@ export function handle_e_investGood(event: e_investGood): void {
                 invest_normal_quantity = proofstate.value.invest.div(BI_128);
                 invest_normal_actual_quantity = proofstate.value.invest.mod(BI_128);
                 invest_actualvalue = proofstate.value.state.mod(BI_128);
+                invest_tts_mint_value = proofstate.value.shares.mod(BI_128);
         }
 
         let proof = ProofState.load(proofNo);
@@ -520,6 +524,7 @@ export function handle_e_investGood(event: e_investGood): void {
                 proof.proofActualValue = ZERO_BI;
                 proof.goodActualQuantity = ZERO_BI;
                 proof.createTime = event.block.timestamp;
+                proof.ttsMintValue = ZERO_BI;
         }
         let normal_good = getOrCreateGoodState(normalgoodid, event.params._goodid);
         let normalcurrentstate = TTSwap_Market.bind(
@@ -530,15 +535,12 @@ export function handle_e_investGood(event: e_investGood): void {
                 event.params._invest.div(BI_128)
         );
         if (!normalcurrentstate.reverted) {
-
-
                 normal_good.virtualQuantity = normalcurrentstate.value.goodConfig.mod(BI_128);
                 normal_good.currentValue = normalcurrentstate.value.investState.mod(BI_128);
                 normal_good.currentQuantity = normalcurrentstate.value.currentState.mod(BI_128);
                 normal_good.investShares = normalcurrentstate.value.investState.div(BI_128);
                 normal_good.investActualQuantity = normalcurrentstate.value.currentState.div(BI_128);
                 normal_good.investQuantity = normal_good.investActualQuantity.plus(normal_good.virtualQuantity);
-
         } else {
                 normal_good.virtualQuantity = normal_good.virtualQuantity.minus(proof.goodQuantity.minus(proof.goodActualQuantity));
                 normal_good.currentValue = normal_good.currentValue.minus(proof.proofValue);
@@ -550,7 +552,7 @@ export function handle_e_investGood(event: e_investGood): void {
                 );
                 normal_good.investShares = normal_good.investShares.minus(proof.goodShares);
                 normal_good.investActualQuantity = normal_good.investActualQuantity.minus(proof.goodActualQuantity);
-
+                normal_good.ttsMintValue = normal_good.ttsMintValue.minus(proof.ttsMintValue);
 
                 normal_good.virtualQuantity = normal_good.virtualQuantity.plus(invest_normal_quantity.minus(invest_normal_actual_quantity));
                 normal_good.currentValue = normal_good.currentValue.plus(invest_value);
@@ -562,7 +564,7 @@ export function handle_e_investGood(event: e_investGood): void {
                 );
                 normal_good.investShares = normal_good.investShares.plus(invest_normal_shares);
                 normal_good.investActualQuantity = normal_good.investActualQuantity.plus(invest_normal_actual_quantity);
-
+                normal_good.ttsMintValue = normal_good.ttsMintValue.plus(invest_tts_mint_value);
         }
 
         normal_good.totalInvestQuantity = normal_good.totalInvestQuantity.minus(
@@ -691,6 +693,7 @@ export function handle_e_investGood(event: e_investGood): void {
         proof.goodShares = invest_normal_shares;
         proof.goodQuantity = invest_normal_quantity;
         proof.goodActualQuantity = invest_normal_actual_quantity;
+        proof.ttsMintValue = invest_tts_mint_value;
         proof.save();
 }
 
@@ -698,6 +701,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
         let normalgoodid = event.params._normalGoodNo.toHexString();
         let proofNo = event.params._proofNo.toHexString();
         let marketmanage = TTSwap_Market.bind(event.address);
+        let disinvest_tts_mint_value = event.params._TTSValue.mod(BI_128);
 
         let tts_stakeproof = ZERO_BI;
         let devestvalue = event.params._value.div(BI_128);
@@ -713,6 +717,7 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
                 proof.proofActualValue = ZERO_BI;
                 proof.goodActualQuantity = ZERO_BI;
                 proof.createTime = event.block.timestamp;
+                proof.ttsMintValue = ZERO_BI;
         }
 
         let normal_good = getOrCreateGoodState(normalgoodid, event.params._normalGoodNo);
@@ -731,7 +736,11 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
 
         normal_good.investQuantity = normal_good.investQuantity.minus(event.params._normalprofit.mod(BI_128));
         normal_good.investQuantity = normal_good.investQuantity.minus(event.params._normalprofit.div(BI_128));
+
         normal_good.investQuantity = normal_good.investQuantity.plus(event.params._normaldisvest.div(BI_128));
+
+        normal_good.ttsMintValue = normal_good.ttsMintValue.minus(proof.ttsMintValue);
+
 
 
         normal_good.investActualQuantity = normal_good.investActualQuantity.minus(event.params._normaldisvest.mod(BI_128));
@@ -760,6 +769,16 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
         );
         normal_good.modifiedTime = event.block.timestamp;
         normal_good.txCount = normal_good.txCount.plus(ONE_BI);
+        let proofstate = marketmanage.try_getProofState(event.params._proofNo);
+        if (!proofstate.reverted) {
+                proof.proofValue = proofstate.value.state.div(BI_128);
+                proof.goodShares = proofstate.value.shares.div(BI_128);
+                proof.goodQuantity = proofstate.value.invest.div(BI_128);
+                proof.goodActualQuantity = proofstate.value.invest.mod(BI_128);
+                proof.proofActualValue = proofstate.value.state.mod(BI_128);
+                proof.ttsMintValue = proofstate.value.shares.mod(BI_128);
+        }
+        normal_good.ttsMintValue = normal_good.ttsMintValue.plus(proof.ttsMintValue);
         normal_good.save();
         let marketstate = MarketState.load("1");
         if (marketstate === null) {
@@ -874,14 +893,8 @@ export function handle_e_disinvestProof(event: e_disinvestProof): void {
         tx.fromgoodActualQuanity = event.params._normaldisvest.mod(BI_128);
         tx.excuter = event.transaction.from.toHexString();
         tx.save();
-        let proofstate = marketmanage.try_getProofState(event.params._proofNo);
-        if (!proofstate.reverted) {
-                proof.proofValue = proofstate.value.state.div(BI_128);
-                proof.goodShares = proofstate.value.shares.div(BI_128);
-                proof.goodQuantity = proofstate.value.invest.div(BI_128);
-                proof.goodActualQuantity = proofstate.value.invest.mod(BI_128);
-                proof.proofActualValue = proofstate.value.state.mod(BI_128);
-        }
+        
+        
         proof.save();
         log_GoodData(normal_good, event.block.timestamp);
         log_MarketData(marketstate, event.block.timestamp);

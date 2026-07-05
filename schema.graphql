@@ -179,6 +179,7 @@ type GoodState @entity(immutable:false) {
   create_time: BigInt!
   name_lower:String!
   symbol_lower:String!
+  ttsMintValue:BigInt!
   proofs: [ProofState!] @derivedFrom(field: "good")
   goodData: [GoodData!] @derivedFrom(field: "good")
 }
@@ -193,6 +194,7 @@ type ProofState @entity(immutable:false) {
   goodQuantity:BigInt!
   goodActualQuantity:BigInt!
   proofActualValue:BigInt!
+  ttsMintValue:BigInt!
   createTime: BigInt!
 }
 
@@ -253,6 +255,7 @@ type GoodData @entity(immutable:false) {
   promiseCurrency:GoodState
   promiseValue:BigInt
   promiseQuantity:BigInt
+  ttsMintValue:BigInt!
   open: BigInt!
   high: BigInt!
   low: BigInt!
