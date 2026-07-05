@@ -87,6 +87,7 @@ export function log_GoodData(
                 goodData_hour.promiseCurrency = normal_good.promiseCurrency;
                 goodData_hour.promiseValue = normal_good.promiseValue;
                 goodData_hour.modifiedTime = modifiedTime;
+                goodData_hour.ttsMintValue = normal_good.ttsMintValue;
                 goodData_hour.save();
         }
 
@@ -127,6 +128,7 @@ export function log_GoodData(
                 goodData_hour.promiseQuantity = normal_good.promiseQuantity;
                 goodData_hour.promiseCurrency = normal_good.promiseCurrency;
                 goodData_hour.promiseValue = normal_good.promiseValue;
+                goodData_hour.ttsMintValue = normal_good.ttsMintValue;
 
                 if (
                         goodData_hour.modifiedTime
@@ -206,6 +208,7 @@ export function log_GoodData(
                 goodData_day.high = price;
                 goodData_day.low = price;
                 goodData_day.close = price;
+                goodData_day.ttsMintValue = goodData_hour.ttsMintValue;
                 goodData_day.save();
         }
         if (
@@ -249,6 +252,7 @@ export function log_GoodData(
                 goodData_day.promiseCurrency = goodData_hour.promiseCurrency;
                 goodData_day.promiseValue = goodData_hour.promiseValue;
                 goodData_day.modifiedTime = modifiedTime;
+                goodData_day.ttsMintValue = goodData_hour.ttsMintValue;
                 if (
                         goodData_day.modifiedTime
                                 .mod(BigInt.fromU32(174000))
@@ -329,6 +333,7 @@ export function log_GoodData(
                 goodData_week.high = price;
                 goodData_week.low = price;
                 goodData_week.close = price;
+                goodData_week.ttsMintValue = goodData_day.ttsMintValue;
                 goodData_week.save();
         }
         if (
@@ -366,6 +371,7 @@ export function log_GoodData(
                 goodData_week.totalDisinvestCount =
                         goodData_day.totalDisinvestCount;
                 goodData_week.modifiedTime = modifiedTime;
+                goodData_week.ttsMintValue = goodData_day.ttsMintValue;
                 if (
                         goodData_week.modifiedTime
                                 .mod(BigInt.fromU32(1220400))
@@ -451,6 +457,7 @@ export function log_GoodData(
                 goodData_month.high = price;
                 goodData_month.low = price;
                 goodData_month.close = price;
+                goodData_month.ttsMintValue = goodData_week.ttsMintValue;
                 goodData_month.save();
         }
         if (
@@ -493,6 +500,7 @@ export function log_GoodData(
                 goodData_month.promiseCurrency = goodData_week.promiseCurrency;
                 goodData_month.promiseValue = goodData_week.promiseValue;
                 goodData_month.modifiedTime = modifiedTime;
+                goodData_month.ttsMintValue = goodData_week.ttsMintValue;
                 if (
                         goodData_month.modifiedTime
                                 .mod(BigInt.fromU32(5356800))
@@ -576,6 +584,7 @@ export function log_GoodData(
                 goodData_year.promiseCurrency = goodData_month.promiseCurrency;
                 goodData_year.promiseValue = goodData_month.promiseValue;
                 goodData_year.modifiedTime = modifiedTime;
+                goodData_year.ttsMintValue = goodData_month.ttsMintValue;
                 goodData_year.save();
         }
         if (
@@ -636,6 +645,7 @@ export function log_GoodData(
                 ) {
                         goodData_year.close = price;
                 }
+                goodData_year.ttsMintValue = goodData_month.ttsMintValue;
                 goodData_year.save();
         }
 }
