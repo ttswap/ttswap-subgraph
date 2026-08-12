@@ -7,11 +7,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: TTSwap_Market
-    network: mainnet
+    network: hoodi
     source:
-      address: "0x49c49434Ec51EDB3730EcDdC5Fa75263dF5009ad"
+      address: "0x2e8917dc8D84aDfbD59BdD44F04947BF848cd9E4"
       abi: TTSwap_Market
-      startBlock: 25574420
+      startBlock: 3401378
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -64,11 +64,11 @@ dataSources:
           handler: handle_e_getPromiseProof
   - kind: ethereum/contract
     name: TTSwap_Token
-    network: mainnet
+    network: hoodi
     source:
-      address: "0x6254207772239F6c820FC6072dD433AC4E6023a4"
+      address: "0x9a4C0EE48f6B84D01cdbA726110BEc95D301a12f"
       abi: TTSwap_Token
-      startBlock: 25574360
+      startBlock: 3401360
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

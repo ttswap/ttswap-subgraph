@@ -16,8 +16,8 @@ import { TTSwap_Market } from "../../generated/TTSwap_Market/TTSwap_Market";
 
 // goodConfig flag bits (MSB = bit 255)
 const CONFIG_BIT_IS_VALUE_GOOD: u8 = 255;
-const CONFIG_BIT_IS_FREEZE: u8 = 252;
-const CONFIG_BIT_IS_PROMISE: u8 = 250;
+const CONFIG_BIT_IS_FREEZE: u8 = 236;
+const CONFIG_BIT_IS_PROMISE: u8 = 234;
 
 function getConfigFlag(goodConfig: BigInt, bit: u8): boolean {
         return goodConfig.rightShift(bit).bitAnd(ONE_BI).equals(ONE_BI);
